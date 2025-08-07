@@ -1,0 +1,26 @@
+.itemContainer {
+  display: flex;
+}
+.content {
+  width: 100%;
+}
+
+.Cards {
+  margin: 20px;
+}
+
+.Form {
+  margin: 20px;
+}
+
+.message {
+  margin: 20px;
+  height: 80px;
+  font-size: 1.5rem;
+  color: #555;
+  text-align: center;
+}
+
+.loader {
+  margin: 10%;
+}

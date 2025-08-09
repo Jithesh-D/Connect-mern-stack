@@ -19,12 +19,12 @@ const Header = () => {
         <div className="collapse navbar-collapse" id="navbarSupportedContent">
           <ul className="navbar-nav me-auto mb-2 mb-lg-0">
             <li className="nav-item">
-              <li className="nav-link active" aria-current="page">
+              <a className="nav-link active" aria-current="page">
                 Home
-              </li>
+              </a>
             </li>
             <li className="nav-item">
-              <li className="nav-link">Profile</li>
+              <a className="nav-link">Profile</a>
             </li>
           </ul>
           <form className="d-flex" role="search">
@@ -45,3 +45,4 @@ const Header = () => {
 };
 
 export default Header;
+

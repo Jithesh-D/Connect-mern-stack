@@ -19,6 +19,7 @@ const deletePostFromServer = async (postId) => {
   await fetch(`http://localhost:3000/api/posts/${postId}`, {
     method: "DELETE",
   });
+  return postId;
 };
 
 const mapPostFromServer = (post) => {

@@ -38,13 +38,12 @@ const postListReducer = (currPostList, action) => {
 const PostListProvider = ({ children }) => {
   const [postList, dispatchPostList] = useReducer(postListReducer, []);
 
-  const addPost = (userId, postTitle, postBody, reactions, tags) => {
+  const addPost = (postTitle, postBody, reactions, tags) => {
     const newPost = {
       id: Date.now(),
       title: postTitle,
       body: postBody,
       reactions: parseInt(reactions) || 0,
-      userId: userId,
       tags: tags,
     };
 

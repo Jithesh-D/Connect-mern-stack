@@ -3,7 +3,6 @@ import Post from "./posts";
 import { PostList as PostListData } from "../store/postListContext.jsx";
 import WelcomeMessage from "./welcomeMessage.jsx";
 import Loader from "./loading.jsx";
-import { useNavigate } from "react-router-dom";
 
 const PostList = () => {
   const { postList, addInitialPost } = useContext(PostListData);

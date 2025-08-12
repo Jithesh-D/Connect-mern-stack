@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 const CreatePost = () => {
   const { addPost } = useContext(PostListData);
   const navigate = useNavigate();
-  const userIdElement = useRef();
+  // const userIdElement = useRef();
   const postTitleElement = useRef();
   const postBodyElement = useRef();
   const reactionsElement = useRef();
@@ -13,25 +13,25 @@ const CreatePost = () => {
 
   const handleSubmit = (event) => {
     event.preventDefault();
-    const userId = userIdElement.current.value;
+    // const userId = userIdElement.current.value;
     const postTitle = postTitleElement.current.value;
     const postBody = postBodyElement.current.value;
     const reactions = reactionsElement.current.value;
     const tags = tagsElement.current.value.split(" ");
 
-    userIdElement.current.value = "";
+    // userIdElement.current.value = "";
     postTitleElement.current.value = "";
     postBodyElement.current.value = "";
     reactionsElement.current.value = "";
     tagsElement.current.value = "";
 
-    addPost(userId, postTitle, postBody, reactions, tags);
+    addPost(postTitle, postBody, reactions, tags);
     navigate("/"); // Navigate to home after post creation
   };
 
   return (
     <form className="create-post Form" onSubmit={handleSubmit}>
-      <div className="mb-3">
+      {/* <div className="mb-3">
         <label htmlFor="userId" className="form-label">
           Enter your User Id here
         </label>
@@ -42,7 +42,7 @@ const CreatePost = () => {
           id="userId"
           placeholder="Your User Id"
         />
-      </div>
+      </div> */}
 
       <div className="mb-3">
         <label htmlFor="title" className="form-label">
@@ -105,4 +105,3 @@ const CreatePost = () => {
 };
 
 export default CreatePost;
-

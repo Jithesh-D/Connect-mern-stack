@@ -85,7 +85,9 @@ npm start
 ---
 
 ## **📸 Screenshots**
-*(Add screenshots of your app here)*
+
+<img width="1901" height="910" alt="image" src="https://github.com/user-attachments/assets/88bc81e1-eb64-425f-8f78-f8738ea54c4e" />
+
 
 ---
 

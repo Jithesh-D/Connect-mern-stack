@@ -13,7 +13,7 @@ const mongo_path =
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors());
-app.use("/posts", postRouter);
+app.use("/api/posts", postRouter);
 app.use(errorController.handleError);
 
 mongoose

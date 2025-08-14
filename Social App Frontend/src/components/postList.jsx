@@ -11,15 +11,15 @@ const PostList = () => {
   //can also use buutons for fetching
   //  const onClickFetchPost=()=>{}
 
-  useEffect(() => {
-    setFetchingData(true);
-    fetch("https://dummyjson.com/posts")
-      .then((res) => res.json())
-      .then((data) => {
-        addInitialPost(data.posts);
-        setFetchingData(false);
-      });
-  }, []);
+  // useEffect(() => {
+  //   setFetchingData(true);
+  //   fetch("https://dummyjson.com/posts")
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       addInitialPost(data.posts);
+  //       setFetchingData(false);
+  //     });
+  // }, []);
 
   return (
     <>

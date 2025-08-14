@@ -1,5 +1,5 @@
 const addPostToServer = async (title, body, tags, reactions) => {
-  const response = await fetch("http://localhost:3000/api/posts", {
+  const response = await fetch("http://localhost:3001/api/posts", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -11,12 +11,12 @@ const addPostToServer = async (title, body, tags, reactions) => {
 };
 
 const getPostsFromServer = async () => {
-  const response = await fetch("http://localhost:3000/api/posts");
+  const response = await fetch("http://localhost:3001/api/posts");
   const posts = await response.json();
   return posts.map(mapPostFromServer);
 };
 const deletePostFromServer = async (postId) => {
-  await fetch(`http://localhost:3000/api/posts/${postId}`, {
+  await fetch(`http://localhost:3001/api/posts/${postId}`, {
     method: "DELETE",
   });
   return postId;
@@ -24,8 +24,7 @@ const deletePostFromServer = async (postId) => {
 
 const mapPostFromServer = (post) => {
   return {
-    id: post.id,
-    userId: post.userId,
+     id: post.id,
     title: post.title,
     body: post.body,
     tags: post.tags,

@@ -17,7 +17,7 @@ app.use("/posts", postRouter);
 app.use(errorController.handleError);
 
 mongoose
-  .connect(dbPath)
+  .connect(mongo_path)
   .then(() => {
     console.log("Connected to MongoDB");
     app.listen(PORT, () => {

@@ -1,10 +1,10 @@
-const addPostToServer = async (userId, title, body, tags, reactions) => {
+const addPostToServer = async (title, body, tags, reactions) => {
   const response = await fetch("http://localhost:3000/api/posts", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ userId, title, body, tags, reactions }),
+    body: JSON.stringify({ title, body, tags, reactions }),
   });
   const post = await response.json();
   return mapPostFromServer(post);
@@ -34,3 +34,4 @@ const mapPostFromServer = (post) => {
 };
 
 export { addPostToServer, getPostsFromServer, deletePostFromServer };
+

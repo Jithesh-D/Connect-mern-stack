@@ -1,31 +1,41 @@
-const addPostToServer = async (userId, title, body, tags, reactions) => {
-  const response = await fetch("http://localhost:3000/api/posts", {
+const addPostToServer = async (title, body, tags, reactions) => {
+  const response = await fetch("http://localhost:3001/api/posts", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ userId, title, body, tags, reactions }),
+    body: JSON.stringify({ title, body, tags, reactions }),
   });
   const post = await response.json();
   return mapPostFromServer(post);
 };
 
 const getPostsFromServer = async () => {
-  const response = await fetch("http://localhost:3000/api/posts");
+  const response = await fetch("http://localhost:3001/api/posts");
   const posts = await response.json();
   return posts.map(mapPostFromServer);
 };
 const deletePostFromServer = async (postId) => {
-  await fetch(`http://localhost:3000/api/posts/${postId}`, {
+  await fetch(`http://localhost:3001/api/posts/${postId}`, {
     method: "DELETE",
   });
   return postId;
 };
 
+const editReactionFromServer = async (postId) => {
+  const response = await fetch(
+    `http://localhost:3001/api/posts/${postId}/reaction`,
+    {
+      method: "PATCH",
+    }
+  );
+  const post = await response.json();
+  return mapPostFromServer(post);
+};
+
 const mapPostFromServer = (post) => {
   return {
-    id: post.id,
-    userId: post.userId,
+    id: post._id,
     title: post.title,
     body: post.body,
     tags: post.tags,
@@ -33,4 +43,9 @@ const mapPostFromServer = (post) => {
   };
 };
 
-export { addPostToServer, getPostsFromServer, deletePostFromServer };
+export {
+  addPostToServer,
+  getPostsFromServer,
+  deletePostFromServer,
+  editReactionFromServer,
+};

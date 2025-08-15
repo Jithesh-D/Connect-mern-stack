@@ -25,13 +25,6 @@ const postListReducer = (currPostList, action) => {
       newPostList = currPostList;
     }
   }
-
-  console.log(
-    "Reducer action:",
-    action.type,
-    "New list length:",
-    newPostList.length
-  );
   return newPostList;
 };
 

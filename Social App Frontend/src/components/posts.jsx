@@ -1,10 +1,36 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { RiDeleteBin2Fill } from "react-icons/ri";
 import { PostList } from "../store/postListContext.jsx";
+import { formatDistanceToNow } from "date-fns";
+import {
+  deletePostFromServer,
+  editReactionFromServer,
+} from "../services/service.jsx";
 
-const now = Date();
 const Post = ({ post }) => {
   const { deletePost } = useContext(PostList);
+  const [currentReactions, setReaction] = useState(post.reactions || 0);
+  //to the PostTimeCreated
+  const createdDate = post.createdAt ? new Date(post.createdAt) : new Date();
+
+  const handleDelete = async () => {
+    try {
+      await deletePostFromServer(post.id);
+      deletePost(post.id);
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
+  };
+
+  const handleReaction = async () => {
+    try {
+      const updatedReactions = await editReactionFromServer(post.id);
+      setReaction(updatedReactions.reactions);
+    } catch (error) {
+      console.error("Error updating reaction:", error);
+    }
+  };
+
   return (
     <div
       className="card shadow-sm mb-4 Cards"
@@ -15,11 +41,13 @@ const Post = ({ post }) => {
           <h5 className="card-title mb-0">{post.title}</h5>
           <span
             className=" btn position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
-            onClick={() => deletePost(post.id)}
+            onClick={handleDelete}
           >
             <RiDeleteBin2Fill />
           </span>
-          <small className="text-muted">{now.toString()}</small>
+          <small className="text-muted">
+            {formatDistanceToNow(createdDate, { addSuffix: true })}
+          </small>
         </div>
         <p className="card-text">{post.body}</p>
         {post.tags.map((tag) => (
@@ -29,8 +57,12 @@ const Post = ({ post }) => {
         ))}
         <div className="d-flex justify-content-between align-items-center">
           <div className="btn-group">
-            <button type="button" className="btn btn-sm btn-outline-primary">
-              ❤️ {Number(post.reactions)}
+            <button
+              type="button"
+              className="btn btn-sm btn-outline-primary"
+              onClick={handleReaction}
+            >
+              👍 {currentReactions}
             </button>
             <button type="button" className="btn btn-sm btn-outline-secondary">
               💬 Comment
@@ -75,4 +107,3 @@ export default Post;
 // };
 
 // export default Post;
-

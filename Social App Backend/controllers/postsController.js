@@ -22,3 +22,12 @@ exports.deletePost = async (req, res) => {
   await Post.findByIdAndDelete(id);
   res.status(204).send();
 };
+
+exports.reactionCounter = async (req, res) => {
+  const { id } = req.params;
+  const post = await Post.findById(id);
+  if (!post) return res.status(404).json({ message: "Post not found" });
+  post.reactions += 1;
+  await post.save();
+  res.status(200).json({ reactions: post.reactions });
+};

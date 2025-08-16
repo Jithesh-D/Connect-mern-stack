@@ -27,6 +27,15 @@ const PostList = () => {
 
     fetchPosts();
   }, []);
+  // useEffect(() => {
+  //   setFetchingData(true);
+  //   fetch("https://dummyjson.com/posts")
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       addInitialPost(data.posts);
+  //       setFetchingData(false);
+  //     });
+  // }, []);
 
   return (
     <>

@@ -1,44 +1,64 @@
-import { useContext, useRef } from "react";
+import { useContext, useRef, useState, useEffect } from "react";
 import { PostList as PostListData } from "../store/postListContext";
-import { useNavigate } from "react-router-dom";
-import { addPostToServer } from "../services/service.jsx";
+import { useNavigate, useLocation } from "react-router-dom";
+import { addPostToServer, updatePostInServer } from "../services/service.jsx";
 
 const CreatePost = () => {
-  const { addPost } = useContext(PostListData);
+  const { addPost, editPost } = useContext(PostListData);
   const navigate = useNavigate();
-  // const userIdElement = useRef();
+  const location = useLocation();
+
+  // If we are editing, post data comes via router state
+  const editingPost = location.state?.post || null;
+
   const postTitleElement = useRef();
   const postBodyElement = useRef();
-  const reactionsElement = useRef();
   const tagsElement = useRef();
+
+  const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    if (editingPost) {
+      setIsEditing(true);
+      postTitleElement.current.value = editingPost.title;
+      postBodyElement.current.value = editingPost.body;
+      tagsElement.current.value = editingPost.tags.join(" ");
+    }
+  }, [editingPost]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     const postTitle = postTitleElement.current.value;
     const postBody = postBodyElement.current.value;
-    const reactions = reactionsElement.current.value;
     const tags = tagsElement.current.value
       .trim()
       .split(/\s+/)
       .filter((tag) => tag.length > 0);
 
     try {
-      const newPost = await addPostToServer(
-        postTitle,
-        postBody,
-        tags,
-        parseInt(reactions) || 0
-      );
-      addPost(newPost.title, newPost.body, newPost.reactions, newPost.tags);
-
-      postTitleElement.current.value = "";
-      postBodyElement.current.value = "";
-      reactionsElement.current.value = "";
-      tagsElement.current.value = "";
+      if (isEditing) {
+        const updatedPost = await updatePostInServer(
+          editingPost.id,
+          postTitle,
+          postBody,
+          tags,
+          editingPost.reactions // keep old reactions
+        );
+        editPost(
+          updatedPost.id,
+          updatedPost.title,
+          updatedPost.body,
+          updatedPost.tags
+        );
+      } else {
+        // Create new post
+        const newPost = await addPostToServer(postTitle, postBody, tags, 0);
+        addPost(newPost.id, newPost.title, newPost.body, newPost.tags);
+      }
 
       navigate("/");
     } catch (error) {
-      console.error("Error creating post:", error);
+      console.error("Error saving post:", error);
     }
   };
 
@@ -84,7 +104,7 @@ const CreatePost = () => {
         />
       </div>
 
-      <div className="mb-3">
+      {/* <div className="mb-3">
         <label htmlFor="reactions" className="form-label">
           Number of reactions
         </label>
@@ -95,7 +115,7 @@ const CreatePost = () => {
           id="reactions"
           placeholder="How many people reacted to this post"
         />
-      </div>
+      </div> */}
 
       <div className="mb-3">
         <label htmlFor="tags" className="form-label">

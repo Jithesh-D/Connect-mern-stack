@@ -1,0 +1,91 @@
+import { createContext, useReducer } from "react";
+
+export const PostList = createContext({
+  postList: [],
+  addPost: () => {},
+  deletePost: () => {},
+  addInitialPost: () => {},
+  editPost: () => {},
+});
+
+const postListReducer = (currPostList, action) => {
+  let newPostList = currPostList;
+
+  if (action.type === "DELETE_POST") {
+    newPostList = currPostList.filter(
+      (post) => post.id !== action.payload.postId
+    );
+  } else if (action.type === "ADD_POST") {
+    newPostList = [action.payload, ...currPostList];
+  } else if (action.type === "ADD_INITIAL_POSTS") {
+    // Only add initial posts if the current list is empty
+    // This prevents overwriting user-added posts
+    if (currPostList.length === 0) {
+      newPostList = action.payload.posts;
+    } else {
+      newPostList = currPostList;
+    }
+  }
+  return newPostList;
+};
+
+const PostListProvider = ({ children }) => {
+  const [postList, dispatchPostList] = useReducer(postListReducer, []);
+
+  const addPost = (id, postTitle, postBody, tags) => {
+    const newPost = {
+      id: id,
+      title: postTitle,
+      body: postBody,
+      reactions: 0,
+      tags: tags,
+    };
+
+    dispatchPostList({
+      type: "ADD_POST",
+      payload: newPost,
+    });
+  };
+
+  const addInitialPost = (posts) => {
+    dispatchPostList({
+      type: "ADD_INITIAL_POSTS",
+      payload: { posts },
+    });
+  };
+
+  const deletePost = (postId) => {
+    console.log("Deleting post:", postId);
+    dispatchPostList({
+      type: "DELETE_POST",
+      payload: {
+        postId,
+      },
+    });
+  };
+
+  const editPost = (id, updatedTitle, updatedBody, updatedTags) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === id
+          ? {
+              ...post,
+              title: updatedTitle,
+              body: updatedBody,
+              tags: updatedTags,
+            }
+          : post
+      )
+    );
+  };
+
+  return (
+    <PostList.Provider
+      value={{ postList, addPost, deletePost, addInitialPost, editPost }}
+    >
+      {children}
+    </PostList.Provider>
+  );
+};
+
+export default PostListProvider;

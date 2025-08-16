@@ -1,7 +1,9 @@
 import { useContext, useState } from "react";
 import { RiDeleteBin2Fill } from "react-icons/ri";
+import { FaPen } from "react-icons/fa";
 import { PostList } from "../store/postListContext.jsx";
 import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import {
   deletePostFromServer,
   editReactionFromServer,
@@ -9,7 +11,9 @@ import {
 
 const Post = ({ post }) => {
   const { deletePost } = useContext(PostList);
+  const navigate = useNavigate();
   const [currentReactions, setReaction] = useState(post.reactions || 0);
+
   //to the PostTimeCreated
   const createdDate = post.createdAt ? new Date(post.createdAt) : new Date();
 
@@ -31,6 +35,10 @@ const Post = ({ post }) => {
     }
   };
 
+  const handleEdit = () => {
+    navigate("/create-post", { state: { post } });
+  };
+
   return (
     <div
       className="card shadow-sm mb-4 Cards"
@@ -44,6 +52,12 @@ const Post = ({ post }) => {
             onClick={handleDelete}
           >
             <RiDeleteBin2Fill />
+          </span>
+          <span
+            className=" btn position-absolute top-40 start-100 translate-middle badge rounded-pill bg-primary"
+            onClick={handleEdit}
+          >
+            <FaPen />
           </span>
           <small className="text-muted">
             {formatDistanceToNow(createdDate, { addSuffix: true })}
@@ -68,7 +82,6 @@ const Post = ({ post }) => {
               💬 Comment
             </button>
           </div>
-          <small className="text-muted"></small>
         </div>
       </div>
     </div>

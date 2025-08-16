@@ -6,7 +6,7 @@ exports.createPost = async (req, res) => {
     title,
     body,
     tags,
-    reactions,
+    reactions: 0,
   });
   await post.save();
   res.status(201).json(post);
@@ -18,9 +18,18 @@ exports.getPosts = async (req, res) => {
 };
 
 exports.deletePost = async (req, res) => {
-  const { id } = req.params;
-  await Post.findByIdAndDelete(id);
-  res.status(204).send();
+  try {
+    const { id } = req.params;
+    const deletedPost = await Post.findByIdAndDelete(id);
+    if (!deletedPost) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+    res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error deleting post", error: error.message });
+  }
 };
 
 exports.reactionCounter = async (req, res) => {
@@ -30,4 +39,19 @@ exports.reactionCounter = async (req, res) => {
   post.reactions += 1;
   await post.save();
   res.status(200).json({ reactions: post.reactions });
+};
+
+exports.editPost = async (req, res) => {
+  const { id } = req.params;
+  const { title, body, tags } = req.body;
+
+  const post = await Post.findById(id);
+  if (!post) return res.status(404).json({ message: "Post not found" });
+
+  post.title = title;
+  post.body = body;
+  post.tags = tags;
+
+  await post.save();
+  res.status(200).json(post);
 };

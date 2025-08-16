@@ -5,44 +5,50 @@ export const PostList = createContext({
   addPost: () => {},
   deletePost: () => {},
   addInitialPost: () => {},
+  editPost: () => {},
 });
 
 const postListReducer = (currPostList, action) => {
-  let newPostList = currPostList;
+  switch (action.type) {
+    case "DELETE_POST":
+      return currPostList.filter((post) => post.id !== action.payload.postId);
 
-  if (action.type === "DELETE_POST") {
-    newPostList = currPostList.filter(
-      (post) => post.id !== action.payload.postId
-    );
-  } else if (action.type === "ADD_POST") {
-    newPostList = [action.payload, ...currPostList];
-  } else if (action.type === "ADD_INITIAL_POSTS") {
-    // Only add initial posts if the current list is empty
-    // This prevents overwriting user-added posts
-    if (currPostList.length === 0) {
-      newPostList = action.payload.posts;
-    } else {
-      newPostList = currPostList;
-    }
+    case "ADD_POST":
+      return [action.payload, ...currPostList];
+
+    case "ADD_INITIAL_POSTS":
+      return currPostList.length === 0 ? action.payload.posts : currPostList;
+
+    case "EDIT_POST":
+      return currPostList.map((post) =>
+        post.id === action.payload.id
+          ? {
+              ...post,
+              title: action.payload.title,
+              body: action.payload.body,
+              tags: action.payload.tags,
+            }
+          : post
+      );
+
+    default:
+      return currPostList;
   }
-  return newPostList;
 };
 
 const PostListProvider = ({ children }) => {
   const [postList, dispatchPostList] = useReducer(postListReducer, []);
 
-  const addPost = (postTitle, postBody, reactions, tags) => {
-    const newPost = {
-      id: Date.now(),
-      title: postTitle,
-      body: postBody,
-      reactions: parseInt(reactions) || 0,
-      tags: tags,
-    };
-
+  const addPost = (id, postTitle, postBody, tags) => {
     dispatchPostList({
       type: "ADD_POST",
-      payload: newPost,
+      payload: {
+        id,
+        title: postTitle,
+        body: postBody,
+        reactions: 0,
+        tags,
+      },
     });
   };
 
@@ -54,18 +60,33 @@ const PostListProvider = ({ children }) => {
   };
 
   const deletePost = (postId) => {
-    console.log("Deleting post:", postId);
     dispatchPostList({
       type: "DELETE_POST",
+      payload: { postId },
+    });
+  };
+
+  const editPost = (id, updatedTitle, updatedBody, updatedTags) => {
+    dispatchPostList({
+      type: "EDIT_POST",
       payload: {
-        postId,
+        id,
+        title: updatedTitle,
+        body: updatedBody,
+        tags: updatedTags,
       },
     });
   };
 
   return (
     <PostList.Provider
-      value={{ postList, addPost, deletePost, addInitialPost }}
+      value={{
+        postList,
+        addPost,
+        deletePost,
+        addInitialPost,
+        editPost,
+      }}
     >
       {children}
     </PostList.Provider>

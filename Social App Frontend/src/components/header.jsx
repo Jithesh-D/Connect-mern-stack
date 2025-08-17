@@ -4,7 +4,7 @@ const Header = () => {
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <div className="container-fluid">
-        <a className="navbar-brand">SocialApp</a>
+        <a className="navbar-brand">CampusConnect</a>
         <button
           className="navbar-toggler"
           type="button"
@@ -45,4 +45,3 @@ const Header = () => {
 };
 
 export default Header;
-

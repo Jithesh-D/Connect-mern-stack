@@ -36,7 +36,7 @@ function SignupPage() {
         { withCredentials: true }
       );
       console.log("Signup successful:", res.data);
-      // Redirect to login page after successful signup
+
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.error || "Signup failed. Please try again.");

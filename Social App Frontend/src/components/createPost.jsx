@@ -42,7 +42,7 @@ const CreatePost = () => {
           postTitle,
           postBody,
           tags,
-          editingPost.reactions // keep old reactions
+          editingPost.reactions
         );
         editPost(
           updatedPost.id,
@@ -126,7 +126,7 @@ const CreatePost = () => {
           className="form-control"
           id="tags"
           ref={tagsElement}
-          placeholder="Enter tags separated by spaces (e.g., programming javascript react)"
+          placeholder="Enter tags separated by spaces (e.g., Always Be Happy)"
         />
       </div>
 

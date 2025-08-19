@@ -38,6 +38,30 @@ const Sidebar = () => {
             Create Post
           </button>
         </li>
+        <li className="nav-item">
+          <button
+            onClick={() => navigate("/events")}
+            className={`nav-link ${
+              location.pathname === "/events"
+                ? "active bg-dark text-white"
+                : "text-dark"
+            }`}
+          >
+            Events
+          </button>
+        </li>
+        <li className="nav-item">
+          <button
+            onClick={() => navigate("/placements")}
+            className={`nav-link ${
+              location.pathname === "/placements"
+                ? "active bg-dark text-white"
+                : "text-dark"
+            }`}
+          >
+            Placements
+          </button>
+        </li>
       </ul>
     </div>
   );
@@ -52,4 +76,3 @@ export default Sidebar;
 }
 
 /*{${selectedTab === "Home" ? "active bg-dark text-white" : "text-dark"}} */
-

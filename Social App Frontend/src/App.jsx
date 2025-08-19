@@ -1,25 +1,19 @@
 import "bootstrap/dist/css/bootstrap.min.css";
-import Header from "./components/header.jsx";
-import Footer from "./components/footer.jsx";
 import "./App.css";
-import Sidebar from "./components/sidebar.jsx";
-import PostListProvider from "./store/postListContext.jsx";
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
 
 function App() {
+  const isAuthenticated = sessionStorage.getItem("user");
+
+  // If not authenticated and trying to access root, show signup
+  if (!isAuthenticated && window.location.pathname === "/") {
+    return <Navigate to="/signup" />;
+  }
+
   return (
-    <>
-      <PostListProvider>
-        <div className="itemContainer">
-          <Sidebar />
-          <div className="content">
-            <Header />
-            <Outlet />
-            <Footer />
-          </div>
-        </div>
-      </PostListProvider>
-    </>
+    <div className="app-container">
+      <Outlet />
+    </div>
   );
 }
 

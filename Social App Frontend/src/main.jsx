@@ -1,32 +1,57 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App.jsx";
-import { RouterProvider, createBrowserRouter } from "react-router-dom";
+import {
+  RouterProvider,
+  createBrowserRouter,
+  Navigate,
+} from "react-router-dom";
 import CreatePost from "./components/createPost.jsx";
 import PostList from "./components/postList.jsx";
 import LoginPage from "./components/loginPage.jsx";
 import SignupPage from "./components/signupPage.jsx";
+import MainLayout from "./components/MainLayout.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
+      // Public routes
       {
-        path: "/",
-        element: <PostList />,
+        path: "signup",
+        element: <SignupPage />,
       },
       {
-        path: "/create-post",
-        element: <CreatePost />,
-      },
-      {
-        path: "/login",
+        path: "login",
         element: <LoginPage />,
       },
+      // Protected routes
       {
-        path: "/signup",
-        element: <SignupPage />,
+        element: (
+          <ProtectedRoute>
+            <MainLayout />
+          </ProtectedRoute>
+        ),
+        children: [
+          {
+            path: "/",
+            element: <PostList />,
+          },
+          {
+            path: "home",
+            element: <PostList />,
+          },
+          {
+            path: "create-post",
+            element: sessionStorage.getItem("user") ? (
+              <CreatePost />
+            ) : (
+              <Navigate to="/signup" />
+            ),
+          },
+        ],
       },
     ],
   },

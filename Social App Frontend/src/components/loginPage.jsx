@@ -21,8 +21,10 @@ function LoginPage() {
         { withCredentials: true }
       );
       console.log("Login successful:", res.data);
+      // Store user data in session storage
+      sessionStorage.setItem("user", JSON.stringify(res.data.user));
       // Redirect to home page after successful login
-      navigate("/");
+      navigate("/home");
     } catch (err) {
       setError(err.response?.data?.error || "Login failed. Please try again.");
     } finally {

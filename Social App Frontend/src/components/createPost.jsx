@@ -8,7 +8,6 @@ const CreatePost = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // If we are editing, post data comes via router state
   const editingPost = location.state?.post || null;
 
   const postTitleElement = useRef();
@@ -35,31 +34,27 @@ const CreatePost = () => {
       .split(/\s+/)
       .filter((tag) => tag.length > 0);
 
-    try {
-      if (isEditing) {
-        const updatedPost = await updatePostInServer(
-          editingPost.id,
-          postTitle,
-          postBody,
-          tags,
-          editingPost.reactions
-        );
-        editPost(
-          updatedPost.id,
-          updatedPost.title,
-          updatedPost.body,
-          updatedPost.tags
-        );
-      } else {
-        // Create new post
-        const newPost = await addPostToServer(postTitle, postBody, tags, 0);
-        addPost(newPost.id, newPost.title, newPost.body, newPost.tags);
-      }
-
-      navigate("/");
-    } catch (error) {
-      console.error("Error saving post:", error);
+    if (isEditing) {
+      const updatedPost = await updatePostInServer(
+        editingPost.id,
+        postTitle,
+        postBody,
+        tags,
+        editingPost.reactions
+      );
+      editPost(
+        updatedPost.id,
+        updatedPost.title,
+        updatedPost.body,
+        updatedPost.tags
+      );
+    } else {
+      // Create new post
+      const newPost = await addPostToServer(postTitle, postBody, tags, 0);
+      addPost(newPost.id, newPost.title, newPost.body, newPost.tags);
     }
+
+    navigate("/");
   };
 
   return (

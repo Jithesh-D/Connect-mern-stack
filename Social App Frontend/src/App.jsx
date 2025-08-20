@@ -5,7 +5,7 @@ import { Outlet, Navigate } from "react-router-dom";
 function App() {
   const isAuthenticated = sessionStorage.getItem("user");
 
-  // If not authenticated and trying to access root, show signup
+  // Redirect to signup if not authenticated and on the root path
   if (!isAuthenticated && window.location.pathname === "/") {
     return <Navigate to="/signup" />;
   }

@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 .itemContainer {
   display: flex;
 }

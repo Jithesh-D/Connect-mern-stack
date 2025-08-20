@@ -12,6 +12,9 @@ import LoginPage from "./components/loginPage.jsx";
 import SignupPage from "./components/signupPage.jsx";
 import MainLayout from "./components/MainLayout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import Events from "./components/events.jsx";
+
+import Placements from "./components/placements.jsx";
 
 const router = createBrowserRouter([
   {
@@ -50,6 +53,14 @@ const router = createBrowserRouter([
             ) : (
               <Navigate to="/signup" />
             ),
+          },
+          {
+            path: "events",
+            element: <Events />,
+          },
+          {
+            path: "placements",
+            element: <Placements />,
           },
         ],
       },

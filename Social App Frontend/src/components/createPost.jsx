@@ -34,27 +34,31 @@ const CreatePost = () => {
       .split(/\s+/)
       .filter((tag) => tag.length > 0);
 
-    if (isEditing) {
-      const updatedPost = await updatePostInServer(
-        editingPost.id,
-        postTitle,
-        postBody,
-        tags,
-        editingPost.reactions
-      );
-      editPost(
-        updatedPost.id,
-        updatedPost.title,
-        updatedPost.body,
-        updatedPost.tags
-      );
-    } else {
-      // Create new post
-      const newPost = await addPostToServer(postTitle, postBody, tags, 0);
-      addPost(newPost.id, newPost.title, newPost.body, newPost.tags);
-    }
+    try {
+      if (isEditing) {
+        const updatedPost = await updatePostInServer(
+          editingPost.id,
+          postTitle,
+          postBody,
+          tags,
+          editingPost.reactions
+        );
+        editPost(
+          updatedPost.id,
+          updatedPost.title,
+          updatedPost.body,
+          updatedPost.tags
+        );
+      } else {
+        // Create new post
+        const newPost = await addPostToServer(postTitle, postBody, tags, 0);
+        addPost(newPost.id, newPost.title, newPost.body, newPost.tags);
+      }
 
-    navigate("/");
+      navigate("/");
+    } catch (error) {
+      console.error("Error saving post:", error);
+    }
   };
 
   return (

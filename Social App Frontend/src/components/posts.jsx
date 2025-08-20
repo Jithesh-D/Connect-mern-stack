@@ -14,7 +14,6 @@ const Post = ({ post }) => {
   const navigate = useNavigate();
   const [currentReactions, setReaction] = useState(post.reactions || 0);
 
-  //to the PostTimeCreated
   const createdDate = post.createdAt ? new Date(post.createdAt) : new Date();
 
   const handleDelete = async () => {

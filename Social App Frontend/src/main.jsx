@@ -13,6 +13,7 @@ import SignupPage from "./components/signupPage.jsx";
 import MainLayout from "./components/MainLayout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import Events from "./components/events.jsx";
+import CreateEvent from "./components/Createevents.jsx";
 
 import Placements from "./components/placements.jsx";
 
@@ -56,11 +57,15 @@ const router = createBrowserRouter([
           },
           {
             path: "events",
-            element: <Events />,
+            element: <CreateEvent />,
           },
           {
             path: "placements",
             element: <Placements />,
+          },
+          {
+            path: "/create-event",
+            element: <CreateEvent />,
           },
         ],
       },

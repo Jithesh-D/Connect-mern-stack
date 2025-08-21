@@ -50,7 +50,6 @@ const CreatePost = () => {
           updatedPost.tags
         );
       } else {
-        // Create new post
         const newPost = await addPostToServer(postTitle, postBody, tags, 0);
         addPost(newPost.id, newPost.title, newPost.body, newPost.tags);
       }

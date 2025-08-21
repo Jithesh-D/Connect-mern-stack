@@ -1,73 +1,46 @@
-import React from "react";
-import "./events.css";
+// import { useState, useEffect } from "react";
+// import { Link } from "react-router-dom";
+// import EventsPost from "./eventsPost.jsx";
 
-const Events = () => {
-  return (
-    <div className="events-container">
-      <div className="event-card">
-        <div className="event-header">
-          <h1>BEAT THE BOSS 4.0</h1>
-          <h2>SIMULTANEOUS TOURNAMENT</h2>
-        </div>
+// const Events = () => {
+//   const [events, setEvents] = useState([]);
 
-        <div className="event-content">
-          <div className="event-info">
-            <h3>ChessArena presents Beat the Boss</h3>
-            <p className="event-description">
-              where Dr. Phani Kumar Pullella takes on multiple players in an
-              epic simultaneous chess showdown!
-            </p>
+//   useEffect(() => {
+//     // Load events from localStorage (or from API later if needed)
+//     const storedEvents = JSON.parse(localStorage.getItem("events") || "[]");
+//     setEvents(storedEvents);
+//   }, []);
 
-            <div className="event-details">
-              <div className="detail-item">
-                <span className="icon">📅</span>
-                <span>Date: 20th August 2025</span>
-              </div>
-              <div className="detail-item">
-                <span className="icon">⏰</span>
-                <span>Time: 4:15 PM – 6:00 PM</span>
-              </div>
-              <div className="detail-item">
-                <span className="icon">📍</span>
-                <span>Venue: B-Block 1st Floor, Multipurpose Hall</span>
-              </div>
-            </div>
+//   return (
+//     <div className="min-h-screen bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+//       <div className="max-w-3xl mx-auto">
+//         {/* Header */}
+//         <div className="flex justify-between items-center mb-8">
+//           <h1 className="text-3xl font-bold text-gray-900">Events</h1>
+//           <Link
+//             to="/create-event"
+//             className="inline-flex items-center px-4 py-2 border border-transparent
+//                        rounded-md shadow-sm text-sm font-medium text-white
+//                        bg-indigo-600 hover:bg-indigo-700 focus:outline-none
+//                        focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+//           >
+//             Create Event
+//           </Link>
+//         </div>
 
-            <div className="event-highlights">
-              <p>🏆 Prizes will be awarded to all winners.</p>
-            </div>
+//         {/* Events List */}
+//         <div className="space-y-6">
+//           {events.length === 0 ? (
+//             <div className="text-center py-12">
+//               <p className="text-gray-500">No events found. Create one!</p>
+//             </div>
+//           ) : (
+//             events.map((event) => <EventsPost key={event.id} event={event} />)
+//           )}
+//         </div>
+//       </div>
+//     </div>
+//   );
+// };
 
-            <div className="event-registration">
-              <p>
-                Registration:{" "}
-                <a
-                  href="https://forms.gle/RPWb9UbAkEZSrZVd9"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  https://forms.gle/RPWb9UbAkEZSrZVd9
-                </a>
-              </p>
-              <p>
-                Join Chess Arena Community:{" "}
-                <a
-                  href="https://chat.whatsapp.com/EP7VBDckn8A652N7Vo66df"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Join WhatsApp Group
-                </a>
-              </p>
-            </div>
-          </div>
-
-          <div className="event-qr">
-            <img src="/qr-code.png" alt="Event Registration QR Code" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default Events;
+// export default Events;

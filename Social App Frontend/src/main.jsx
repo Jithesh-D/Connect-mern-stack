@@ -12,9 +12,8 @@ import LoginPage from "./components/loginPage.jsx";
 import SignupPage from "./components/signupPage.jsx";
 import MainLayout from "./components/MainLayout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import Events from "./components/events.jsx";
+import EventsPage from "./components/EventsPage.jsx";
 import CreateEvent from "./components/Createevents.jsx";
-
 import Placements from "./components/placements.jsx";
 
 const router = createBrowserRouter([
@@ -31,7 +30,6 @@ const router = createBrowserRouter([
         path: "login",
         element: <LoginPage />,
       },
-      // Protected routes
       {
         element: (
           <ProtectedRoute>
@@ -57,15 +55,15 @@ const router = createBrowserRouter([
           },
           {
             path: "events",
+            element: <EventsPage />,
+          },
+          {
+            path: "/create-event",
             element: <CreateEvent />,
           },
           {
             path: "placements",
             element: <Placements />,
-          },
-          {
-            path: "/create-event",
-            element: <CreateEvent />,
           },
         ],
       },

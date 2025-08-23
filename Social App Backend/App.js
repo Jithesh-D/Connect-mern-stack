@@ -3,6 +3,7 @@ const app = express();
 const mongoose = require("mongoose");
 const postRouter = require("./Routes/postsRoute");
 const authRouter = require("./Routes/authRoute");
+const eventRouter = require("./Routes/eventRoute");
 const errorController = require("./controllers/errorController");
 const cors = require("cors");
 const session = require("express-session");
@@ -37,6 +38,7 @@ app.use(
 );
 app.use("/api/posts", postRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/events", eventRouter);
 app.use(errorController.handleError);
 
 mongoose

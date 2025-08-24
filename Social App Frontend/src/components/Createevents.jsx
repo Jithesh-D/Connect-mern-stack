@@ -20,20 +20,16 @@ const CreateEvent = () => {
     setEventData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  // CreateEvent.jsx
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Load existing events
-    const storedEvents = JSON.parse(localStorage.getItem("events") || "[]");
+    await fetch("http://localhost:3001/api/events", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(eventData),
+    });
 
-    // Add new event with unique id
-    const newEvent = { ...eventData, id: Date.now() };
-    const updatedEvents = [...storedEvents, newEvent];
-
-    // Save to localStorage
-    localStorage.setItem("events", JSON.stringify(updatedEvents));
-
-    // Redirect to /events
     navigate("/events");
   };
 

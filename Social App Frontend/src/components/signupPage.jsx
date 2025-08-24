@@ -15,13 +15,10 @@ function SignupPage() {
     e.preventDefault();
     setError("");
 
-    // Validate passwords match
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
-
-    // Validate password strength
     if (password.length < 6) {
       setError("Password must be at least 6 characters long");
       return;
@@ -36,7 +33,6 @@ function SignupPage() {
         { withCredentials: true }
       );
       console.log("Signup successful:", res.data);
-
       navigate("/login");
     } catch (err) {
       setError(err.response?.data?.error || "Signup failed. Please try again.");
@@ -46,105 +42,86 @@ function SignupPage() {
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-6">
-          <div className="card">
-            <div className="card-body">
-              <h2 className="text-center mb-4">Sign Up</h2>
-              {error && (
-                <div className="alert alert-danger" role="alert">
-                  {error}
-                </div>
-              )}
-              <form onSubmit={handleSubmit}>
-                <div className="mb-3">
-                  <label htmlFor="username" className="form-label">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    className="form-control"
-                    id="username"
-                    placeholder="Enter your username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                    minLength="3"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="email" className="form-label">
-                    Email address
-                  </label>
-                  <input
-                    type="email"
-                    className="form-control"
-                    id="email"
-                    placeholder="Enter your email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="password" className="form-label">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    minLength="6"
-                  />
-                </div>
-                <div className="mb-3">
-                  <label htmlFor="confirmPassword" className="form-label">
-                    Confirm Password
-                  </label>
-                  <input
-                    type="password"
-                    className="form-control"
-                    id="confirmPassword"
-                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                    minLength="6"
-                  />
-                </div>
-                <div className="d-grid gap-2">
-                  <button
-                    type="submit"
-                    className="btn btn-primary"
-                    disabled={isLoading}
-                  >
-                    {isLoading ? (
-                      <>
-                        <span
-                          className="spinner-border spinner-border-sm me-2"
-                          role="status"
-                          aria-hidden="true"
-                        ></span>
-                        Signing up...
-                      </>
-                    ) : (
-                      "Sign Up"
-                    )}
-                  </button>
-                  <div className="text-center mt-3">
-                    Already have an account?{" "}
-                    <Link to="/login" className="text-decoration-none">
-                      Login here
-                    </Link>
-                  </div>
-                </div>
-              </form>
-            </div>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-6">
+      {/* Wrapper to center both cards equally */}
+      <div className="flex flex-col md:flex-row items-center justify-between max-w-6xl w-full gap-12">
+        {/* Left Branding Card */}
+        <div className="flex-1 text-center md:text-left">
+          <h1 className="text-5xl font-extrabold text-green-600">
+            CampusConnect
+          </h1>
+          <p className="text-lg text-gray-700 mt-4 max-w-md mx-auto md:mx-0">
+            CampusConnect helps you connect, collaborate, and grow with students
+            and opportunities across your campus.
+          </p>
+        </div>
+
+        {/* Signup Card */}
+        <div className="flex-1 max-w-md w-full">
+          <div className="bg-white shadow-lg rounded-2xl p-8">
+            <h2 className="text-2xl font-semibold text-center mb-6">Sign Up</h2>
+
+            {error && (
+              <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <input
+                type="text"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                minLength="3"
+              />
+              <input
+                type="email"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="College Email (e.g., name@rvu.edu.in)"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+              <input
+                type="password"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                minLength="6"
+              />
+              <input
+                type="password"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                minLength="6"
+              />
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full bg-blue-600 text-white font-semibold p-3 rounded-lg hover:bg-blue-700 transition"
+              >
+                {isLoading ? "Signing up..." : "Sign Up"}
+              </button>
+            </form>
+
+            <p className="text-center text-gray-600 text-sm mt-4">
+              Already have an account?{" "}
+              <Link
+                to="/login"
+                className="text-blue-600 font-medium hover:underline"
+              >
+                Login here
+              </Link>
+            </p>
           </div>
         </div>
       </div>

@@ -5,9 +5,11 @@ const postRouter = require("./Routes/postsRoute");
 const authRouter = require("./Routes/authRoute");
 const eventRouter = require("./Routes/eventRoute");
 const errorController = require("./controllers/errorController");
+const path = require("path");
 const cors = require("cors");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
+const multer = require("multer");
 
 const mongo_path =
   "mongodb+srv://root:root@myproject.pmimgo1.mongodb.net/SocialApp?retryWrites=true&w=majority&appName=Myproject";
@@ -29,6 +31,7 @@ app.use(
 );
 
 app.use(express.urlencoded({ extended: true }));
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use(express.json());
 app.use(
   cors({

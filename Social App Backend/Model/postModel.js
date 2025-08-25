@@ -6,6 +6,7 @@ const postSchema = new mongoose.Schema(
     body: { type: String, required: true },
     tags: { type: [String], required: true },
     reactions: { type: Number, default: 0 },
+    image: { type: String, default: null },
   },
   { timestamps: true }
 );

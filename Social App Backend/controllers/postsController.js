@@ -2,11 +2,13 @@ const Post = require("../Model/postModel");
 
 exports.createPost = async (req, res) => {
   const { title, body, tags, reactions } = req.body;
+  const image = req.file ? `/uploads/${req.file.filename}` : null;
   const post = new Post({
     title,
     body,
     tags,
     reactions: 0,
+    image,
   });
   await post.save();
   res.status(201).json(post);

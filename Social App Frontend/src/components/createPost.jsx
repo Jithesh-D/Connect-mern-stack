@@ -12,6 +12,10 @@ import {
   Sparkles,
   X,
   Check,
+  Image as ImageIcon,
+  Upload,
+  Camera,
+  Trash2,
 } from "lucide-react";
 
 const CreatePost = () => {
@@ -24,6 +28,7 @@ const CreatePost = () => {
   const postTitleElement = useRef();
   const postBodyElement = useRef();
   const tagsElement = useRef();
+  const imageInputElement = useRef();
 
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,9 +36,20 @@ const CreatePost = () => {
   const [titleCount, setTitleCount] = useState(0);
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [dragActive, setDragActive] = useState(false);
 
   const maxTitleLength = 100;
   const maxBodyLength = 1000;
+  const maxImageSize = 5 * 1024 * 1024; // 5MB
+  const allowedImageTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "image/gif",
+    "image/webp",
+  ];
 
   useEffect(() => {
     if (editingPost) {
@@ -44,6 +60,9 @@ const CreatePost = () => {
       setCharCount(editingPost.body.length);
       setTags(editingPost.tags || []);
       setTagInput(editingPost.tags?.join(" ") || "");
+      if (editingPost.image) {
+        setImagePreview(editingPost.image);
+      }
     }
   }, [editingPost]);
 
@@ -71,6 +90,63 @@ const CreatePost = () => {
     tagsElement.current.value = updatedTags.join(" ");
   };
 
+  const validateImage = (file) => {
+    if (!allowedImageTypes.includes(file.type)) {
+      alert("Please select a valid image file (JPEG, PNG, GIF, or WebP)");
+      return false;
+    }
+    if (file.size > maxImageSize) {
+      alert("Image size should be less than 5MB");
+      return false;
+    }
+    return true;
+  };
+
+  const handleImageSelect = (file) => {
+    if (file && validateImage(file)) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    handleImageSelect(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+    const file = e.dataTransfer.files[0];
+    handleImageSelect(file);
+  };
+
+  const removeImage = () => {
+    setSelectedImage(null);
+    setImagePreview(null);
+    if (imageInputElement.current) {
+      imageInputElement.current.value = "";
+    }
+  };
+
+  const triggerImageUpload = () => {
+    imageInputElement.current?.click();
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     setIsSubmitting(true);
@@ -93,17 +169,31 @@ const CreatePost = () => {
           postTitle,
           postBody,
           postTags,
-          editingPost.reactions
+          editingPost.reactions,
+          selectedImage || imagePreview
         );
         editPost(
           updatedPost.id,
           updatedPost.title,
           updatedPost.body,
-          updatedPost.tags
+          updatedPost.tags,
+          updatedPost.image
         );
       } else {
-        const newPost = await addPostToServer(postTitle, postBody, postTags, 0);
-        addPost(newPost.id, newPost.title, newPost.body, newPost.tags);
+        const newPost = await addPostToServer(
+          postTitle,
+          postBody,
+          postTags,
+          0,
+          selectedImage
+        );
+        addPost(
+          newPost.id,
+          newPost.title,
+          newPost.body,
+          newPost.tags,
+          newPost.image
+        );
       }
 
       navigate("/");
@@ -214,6 +304,85 @@ const CreatePost = () => {
             </div>
           </div>
 
+          {/* Image Upload Field */}
+          <div className="space-y-3">
+            <label className="flex items-center text-lg font-semibold text-gray-700">
+              <ImageIcon className="h-5 w-5 mr-2 text-green-600" />
+              Add Image
+              <span className="text-gray-400 ml-2 text-sm font-normal">
+                (optional)
+              </span>
+            </label>
+
+            {!imagePreview ? (
+              <div
+                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 cursor-pointer ${
+                  dragActive
+                    ? "border-green-500 bg-green-50"
+                    : "border-gray-300 hover:border-green-400 hover:bg-gray-50"
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                onClick={triggerImageUpload}
+              >
+                <input
+                  type="file"
+                  ref={imageInputElement}
+                  onChange={handleImageChange}
+                  accept="image/*"
+                  className="hidden"
+                />
+                <div className="flex flex-col items-center space-y-4">
+                  <div className="p-4 bg-green-100 rounded-full">
+                    <Upload className="h-8 w-8 text-green-600" />
+                  </div>
+                  <div>
+                    <p className="text-lg font-medium text-gray-700">
+                      Drop an image here or click to browse
+                    </p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Supports JPEG, PNG, GIF, WebP (max 5MB)
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                  >
+                    <Camera className="h-4 w-4 mr-2" />
+                    Choose Image
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="relative">
+                <div className="relative rounded-xl overflow-hidden border border-gray-200">
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="w-full h-64 object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="opacity-0 hover:opacity-100 bg-red-500 text-white p-2 rounded-full transition-opacity duration-200"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={removeImage}
+                  className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors duration-200"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Tags Field */}
           <div className="space-y-3">
             <label
@@ -311,6 +480,7 @@ const CreatePost = () => {
         <ul className="text-sm text-yellow-700 space-y-2">
           <li>• Write a clear, engaging title that captures attention</li>
           <li>• Share your genuine thoughts and experiences</li>
+          <li>• Use high-quality images to make your post more engaging</li>
           <li>• Use relevant tags to help others find your post</li>
           <li>• Be respectful and constructive in your communication</li>
         </ul>

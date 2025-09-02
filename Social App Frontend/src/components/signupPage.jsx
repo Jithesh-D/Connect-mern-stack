@@ -42,10 +42,8 @@ function SignupPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-6">
-      {/* Wrapper to center both cards equally */}
+    <div className="flex items-center justify-center min-h-screen bg-white-100 px-6">
       <div className="flex flex-col md:flex-row items-center justify-between max-w-6xl w-full gap-12">
-        {/* Left Branding Card */}
         <div className="flex-1 text-center md:text-left">
           <h1 className="text-5xl font-extrabold text-green-600">
             CampusConnect
@@ -56,7 +54,6 @@ function SignupPage() {
           </p>
         </div>
 
-        {/* Signup Card */}
         <div className="flex-1 max-w-md w-full">
           <div className="bg-white shadow-lg rounded-2xl p-8">
             <h2 className="text-2xl font-semibold text-center mb-6">Sign Up</h2>

@@ -15,6 +15,7 @@ import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import EventsPage from "./components/EventsPage.jsx";
 import CreateEvent from "./components/Createevents.jsx";
 import Placements from "./components/placements.jsx";
+import ProfilePage from "./components/ProfilePage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -64,6 +65,10 @@ const router = createBrowserRouter([
           {
             path: "placements",
             element: <Placements />,
+          },
+          {
+            path: "/profile",
+            element: <ProfilePage />,
           },
         ],
       },

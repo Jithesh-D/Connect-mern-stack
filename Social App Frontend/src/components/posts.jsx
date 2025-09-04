@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { API_BASE_URL } from "../config";
 import {
   Trash2,
   Edit3,
@@ -111,6 +112,21 @@ const Post = ({ post }) => {
           <Clock className="h-4 w-4 mr-1" />
           <span>{formatDistanceToNow(createdDate, { addSuffix: true })}</span>
         </div>
+
+        {/* Image Section */}
+        {post.image && (
+          <div className="mb-4">
+            <img
+              src={`${API_BASE_URL}${post.image}`}
+              alt={post.title}
+              className="w-full h-60 object-cover rounded-lg shadow-md hover:scale-105 transition-transform duration-300"
+              onError={(e) => {
+                console.error("Image failed to load:", post.image);
+                e.target.style.display = "none";
+              }}
+            />
+          </div>
+        )}
 
         {/* Content */}
         <p className="text-gray-600 mb-4 leading-relaxed line-clamp-4">

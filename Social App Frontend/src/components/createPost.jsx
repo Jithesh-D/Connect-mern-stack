@@ -168,9 +168,7 @@ const CreatePost = () => {
           editingPost.id,
           postTitle,
           postBody,
-          postTags,
-          editingPost.reactions,
-          selectedImage || imagePreview
+          postTags
         );
         editPost(
           updatedPost.id,
@@ -184,8 +182,7 @@ const CreatePost = () => {
           postTitle,
           postBody,
           postTags,
-          0,
-          selectedImage
+          selectedImage // Pass the actual File object
         );
         addPost(
           newPost.id,

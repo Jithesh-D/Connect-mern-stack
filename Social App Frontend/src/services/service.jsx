@@ -1,11 +1,20 @@
-const addPostToServer = async (title, body, tags, reactions) => {
+import { API_BASE_URL } from "../config";
+
+// ✅ Add a post with optional image
+const addPostToServer = async (title, body, tags, image) => {
   try {
-    const response = await fetch("http://localhost:3001/api/posts", {
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("body", body);
+    formData.append("tags", JSON.stringify(tags));
+    if (image) {
+      formData.append("image", image);
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/posts`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ title, body, tags, reactions: 0 }),
+      credentials: "include",
+      body: formData,
     });
 
     if (!response.ok) {
@@ -20,14 +29,17 @@ const addPostToServer = async (title, body, tags, reactions) => {
   }
 };
 
+// ✅ Get all posts
 const getPostsFromServer = async () => {
-  const response = await fetch("http://localhost:3001/api/posts");
+  const response = await fetch(`${API_BASE_URL}/api/posts`);
   const posts = await response.json();
   return posts.map(mapPostFromServer);
 };
+
+// ✅ Delete a post
 const deletePostFromServer = async (postId) => {
   try {
-    const response = await fetch(`http://localhost:3001/api/posts/${postId}`, {
+    const response = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
       method: "DELETE",
     });
     const data = await response.json();
@@ -41,6 +53,7 @@ const deletePostFromServer = async (postId) => {
   }
 };
 
+// ✅ Add reaction
 const editReactionFromServer = async (postId) => {
   const response = await fetch(
     `http://localhost:3001/api/posts/${postId}/reaction`,
@@ -52,14 +65,21 @@ const editReactionFromServer = async (postId) => {
   return mapPostFromServer(post);
 };
 
-const updatePostInServer = async (id, title, body, tags) => {
+// 🔄 FIXED: Update post WITH optional image support
+const updatePostInServer = async (id, title, body, tags, image) => {
   try {
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("body", body);
+    formData.append("tags", JSON.stringify(tags));
+    if (image) {
+      formData.append("image", image);
+    }
+
     const response = await fetch(`http://localhost:3001/api/posts/${id}`, {
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ title, body, tags }),
+      credentials: "include",
+      body: formData, // ✅ Use FormData instead of JSON
     });
 
     if (!response.ok) {
@@ -69,11 +89,12 @@ const updatePostInServer = async (id, title, body, tags) => {
     const post = await response.json();
     return mapPostFromServer(post);
   } catch (error) {
-    console.error("Error in editPostInServer:", error);
+    console.error("Error in updatePostInServer:", error);
     throw error;
   }
 };
 
+// ✅ Map server response into usable object
 const mapPostFromServer = (post) => {
   return {
     id: post._id,
@@ -81,6 +102,7 @@ const mapPostFromServer = (post) => {
     body: post.body,
     tags: post.tags,
     reactions: post.reactions,
+    image: post.image,
   };
 };
 

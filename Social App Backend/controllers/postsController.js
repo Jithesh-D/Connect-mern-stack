@@ -1,17 +1,35 @@
 const Post = require("../Model/postModel");
 
 exports.createPost = async (req, res) => {
-  const { title, body, tags, reactions } = req.body;
-  const image = req.file ? `/uploads/${req.file.filename}` : null;
-  const post = new Post({
-    title,
-    body,
-    tags,
-    reactions: 0,
-    image,
-  });
-  await post.save();
-  res.status(201).json(post);
+  try {
+    const { title, body, tags } = req.body;
+    let image = null;
+
+    if (req.file) {
+      image = `/uploads/${req.file.filename}`;
+    }
+
+    if (!title || !body) {
+      return res.status(400).json({ message: "Title and body are required" });
+    }
+
+    const post = new Post({
+      title,
+      body,
+      tags: tags || [],
+      reactions: 0,
+      image,
+    });
+
+    await post.save();
+    res.status(201).json(post);
+  } catch (error) {
+    console.error("Error creating post:", error);
+    res.status(500).json({
+      message: "Error creating post",
+      error: error.message,
+    });
+  }
 };
 
 exports.getPosts = async (req, res) => {

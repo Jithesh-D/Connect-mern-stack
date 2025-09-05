@@ -1,6 +1,5 @@
 import { API_BASE_URL } from "../config";
 
-// ✅ Add a post with optional image
 const addPostToServer = async (title, body, tags, image) => {
   try {
     const formData = new FormData();
@@ -29,14 +28,12 @@ const addPostToServer = async (title, body, tags, image) => {
   }
 };
 
-// ✅ Get all posts
 const getPostsFromServer = async () => {
   const response = await fetch(`${API_BASE_URL}/api/posts`);
   const posts = await response.json();
   return posts.map(mapPostFromServer);
 };
 
-// ✅ Delete a post
 const deletePostFromServer = async (postId) => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
@@ -53,7 +50,6 @@ const deletePostFromServer = async (postId) => {
   }
 };
 
-// ✅ Add reaction
 const editReactionFromServer = async (postId) => {
   const response = await fetch(
     `http://localhost:3001/api/posts/${postId}/reaction`,
@@ -65,7 +61,6 @@ const editReactionFromServer = async (postId) => {
   return mapPostFromServer(post);
 };
 
-// 🔄 FIXED: Update post WITH optional image support
 const updatePostInServer = async (id, title, body, tags, image) => {
   try {
     const formData = new FormData();
@@ -79,7 +74,7 @@ const updatePostInServer = async (id, title, body, tags, image) => {
     const response = await fetch(`http://localhost:3001/api/posts/${id}`, {
       method: "PATCH",
       credentials: "include",
-      body: formData, // ✅ Use FormData instead of JSON
+      body: formData,
     });
 
     if (!response.ok) {
@@ -94,7 +89,6 @@ const updatePostInServer = async (id, title, body, tags, image) => {
   }
 };
 
-// ✅ Map server response into usable object
 const mapPostFromServer = (post) => {
   return {
     id: post._id,

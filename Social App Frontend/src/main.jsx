@@ -16,13 +16,13 @@ import EventsPage from "./components/EventsPage.jsx";
 import CreateEvent from "./components/Createevents.jsx";
 import Placements from "./components/placements.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
+import Home from "./components/homePage.jsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <App />,
     children: [
-      // Public routes
       {
         path: "signup",
         element: <SignupPage />,
@@ -40,11 +40,11 @@ const router = createBrowserRouter([
         children: [
           {
             path: "/",
-            element: <PostList />,
+            element: <Home />,
           },
           {
             path: "home",
-            element: <PostList />,
+            element: <Home />,
           },
           {
             path: "create-post",

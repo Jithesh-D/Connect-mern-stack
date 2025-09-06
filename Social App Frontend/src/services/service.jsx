@@ -66,7 +66,10 @@ const updatePostInServer = async (id, title, body, tags, image) => {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("body", body);
-    formData.append("tags", JSON.stringify(tags));
+
+    // Append each tag individually
+    tags.forEach((tag) => formData.append("tags[]", tag));
+
     if (image) {
       formData.append("image", image);
     }
@@ -74,7 +77,7 @@ const updatePostInServer = async (id, title, body, tags, image) => {
     const response = await fetch(`http://localhost:3001/api/posts/${id}`, {
       method: "PATCH",
       credentials: "include",
-      body: formData,
+      body: formData, // No headers for multipart/form-data
     });
 
     if (!response.ok) {

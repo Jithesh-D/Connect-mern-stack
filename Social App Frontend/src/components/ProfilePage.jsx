@@ -1,112 +1,139 @@
-import { User, Settings, LogOut, Moon } from "lucide-react";
+import React, { useState } from "react";
+import { Camera, Settings, Grid, Bookmark, Tag } from "lucide-react";
 
-function ProfilePage() {
+const ProfilePage = () => {
+  const [activeTab, setActiveTab] = useState("posts");
+
   return (
-    <div className="max-w-sm mx-auto bg-white min-h-screen">
-      {/* <div className="flex items-center justify-between p-4 bg-white">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-gray-800 rounded-full flex items-center justify-center">
-            <span className="text-white text-xs">AP</span>
-          </div>
-          <span className="text-gray-600 text-sm">Mark Parchell</span>
-        </div>
-        <button className="bg-gray-900 text-white px-4 py-1 rounded-full text-sm">
-          Following
-        </button>
-      </div>
-
-
-      <div className="flex justify-between items-center px-4 py-2 text-sm font-medium">
-        <span>9:41</span>
-        <div className="flex items-center gap-1">
-          <div className="flex gap-1">
-            <div className="w-1 h-3 bg-black rounded-full"></div>
-            <div className="w-1 h-3 bg-black rounded-full"></div>
-            <div className="w-1 h-3 bg-black rounded-full"></div>
-            <div className="w-1 h-3 bg-gray-300 rounded-full"></div>
-          </div>
-          <svg className="w-6 h-4" viewBox="0 0 24 16" fill="none">
-            <rect
-              x="1"
-              y="3"
-              width="22"
-              height="10"
-              rx="2"
-              stroke="black"
-              strokeWidth="1"
-              fill="none"
-            />
-            <rect x="23" y="6" width="2" height="4" rx="1" fill="black" />
-            <rect x="3" y="5" width="18" height="6" rx="1" fill="black" />
-          </svg>
-        </div>
-      </div> */}
-
-      {/* Purple Background Section */}
-      <div className="bg-gradient-to-b from-purple-300 to-purple-400 px-6 pb-20 pt-8">
-        {/* Profile Image */}
-        <div className="flex justify-center">
-          <div className="w-24 h-24 rounded-full bg-pink-200 overflow-hidden border-4 border-white shadow-lg">
-            <img src="" alt="Profile" className="w-full h-full object-cover" />
-          </div>
-        </div>
-      </div>
-
-      {/* Profile Info Section */}
-      <div className="bg-white -mt-12 rounded-t-3xl px-6 pt-8">
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-semibold text-gray-900 mb-6">
-            Jithesh.D
-          </h1>
-
-          {/* Contact Info */}
-          <div className="space-y-4 mb-8">
-            <div className="flex justify-between items-center">
-              <span className="text-gray-500">Phone</span>
-              <span className="text-gray-900 font-medium">935****45</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-gray-500">Mail</span>
-              <span className="text-gray-900 font-medium">
-                jitheshd0006@gmail.com
-              </span>
-            </div>
-          </div>
-
-          {/* Dark Mode Toggle */}
-          <div className="flex justify-between items-center py-4 border-t border-gray-100">
-            <div className="flex items-center gap-3">
-              <Moon className="w-5 h-5 text-gray-600" />
-              <span className="text-gray-900">Dark mode</span>
-            </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Profile Content - No sidebar/header/footer since they're in MainLayout */}
+      <div className="px-6 py-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Profile Header */}
+          <div className="flex items-start space-x-8 mb-8">
+            {/* Profile Picture */}
             <div className="relative">
-              <input type="checkbox" className="sr-only" />
-              <div className="w-11 h-6 bg-gray-200 rounded-full shadow-inner"></div>
-              <div className="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow transform transition-transform"></div>
+              <div className="w-40 h-40 rounded-full bg-gradient-to-br from-gray-300 to-gray-400 flex items-center justify-center">
+                <Camera size={32} className="text-gray-600" />
+              </div>
+            </div>
+
+            {/* Profile Info */}
+            <div className="flex-1">
+              <div className="flex items-center space-x-4 mb-6">
+                <h2 className="text-2xl font-light text-gray-800">suhas_jax</h2>
+                <button className="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium text-gray-800 transition-colors">
+                  Edit profile
+                </button>
+                <button className="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 rounded-lg text-sm font-medium text-gray-800 transition-colors">
+                  View archive
+                </button>
+                <button className="p-1.5 hover:bg-gray-100 rounded-lg">
+                  <Settings size={20} className="text-gray-600" />
+                </button>
+              </div>
+
+              {/* Stats */}
+              <div className="flex space-x-8 mb-6">
+                <div className="text-center">
+                  <div className="font-semibold text-gray-800">0</div>
+                  <div className="text-gray-600 text-sm">posts</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-gray-800">331</div>
+                  <div className="text-gray-600 text-sm">followers</div>
+                </div>
+                <div className="text-center">
+                  <div className="font-semibold text-gray-800">766</div>
+                  <div className="text-gray-600 text-sm">following</div>
+                </div>
+              </div>
+
+              {/* Bio */}
+              <div className="text-gray-800">
+                <div className="font-semibold mb-1">Suhas</div>
+                <div className="mb-1">Endless Nemesis //</div>
+                <div className="text-gray-600">ON MY OWN SPECTRUM</div>
+              </div>
             </div>
           </div>
 
-          {/* Menu Items */}
-          <div className="space-y-1 mt-4">
-            <button className="flex items-center gap-3 w-full py-4 text-left hover:bg-gray-50 rounded-lg px-2">
-              <User className="w-5 h-5 text-gray-600" />
-              <span className="text-gray-900">Profile details</span>
-            </button>
+          {/* Story Highlights */}
+          <div className="flex items-center space-x-6 mb-8 pb-8 border-b">
+            <div className="flex flex-col items-center">
+              <div className="w-20 h-20 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center mb-2 hover:border-gray-400 cursor-pointer transition-colors">
+                <div className="w-12 h-12 rounded-full border-2 border-gray-400 flex items-center justify-center">
+                  <span className="text-2xl text-gray-400 font-light">+</span>
+                </div>
+              </div>
+              <span className="text-xs text-gray-600">New</span>
+            </div>
+          </div>
 
-            <button className="flex items-center gap-3 w-full py-4 text-left hover:bg-gray-50 rounded-lg px-2">
-              <Settings className="w-5 h-5 text-gray-600" />
-              <span className="text-gray-900">Settings</span>
-            </button>
+          {/* Tab Navigation */}
+          <div className="flex justify-center mb-8">
+            <div className="flex space-x-16">
+              <button
+                onClick={() => setActiveTab("posts")}
+                className={`flex items-center space-x-2 py-3 border-t-2 ${
+                  activeTab === "posts"
+                    ? "border-gray-800 text-gray-800"
+                    : "border-transparent text-gray-400 hover:text-gray-600"
+                } transition-colors`}
+              >
+                <Grid size={16} />
+                <span className="text-sm font-medium uppercase tracking-wide">
+                  POSTS
+                </span>
+              </button>
+              <button
+                onClick={() => setActiveTab("saved")}
+                className={`flex items-center space-x-2 py-3 border-t-2 ${
+                  activeTab === "saved"
+                    ? "border-gray-800 text-gray-800"
+                    : "border-transparent text-gray-400 hover:text-gray-600"
+                } transition-colors`}
+              >
+                <Bookmark size={16} />
+                <span className="text-sm font-medium uppercase tracking-wide">
+                  SAVED
+                </span>
+              </button>
+              <button
+                onClick={() => setActiveTab("tagged")}
+                className={`flex items-center space-x-2 py-3 border-t-2 ${
+                  activeTab === "tagged"
+                    ? "border-gray-800 text-gray-800"
+                    : "border-transparent text-gray-400 hover:text-gray-600"
+                } transition-colors`}
+              >
+                <Tag size={16} />
+                <span className="text-sm font-medium uppercase tracking-wide">
+                  TAGGED
+                </span>
+              </button>
+            </div>
+          </div>
 
-            <button className="flex items-center gap-3 w-full py-4 text-left hover:bg-gray-50 rounded-lg px-2">
-              <LogOut className="w-5 h-5 text-gray-600" />
-              <span className="text-gray-900">Log out</span>
+          {/* Posts Grid */}
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="w-24 h-24 rounded-full border-2 border-gray-800 flex items-center justify-center mb-6">
+              <Camera size={32} className="text-gray-800" />
+            </div>
+            <h3 className="text-2xl font-light text-gray-800 mb-2">
+              Share Photos
+            </h3>
+            <p className="text-gray-600 text-center mb-6">
+              When you share photos, they will appear on your profile.
+            </p>
+            <button className="text-blue-500 font-medium hover:text-blue-600 transition-colors">
+              Share your first photo
             </button>
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 
 export default ProfilePage;

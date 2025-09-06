@@ -60,56 +60,54 @@ const Post = ({ post }) => {
   };
 
   return (
-    <div className="w-full max-w-lg bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 mb-6 group">
-      {/* Card Header - Action Buttons */}
-      <div className="relative p-4 pb-0">
-        <div className="absolute top-4 right-4 flex space-x-2 z-10">
-          {!showDeleteConfirm ? (
-            <>
-              <button
-                onClick={handleEdit}
-                className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
-                title="Edit Post"
-              >
-                <Edit3 className="h-4 w-4" />
-              </button>
-              <button
-                onClick={handleDelete}
-                className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
-                title="Delete Post"
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
-            </>
-          ) : (
-            <div className="flex space-x-1 bg-white rounded-lg p-1 shadow-lg border">
-              <button
-                onClick={handleDelete}
-                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition-colors duration-200"
-              >
-                Confirm
-              </button>
-              <button
-                onClick={cancelDelete}
-                className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs rounded transition-colors duration-200"
-              >
-                Cancel
-              </button>
-            </div>
-          )}
-        </div>
+    <div className="w-full max-w-lg bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 mb-6">
+      {/* Top Action Buttons */}
+      <div className="flex justify-end p-4 pb-0 space-x-2">
+        {!showDeleteConfirm ? (
+          <>
+            <button
+              onClick={handleEdit}
+              className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md transition-transform duration-200 hover:scale-110"
+              title="Edit Post"
+            >
+              <Edit3 size={18} strokeWidth={2} />
+            </button>
+            <button
+              onClick={handleDelete}
+              className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-md transition-transform duration-200 hover:scale-110"
+              title="Delete Post"
+            >
+              <Trash2 size={18} strokeWidth={2} />
+            </button>
+          </>
+        ) : (
+          <div className="flex space-x-2 bg-white rounded-lg p-1 shadow-lg border">
+            <button
+              onClick={handleDelete}
+              className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition-colors duration-200"
+            >
+              Confirm
+            </button>
+            <button
+              onClick={cancelDelete}
+              className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs rounded transition-colors duration-200"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Card Body */}
       <div className="p-4">
         {/* Title */}
-        <h5 className="text-lg font-semibold mb-2 text-gray-900 pr-20 group-hover:text-blue-600 transition-colors duration-200">
+        <h5 className="text-xl font-semibold mb-2 text-gray-900 hover:text-blue-600 transition-colors duration-200">
           {post.title}
         </h5>
 
         {/* Timestamp */}
         <div className="flex items-center text-sm text-gray-500 mb-3">
-          <Clock className="h-4 w-4 mr-1" />
+          <Clock size={16} strokeWidth={2} className="mr-1 text-gray-600" />
           <span>{formatDistanceToNow(createdDate, { addSuffix: true })}</span>
         </div>
 
@@ -129,9 +127,7 @@ const Post = ({ post }) => {
         )}
 
         {/* Content */}
-        <p className="text-gray-600 mb-4 leading-relaxed line-clamp-4">
-          {post.body}
-        </p>
+        <p className="text-gray-700 mb-4 leading-relaxed">{post.body}</p>
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
@@ -141,7 +137,7 @@ const Post = ({ post }) => {
                 key={`${tag}-${index}`}
                 className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full hover:bg-blue-200 transition-colors duration-200"
               >
-                <Hash className="h-3 w-3 mr-1" />
+                <Hash size={14} strokeWidth={2} className="mr-1" />
                 {tag}
               </span>
             ))}
@@ -159,14 +155,12 @@ const Post = ({ post }) => {
                   : "bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600"
               }`}
             >
-              <ThumbsUp
-                className={`h-4 w-4 mr-2 ${isLiked ? "fill-current" : ""}`}
-              />
+              <ThumbsUp size={16} strokeWidth={2} className="mr-2" />
               <span>{currentReactions}</span>
             </button>
 
             <button className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200">
-              <MessageCircle className="h-4 w-4 mr-2" />
+              <MessageCircle size={16} strokeWidth={2} className="mr-2" />
               <span className="hidden sm:inline">Comment</span>
             </button>
           </div>

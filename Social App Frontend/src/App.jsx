@@ -1,5 +1,6 @@
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
+import React from "react";
 import { Outlet, Navigate } from "react-router-dom";
 
 function App() {
@@ -10,7 +11,7 @@ function App() {
   }
 
   return (
-    <div className="app-container">
+    <div className="app-container min-h-screen transition-colors duration-200 dark:bg-dark dark:text-dark-light">
       <Outlet />
     </div>
   );

@@ -1,6 +1,7 @@
-import PostList from "./postList.jsx";
+import { PlusSquare, Calendar, Briefcase, Home } from "lucide-react";
+import PostList from "./postList";
 
-const Home = () => {
+export default function Homepage() {
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* MAIN CONTENT */}
@@ -23,8 +24,38 @@ const Home = () => {
           </div>
         </div>
       </aside>
+
+      {/* Mobile Bottom Navigation */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t flex justify-around py-2 z-50">
+        <a
+          href="#"
+          className="flex flex-col items-center text-gray-600 hover:text-blue-600"
+        >
+          <Home className="w-6 h-6" />
+          <span className="text-xs">Home</span>
+        </a>
+        <a
+          href="#"
+          className="flex flex-col items-center text-gray-600 hover:text-blue-600"
+        >
+          <PlusSquare className="w-6 h-6" />
+          <span className="text-xs">Post</span>
+        </a>
+        <a
+          href="#"
+          className="flex flex-col items-center text-gray-600 hover:text-blue-600"
+        >
+          <Calendar className="w-6 h-6" />
+          <span className="text-xs">Events</span>
+        </a>
+        <a
+          href="#"
+          className="flex flex-col items-center text-gray-600 hover:text-blue-600"
+        >
+          <Briefcase className="w-6 h-6" />
+          <span className="text-xs">Placements</span>
+        </a>
+      </nav>
     </div>
   );
-};
-
-export default Home;
+}

@@ -7,20 +7,25 @@ import { Outlet } from "react-router-dom";
 function MainLayout() {
   return (
     <PostListProvider>
-      <div className="flex min-h-screen bg-gray-50">
-        {/* LEFT SIDEBAR */}
-        <aside className="hidden md:block w-64 bg-white shadow-lg">
-          <Sidebar />
-        </aside>
+      <div className="flex flex-col min-h-screen bg-gray-50">
+        {/* HEADER */}
+        <Header />
 
-        {/* MAIN CONTENT AREA */}
-        <div className="flex-1 flex flex-col">
-          <Header />
-          <main className="flex-1">
+        {/* MIDDLE SECTION: Sidebar + Main Content */}
+        <div className="flex flex-1">
+          {/* LEFT SIDEBAR */}
+          <aside className="hidden md:block w-64 bg-white shadow-lg">
+            <Sidebar />
+          </aside>
+
+          {/* MAIN CONTENT AREA */}
+          <main className="flex-1 p-4 overflow-auto">
             <Outlet />
           </main>
-          <Footer />
         </div>
+
+        {/* FOOTER */}
+        <Footer />
       </div>
     </PostListProvider>
   );

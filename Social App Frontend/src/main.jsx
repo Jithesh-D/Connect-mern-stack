@@ -16,7 +16,7 @@ import EventsPage from "./components/EventsPage.jsx";
 import CreateEvent from "./components/Createevents.jsx";
 import Placements from "./components/placements.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
-import Home from "./components/homePage.jsx";
+import Homepage from "./components/homePage.jsx";
 
 const router = createBrowserRouter([
   {
@@ -40,11 +40,11 @@ const router = createBrowserRouter([
         children: [
           {
             path: "/",
-            element: <Home />,
+            element: <Homepage />,
           },
           {
             path: "home",
-            element: <Home />,
+            element: <Homepage />,
           },
           {
             path: "create-post",

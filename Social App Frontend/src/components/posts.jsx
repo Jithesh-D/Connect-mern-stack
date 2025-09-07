@@ -15,7 +15,7 @@ import {
   deletePostFromServer,
   editReactionFromServer,
 } from "../services/service.jsx";
-
+import React from "react";
 const Post = ({ post }) => {
   const { deletePost } = useContext(PostList);
   const navigate = useNavigate();
@@ -61,7 +61,6 @@ const Post = ({ post }) => {
 
   return (
     <div className="w-full max-w-lg bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 mb-6">
-      {/* Top Action Buttons */}
       <div className="flex justify-end p-4 pb-0 space-x-2">
         {!showDeleteConfirm ? (
           <>

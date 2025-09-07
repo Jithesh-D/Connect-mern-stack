@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import ThemeToggle from "./themeToggle.jsx";
 import {
   Search,
   Menu,
@@ -26,7 +27,6 @@ const Header = () => {
     <nav className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Brand */}
           <div className="flex items-center">
             <a href="/" className="flex items-center space-x-2">
               <GraduationCap className="h-8 w-8 text-yellow-400" />
@@ -36,7 +36,6 @@ const Header = () => {
             </a>
           </div>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
               <a

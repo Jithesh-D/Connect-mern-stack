@@ -11,7 +11,7 @@ function App() {
   }
 
   return (
-    <div className="app-container min-h-screen transition-colors duration-200 dark:bg-dark dark:text-dark-light">
+    <div className="app-container min-h-screen bg-white text-black dark:bg-dark dark:text-white transition-colors duration-200">
       <Outlet />
     </div>
   );

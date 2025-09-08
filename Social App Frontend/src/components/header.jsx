@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import DarkModeToggle from "./DarkModeToggle.jsx";
 import ThemeToggle from "./themeToggle.jsx";
 import {
   Search,
@@ -27,6 +28,7 @@ const Header = () => {
     <nav className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 shadow-lg sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          {/* Logo - Left */}
           <div className="flex items-center">
             <a href="/" className="flex items-center space-x-2">
               <GraduationCap className="h-8 w-8 text-yellow-400" />
@@ -36,8 +38,9 @@ const Header = () => {
             </a>
           </div>
 
+          {/* Navigation Links - Desktop */}
           <div className="hidden md:block">
-            <div className="ml-10 flex items-baseline space-x-4">
+            <div className="flex items-baseline space-x-4">
               <a
                 href="/"
                 className="text-white hover:bg-blue-700 hover:text-yellow-300 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200"
@@ -54,7 +57,7 @@ const Header = () => {
           </div>
 
           {/* Search Bar - Desktop */}
-          <div className="hidden md:block flex-1 max-w-md mx-8">
+          <div className="hidden md:block flex-1 max-w-md mx-6">
             <form onSubmit={handleSearch} className="relative">
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -69,6 +72,11 @@ const Header = () => {
                 />
               </div>
             </form>
+          </div>
+
+          {/* Theme Toggle - Desktop */}
+          <div className="hidden md:block mx-4">
+            <DarkModeToggle />
           </div>
 
           {/* Auth Buttons - Desktop */}
@@ -136,6 +144,27 @@ const Header = () => {
                   />
                 </div>
               </form>
+            </div>
+
+            {/* Mobile Theme Toggle */}
+            <div className="px-3 py-2">
+              <button
+                onClick={ThemeToggle}
+                className="w-full flex items-center justify-center p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 text-yellow-400 hover:bg-white/20 hover:text-yellow-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                aria-label="Toggle theme"
+              >
+                {isDarkMode ? (
+                  <>
+                    <Sun className="h-5 w-5 mr-2" />
+                    <span className="text-sm font-medium">Light Mode</span>
+                  </>
+                ) : (
+                  <>
+                    <Moon className="h-5 w-5 mr-2" />
+                    <span className="text-sm font-medium">Dark Mode</span>
+                  </>
+                )}
+              </button>
             </div>
 
             {/* Mobile Auth Buttons */}

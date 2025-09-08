@@ -6,6 +6,7 @@ import {
   createBrowserRouter,
   Navigate,
 } from "react-router-dom";
+import { DarkModeProvider } from "./store/darkModeContext";
 import CreatePost from "./components/createPost.jsx";
 import PostList from "./components/postList.jsx";
 import LoginPage from "./components/loginPage.jsx";
@@ -78,6 +79,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <DarkModeProvider>
+      <RouterProvider router={router} />
+    </DarkModeProvider>
   </StrictMode>
 );

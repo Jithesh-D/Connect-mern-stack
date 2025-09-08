@@ -1,8 +1,26 @@
 @import "tailwindcss";
 
+:root {
+  --background-light: #ffffff;
+  --text-light: #000000;
+  --background-dark: #1a1a1a;
+  --text-dark: #ffffff;
+}
+
+.dark {
+  background-color: var(--background-dark);
+  color: var(--text-dark);
+}
+
+.light {
+  background-color: var(--background-light);
+  color: var(--text-light);
+}
+
 .itemContainer {
   display: flex;
 }
+
 .content {
   width: 100%;
 }
@@ -19,7 +37,7 @@
   margin: 20px;
   height: 80px;
   font-size: 1.5rem;
-  color: #555;
+  color: inherit;
   text-align: center;
 }
 

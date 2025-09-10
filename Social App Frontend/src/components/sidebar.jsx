@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Search,
@@ -16,6 +16,30 @@ const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Check for dark mode on component mount
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const darkMode =
+        document.documentElement.classList.contains("dark") ||
+        localStorage.getItem("theme") === "dark" ||
+        (!localStorage.getItem("theme") &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches);
+      setIsDarkMode(darkMode);
+    };
+
+    checkDarkMode();
+
+    // Listen for theme changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const menuItems = [
     { path: "/", icon: Home, label: "Home" },
@@ -30,8 +54,12 @@ const Sidebar = () => {
 
   return (
     <div
-      className={`bg-gradient-to-b from-gray-50 to-gray-100 border-r border-gray-200 shadow-lg transition-all duration-300 ease-in-out ${
+      className={`transition-all duration-300 ease-in-out border-r shadow-lg ${
         isCollapsed ? "w-16" : "w-64"
+      } ${
+        isDarkMode
+          ? "bg-gradient-to-b from-gray-800 via-gray-900 to-black border-gray-700"
+          : "bg-gradient-to-b from-gray-50 to-gray-100 border-gray-200"
       }`}
       style={{ minHeight: "calc(100vh - 64px)" }}
     >
@@ -39,7 +67,11 @@ const Sidebar = () => {
         <div className="flex items-center mb-6">
           <button
             onClick={toggleSidebar}
-            className="h-6 w-6 text-blue-600 mr-3 hover:text-blue-800 transition-colors duration-200 cursor-pointer"
+            className={`h-6 w-6 mr-3 transition-colors duration-200 cursor-pointer ${
+              isDarkMode
+                ? "text-blue-400 hover:text-blue-300"
+                : "text-blue-600 hover:text-blue-800"
+            }`}
           >
             {isCollapsed ? (
               <Menu className="h-6 w-6" />
@@ -48,14 +80,24 @@ const Sidebar = () => {
             )}
           </button>
           {!isCollapsed && (
-            <span className="text-xl font-bold text-gray-800 transition-opacity duration-200">
+            <span
+              className={`text-xl font-bold transition-opacity duration-200 ${
+                isDarkMode ? "text-gray-100" : "text-gray-800"
+              }`}
+            >
               Menu
             </span>
           )}
         </div>
 
         {!isCollapsed && (
-          <div className="h-px bg-gradient-to-r from-blue-200 to-purple-200 mb-6"></div>
+          <div
+            className={`h-px mb-6 ${
+              isDarkMode
+                ? "bg-gradient-to-r from-blue-400/30 to-purple-400/30"
+                : "bg-gradient-to-r from-blue-200 to-purple-200"
+            }`}
+          ></div>
         )}
 
         <nav className="space-y-2">
@@ -69,7 +111,11 @@ const Sidebar = () => {
                 onClick={() => navigate(item.path)}
                 className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200 group ${
                   isActive
-                    ? "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md transform scale-105"
+                    ? isDarkMode
+                      ? "bg-gradient-to-r from-blue-600 to-purple-700 text-white shadow-lg transform scale-105 shadow-blue-500/20"
+                      : "bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-md transform scale-105"
+                    : isDarkMode
+                    ? "text-gray-300 hover:bg-gray-700/50 hover:text-blue-300 hover:shadow-sm"
                     : "text-gray-700 hover:bg-blue-50 hover:text-blue-700 hover:shadow-sm"
                 } ${isCollapsed ? "justify-center" : ""}`}
                 title={isCollapsed ? item.label : ""}
@@ -78,6 +124,8 @@ const Sidebar = () => {
                   className={`h-5 w-5 ${isCollapsed ? "" : "mr-3"} ${
                     isActive
                       ? "text-white"
+                      : isDarkMode
+                      ? "text-gray-400 group-hover:text-blue-400"
                       : "text-gray-500 group-hover:text-blue-600"
                   }`}
                 />
@@ -93,22 +141,93 @@ const Sidebar = () => {
 
         {/* Quick Stats Card - only show when expanded */}
         {!isCollapsed && (
-          <div className="mt-8 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100 transition-opacity duration-200">
-            <h3 className="text-sm font-semibold text-gray-700 mb-2">
+          <div
+            className={`mt-8 p-4 rounded-lg border transition-all duration-200 ${
+              isDarkMode
+                ? "bg-gradient-to-r from-gray-800/50 to-gray-700/50 border-gray-600/50 backdrop-blur-sm"
+                : "bg-gradient-to-r from-blue-50 to-purple-50 border-blue-100"
+            }`}
+          >
+            <h3
+              className={`text-sm font-semibold mb-2 ${
+                isDarkMode ? "text-gray-200" : "text-gray-700"
+              }`}
+            >
               Quick Stats
             </h3>
-            <div className="space-y-1 text-xs text-gray-600">
+            <div
+              className={`space-y-1 text-xs ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
               <div className="flex justify-between">
                 <span>Active Posts</span>
-                <span className="font-medium text-blue-600">24</span>
+                <span
+                  className={`font-medium ${
+                    isDarkMode ? "text-blue-400" : "text-blue-600"
+                  }`}
+                >
+                  24
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Upcoming Events</span>
-                <span className="font-medium text-purple-600">8</span>
+                <span
+                  className={`font-medium ${
+                    isDarkMode ? "text-purple-400" : "text-purple-600"
+                  }`}
+                >
+                  8
+                </span>
               </div>
               <div className="flex justify-between">
                 <span>Job Openings</span>
-                <span className="font-medium text-green-600">15</span>
+                <span
+                  className={`font-medium ${
+                    isDarkMode ? "text-green-400" : "text-green-600"
+                  }`}
+                >
+                  15
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* User Profile Section - only show when expanded */}
+        {!isCollapsed && (
+          <div
+            className={`mt-6 p-3 rounded-lg border transition-all duration-200 ${
+              isDarkMode
+                ? "bg-gray-800/30 border-gray-600/30 hover:bg-gray-800/50"
+                : "bg-white/50 border-gray-200/50 hover:bg-white/80"
+            } cursor-pointer group`}
+          >
+            <div className="flex items-center">
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
+                  isDarkMode
+                    ? "bg-gradient-to-r from-blue-500 to-purple-600"
+                    : "bg-gradient-to-r from-blue-400 to-purple-500"
+                }`}
+              >
+                <User className="h-4 w-4 text-white" />
+              </div>
+              <div className="flex-1">
+                <div
+                  className={`text-sm font-medium ${
+                    isDarkMode ? "text-gray-200" : "text-gray-800"
+                  }`}
+                >
+                  Student
+                </div>
+                <div
+                  className={`text-xs ${
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
+                  View Profile
+                </div>
               </div>
             </div>
           </div>

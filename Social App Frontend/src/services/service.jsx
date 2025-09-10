@@ -1,5 +1,12 @@
 import { API_BASE_URL } from "../config";
 
+const handleAuthError = (status) => {
+  if (status === 401) {
+    sessionStorage.removeItem("user");
+    window.location.href = "/login";
+  }
+};
+
 const addPostToServer = async (title, body, tags, image) => {
   try {
     const formData = new FormData();
@@ -17,6 +24,7 @@ const addPostToServer = async (title, body, tags, image) => {
     });
 
     if (!response.ok) {
+      handleAuthError(response.status);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
@@ -29,7 +37,9 @@ const addPostToServer = async (title, body, tags, image) => {
 };
 
 const getPostsFromServer = async () => {
-  const response = await fetch(`${API_BASE_URL}/api/posts`);
+  const response = await fetch(`${API_BASE_URL}/api/posts`, {
+    credentials: "include",
+  });
   const posts = await response.json();
   return posts.map(mapPostFromServer);
 };
@@ -38,6 +48,7 @@ const deletePostFromServer = async (postId) => {
   try {
     const response = await fetch(`${API_BASE_URL}/api/posts/${postId}`, {
       method: "DELETE",
+      credentials: "include",
     });
     const data = await response.json();
 
@@ -51,12 +62,10 @@ const deletePostFromServer = async (postId) => {
 };
 
 const editReactionFromServer = async (postId) => {
-  const response = await fetch(
-    `http://localhost:3001/api/posts/${postId}/reaction`,
-    {
-      method: "PATCH",
-    }
-  );
+  const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/reaction`, {
+    method: "PATCH",
+    credentials: "include",
+  });
   const post = await response.json();
   return mapPostFromServer(post);
 };
@@ -67,20 +76,23 @@ const updatePostInServer = async (id, title, body, tags, image) => {
     formData.append("title", title);
     formData.append("body", body);
 
-    // Append each tag individually
-    tags.forEach((tag) => formData.append("tags[]", tag));
+    // Handle tags
+    if (tags && Array.isArray(tags)) {
+      formData.append("tags", JSON.stringify(tags));
+    }
 
     if (image) {
       formData.append("image", image);
     }
 
-    const response = await fetch(`http://localhost:3001/api/posts/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/posts/${id}`, {
       method: "PATCH",
       credentials: "include",
       body: formData, // No headers for multipart/form-data
     });
 
     if (!response.ok) {
+      handleAuthError(response.status);
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 

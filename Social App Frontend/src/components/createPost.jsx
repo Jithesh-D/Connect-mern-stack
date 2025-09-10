@@ -39,6 +39,7 @@ const CreatePost = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const maxTitleLength = 100;
   const maxBodyLength = 1000;
@@ -50,6 +51,29 @@ const CreatePost = () => {
     "image/gif",
     "image/webp",
   ];
+
+  // Check for dark mode on component mount
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const darkMode =
+        document.documentElement.classList.contains("dark") ||
+        localStorage.getItem("theme") === "dark" ||
+        (!localStorage.getItem("theme") &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches);
+      setIsDarkMode(darkMode);
+    };
+
+    checkDarkMode();
+
+    // Listen for theme changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (editingPost) {
@@ -208,9 +232,21 @@ const CreatePost = () => {
 
   return (
     <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden">
+      <div
+        className={`rounded-2xl shadow-xl border overflow-hidden ${
+          isDarkMode
+            ? "bg-gray-800 border-gray-700"
+            : "bg-white border-gray-100"
+        }`}
+      >
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 px-8 py-6">
+        <div
+          className={`px-8 py-6 ${
+            isDarkMode
+              ? "bg-gradient-to-r from-blue-700 via-purple-700 to-indigo-700"
+              : "bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600"
+          }`}
+        >
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
               {isEditing ? (
@@ -222,7 +258,11 @@ const CreatePost = () => {
                 <h1 className="text-2xl font-bold text-white">
                   {isEditing ? "Edit Your Post" : "Create New Post"}
                 </h1>
-                <p className="text-blue-100 text-sm">
+                <p
+                  className={`text-sm ${
+                    isDarkMode ? "text-blue-200" : "text-blue-100"
+                  }`}
+                >
                   {isEditing
                     ? "Update your thoughts"
                     : "Share your thoughts with the campus community"}
@@ -239,9 +279,15 @@ const CreatePost = () => {
           <div className="space-y-3">
             <label
               htmlFor="title"
-              className="flex items-center text-lg font-semibold text-gray-700"
+              className={`flex items-center text-lg font-semibold ${
+                isDarkMode ? "text-gray-200" : "text-gray-700"
+              }`}
             >
-              <Type className="h-5 w-5 mr-2 text-blue-600" />
+              <Type
+                className={`h-5 w-5 mr-2 ${
+                  isDarkMode ? "text-blue-400" : "text-blue-600"
+                }`}
+              />
               Post Title
               <span className="text-red-500 ml-1">*</span>
             </label>
@@ -249,18 +295,30 @@ const CreatePost = () => {
               <input
                 type="text"
                 ref={postTitleElement}
-                className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-blue-500 focus:bg-white transition-all duration-200 text-lg"
+                className={`w-full px-4 py-4 border-2 rounded-xl transition-all duration-200 text-lg ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-blue-400 focus:bg-gray-600"
+                    : "bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:bg-white"
+                } focus:outline-none`}
                 id="title"
                 placeholder="What's on your mind? Make it catchy..."
                 maxLength={maxTitleLength}
                 onChange={handleTitleChange}
                 required
               />
-              <div className="absolute right-4 top-4 text-sm text-gray-400">
+              <div
+                className={`absolute right-4 top-4 text-sm ${
+                  isDarkMode ? "text-gray-400" : "text-gray-400"
+                }`}
+              >
                 {titleCount}/{maxTitleLength}
               </div>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className={`h-2 rounded-full overflow-hidden ${
+                isDarkMode ? "bg-gray-700" : "bg-gray-200"
+              }`}
+            >
               <div
                 className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-200"
                 style={{ width: `${(titleCount / maxTitleLength) * 100}%` }}
@@ -272,9 +330,15 @@ const CreatePost = () => {
           <div className="space-y-3">
             <label
               htmlFor="body"
-              className="flex items-center text-lg font-semibold text-gray-700"
+              className={`flex items-center text-lg font-semibold ${
+                isDarkMode ? "text-gray-200" : "text-gray-700"
+              }`}
             >
-              <FileText className="h-5 w-5 mr-2 text-purple-600" />
+              <FileText
+                className={`h-5 w-5 mr-2 ${
+                  isDarkMode ? "text-purple-400" : "text-purple-600"
+                }`}
+              />
               Post Content
               <span className="text-red-500 ml-1">*</span>
             </label>
@@ -282,18 +346,30 @@ const CreatePost = () => {
               <textarea
                 ref={postBodyElement}
                 rows="6"
-                className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:bg-white transition-all duration-200 text-base resize-none"
+                className={`w-full px-4 py-4 border-2 rounded-xl transition-all duration-200 text-base resize-none ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-purple-400 focus:bg-gray-600"
+                    : "bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400 focus:border-purple-500 focus:bg-white"
+                } focus:outline-none`}
                 id="body"
                 placeholder="Tell us more about it... Share your thoughts, experiences, or ask questions!"
                 maxLength={maxBodyLength}
                 onChange={handleBodyChange}
                 required
               />
-              <div className="absolute right-4 bottom-4 text-sm text-gray-400">
+              <div
+                className={`absolute right-4 bottom-4 text-sm ${
+                  isDarkMode ? "text-gray-400" : "text-gray-400"
+                }`}
+              >
                 {charCount}/{maxBodyLength}
               </div>
             </div>
-            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+            <div
+              className={`h-2 rounded-full overflow-hidden ${
+                isDarkMode ? "bg-gray-700" : "bg-gray-200"
+              }`}
+            >
               <div
                 className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-200"
                 style={{ width: `${(charCount / maxBodyLength) * 100}%` }}
@@ -303,10 +379,22 @@ const CreatePost = () => {
 
           {/* Image Upload Field */}
           <div className="space-y-3">
-            <label className="flex items-center text-lg font-semibold text-gray-700">
-              <ImageIcon className="h-5 w-5 mr-2 text-green-600" />
+            <label
+              className={`flex items-center text-lg font-semibold ${
+                isDarkMode ? "text-gray-200" : "text-gray-700"
+              }`}
+            >
+              <ImageIcon
+                className={`h-5 w-5 mr-2 ${
+                  isDarkMode ? "text-green-400" : "text-green-600"
+                }`}
+              />
               Add Image
-              <span className="text-gray-400 ml-2 text-sm font-normal">
+              <span
+                className={`ml-2 text-sm font-normal ${
+                  isDarkMode ? "text-gray-400" : "text-gray-400"
+                }`}
+              >
                 (optional)
               </span>
             </label>
@@ -315,7 +403,11 @@ const CreatePost = () => {
               <div
                 className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 cursor-pointer ${
                   dragActive
-                    ? "border-green-500 bg-green-50"
+                    ? isDarkMode
+                      ? "border-green-400 bg-green-900/20"
+                      : "border-green-500 bg-green-50"
+                    : isDarkMode
+                    ? "border-gray-600 hover:border-green-400 hover:bg-gray-700/50"
                     : "border-gray-300 hover:border-green-400 hover:bg-gray-50"
                 }`}
                 onDragOver={handleDragOver}
@@ -331,20 +423,40 @@ const CreatePost = () => {
                   className="hidden"
                 />
                 <div className="flex flex-col items-center space-y-4">
-                  <div className="p-4 bg-green-100 rounded-full">
-                    <Upload className="h-8 w-8 text-green-600" />
+                  <div
+                    className={`p-4 rounded-full ${
+                      isDarkMode ? "bg-green-900/30" : "bg-green-100"
+                    }`}
+                  >
+                    <Upload
+                      className={`h-8 w-8 ${
+                        isDarkMode ? "text-green-400" : "text-green-600"
+                      }`}
+                    />
                   </div>
                   <div>
-                    <p className="text-lg font-medium text-gray-700">
+                    <p
+                      className={`text-lg font-medium ${
+                        isDarkMode ? "text-gray-200" : "text-gray-700"
+                      }`}
+                    >
                       Drop an image here or click to browse
                     </p>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p
+                      className={`text-sm mt-1 ${
+                        isDarkMode ? "text-gray-400" : "text-gray-500"
+                      }`}
+                    >
                       Supports JPEG, PNG, GIF, WebP (max 5MB)
                     </p>
                   </div>
                   <button
                     type="button"
-                    className="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200"
+                    className={`inline-flex items-center px-4 py-2 rounded-lg transition-colors duration-200 ${
+                      isDarkMode
+                        ? "bg-green-600 hover:bg-green-500 text-white"
+                        : "bg-green-600 hover:bg-green-700 text-white"
+                    }`}
                   >
                     <Camera className="h-4 w-4 mr-2" />
                     Choose Image
@@ -353,7 +465,11 @@ const CreatePost = () => {
               </div>
             ) : (
               <div className="relative">
-                <div className="relative rounded-xl overflow-hidden border border-gray-200">
+                <div
+                  className={`relative rounded-xl overflow-hidden border ${
+                    isDarkMode ? "border-gray-600" : "border-gray-200"
+                  }`}
+                >
                   <img
                     src={imagePreview}
                     alt="Preview"
@@ -384,18 +500,32 @@ const CreatePost = () => {
           <div className="space-y-3">
             <label
               htmlFor="tags"
-              className="flex items-center text-lg font-semibold text-gray-700"
+              className={`flex items-center text-lg font-semibold ${
+                isDarkMode ? "text-gray-200" : "text-gray-700"
+              }`}
             >
-              <Hash className="h-5 w-5 mr-2 text-indigo-600" />
+              <Hash
+                className={`h-5 w-5 mr-2 ${
+                  isDarkMode ? "text-indigo-400" : "text-indigo-600"
+                }`}
+              />
               Tags
-              <span className="text-gray-400 ml-2 text-sm font-normal">
+              <span
+                className={`ml-2 text-sm font-normal ${
+                  isDarkMode ? "text-gray-400" : "text-gray-400"
+                }`}
+              >
                 (optional)
               </span>
             </label>
             <input
               type="text"
               ref={tagsElement}
-              className="w-full px-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-800 placeholder-gray-400 focus:outline-none focus:border-indigo-500 focus:bg-white transition-all duration-200"
+              className={`w-full px-4 py-4 border-2 rounded-xl transition-all duration-200 ${
+                isDarkMode
+                  ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-indigo-400 focus:bg-gray-600"
+                  : "bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400 focus:border-indigo-500 focus:bg-white"
+              } focus:outline-none`}
               id="tags"
               placeholder="Add tags separated by spaces (e.g., programming student-life campus-events)"
               value={tagInput}
@@ -404,8 +534,18 @@ const CreatePost = () => {
 
             {/* Tag Preview */}
             {tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl border border-blue-100">
-                <span className="text-sm font-medium text-gray-600 mr-2">
+              <div
+                className={`flex flex-wrap gap-2 p-4 rounded-xl border ${
+                  isDarkMode
+                    ? "bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-blue-700/50"
+                    : "bg-gradient-to-r from-blue-50 to-purple-50 border-blue-100"
+                }`}
+              >
+                <span
+                  className={`text-sm font-medium mr-2 ${
+                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  }`}
+                >
                   Preview:
                 </span>
                 {tags.map((tag, index) => (
@@ -429,7 +569,11 @@ const CreatePost = () => {
           </div>
 
           {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-gray-200">
+          <div
+            className={`flex flex-col sm:flex-row gap-4 pt-6 border-t ${
+              isDarkMode ? "border-gray-700" : "border-gray-200"
+            }`}
+          >
             <button
               type="submit"
               disabled={isSubmitting}
@@ -459,7 +603,11 @@ const CreatePost = () => {
             <button
               type="button"
               onClick={handleCancel}
-              className="flex-1 sm:flex-initial inline-flex items-center justify-center px-8 py-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold rounded-xl transition-all duration-200 border-2 border-gray-200 hover:border-gray-300"
+              className={`flex-1 sm:flex-initial inline-flex items-center justify-center px-8 py-4 font-semibold rounded-xl transition-all duration-200 border-2 ${
+                isDarkMode
+                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200 border-gray-600 hover:border-gray-500"
+                  : "bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200 hover:border-gray-300"
+              }`}
             >
               <X className="h-5 w-5 mr-2" />
               Cancel
@@ -469,12 +617,26 @@ const CreatePost = () => {
       </div>
 
       {/* Helpful Tips */}
-      <div className="mt-8 bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-yellow-800 mb-3 flex items-center">
+      <div
+        className={`mt-8 border rounded-xl p-6 ${
+          isDarkMode
+            ? "bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border-yellow-700/50"
+            : "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200"
+        }`}
+      >
+        <h3
+          className={`text-lg font-semibold mb-3 flex items-center ${
+            isDarkMode ? "text-yellow-300" : "text-yellow-800"
+          }`}
+        >
           <Sparkles className="h-5 w-5 mr-2" />
           Tips for Great Posts
         </h3>
-        <ul className="text-sm text-yellow-700 space-y-2">
+        <ul
+          className={`text-sm space-y-2 ${
+            isDarkMode ? "text-yellow-200" : "text-yellow-700"
+          }`}
+        >
           <li>• Write a clear, engaging title that captures attention</li>
           <li>• Share your genuine thoughts and experiences</li>
           <li>• Use high-quality images to make your post more engaging</li>

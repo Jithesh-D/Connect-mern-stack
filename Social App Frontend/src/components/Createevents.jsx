@@ -15,22 +15,44 @@ const CreateEvent = () => {
     whatsappLink: "",
   });
 
+  const [image, setImage] = useState(null);
+  const [preview, setPreview] = useState(null);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEventData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // CreateEvent.jsx
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      setPreview(URL.createObjectURL(file)); // Preview
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    await fetch("http://localhost:3001/api/events", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(eventData),
-    });
+    try {
+      const formData = new FormData();
+      Object.entries(eventData).forEach(([key, value]) => {
+        formData.append(key, value);
+      });
+      if (image) {
+        formData.append("image", image);
+      }
 
-    navigate("/events");
+      await fetch("http://localhost:3001/api/events", {
+        method: "POST",
+        body: formData,
+      });
+
+      navigate("/events");
+    } catch (err) {
+      console.error("Error creating event:", err);
+      alert("Failed to create event. Please try again.");
+    }
   };
 
   return (
@@ -41,6 +63,24 @@ const CreateEvent = () => {
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label className="block text-gray-700 font-medium">
+              Event Image
+            </label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              className="w-full border border-gray-300 rounded-md p-2"
+            />
+            {preview && (
+              <img
+                src={preview}
+                alt="Event Preview"
+                className="mt-3 w-full h-48 object-cover rounded-md border"
+              />
+            )}
+          </div>
           <input
             type="text"
             name="title"
@@ -116,6 +156,8 @@ const CreateEvent = () => {
             placeholder="WhatsApp Group Link"
             className="w-full border border-gray-300 rounded-md p-2 focus:ring-2 focus:ring-green-500"
           />
+
+          {/* ✅ Image Upload */}
 
           <button
             type="submit"

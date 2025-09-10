@@ -1,4 +1,4 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { API_BASE_URL } from "../config";
 import {
   Trash2,
@@ -16,12 +16,37 @@ import {
   editReactionFromServer,
 } from "../services/service.jsx";
 import React from "react";
+
 const Post = ({ post }) => {
   const { deletePost } = useContext(PostList);
   const navigate = useNavigate();
   const [currentReactions, setReaction] = useState(post.reactions || 0);
   const [isLiked, setIsLiked] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  // Check for dark mode on component mount
+  useEffect(() => {
+    const checkDarkMode = () => {
+      const darkMode =
+        document.documentElement.classList.contains("dark") ||
+        localStorage.getItem("theme") === "dark" ||
+        (!localStorage.getItem("theme") &&
+          window.matchMedia("(prefers-color-scheme: dark)").matches);
+      setIsDarkMode(darkMode);
+    };
+
+    checkDarkMode();
+
+    // Listen for theme changes
+    const observer = new MutationObserver(checkDarkMode);
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
+    return () => observer.disconnect();
+  }, []);
 
   const createdDate = post.createdAt ? new Date(post.createdAt) : new Date();
 
@@ -60,36 +85,64 @@ const Post = ({ post }) => {
   };
 
   return (
-    <div className="w-full max-w-lg bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 mb-6">
+    <div
+      className={`w-full max-w-lg border rounded-xl shadow-md hover:shadow-xl transition-all duration-300 mb-6 ${
+        isDarkMode
+          ? "bg-gray-800 border-gray-700 hover:shadow-blue-500/10"
+          : "bg-white border-gray-200"
+      }`}
+    >
       <div className="flex justify-end p-4 pb-0 space-x-2">
         {!showDeleteConfirm ? (
           <>
             <button
               onClick={handleEdit}
-              className="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-md transition-transform duration-200 hover:scale-110"
+              className={`p-2 rounded-full shadow-md transition-all duration-200 hover:scale-110 ${
+                isDarkMode
+                  ? "bg-blue-600 hover:bg-blue-500 text-white"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
               title="Edit Post"
             >
               <Edit3 size={18} strokeWidth={2} />
             </button>
             <button
               onClick={handleDelete}
-              className="p-2 bg-red-600 hover:bg-red-700 text-white rounded-full shadow-md transition-transform duration-200 hover:scale-110"
+              className={`p-2 rounded-full shadow-md transition-all duration-200 hover:scale-110 ${
+                isDarkMode
+                  ? "bg-red-600 hover:bg-red-500 text-white"
+                  : "bg-red-600 hover:bg-red-700 text-white"
+              }`}
               title="Delete Post"
             >
               <Trash2 size={18} strokeWidth={2} />
             </button>
           </>
         ) : (
-          <div className="flex space-x-2 bg-white rounded-lg p-1 shadow-lg border">
+          <div
+            className={`flex space-x-2 rounded-lg p-1 shadow-lg border ${
+              isDarkMode
+                ? "bg-gray-700 border-gray-600"
+                : "bg-white border-gray-200"
+            }`}
+          >
             <button
               onClick={handleDelete}
-              className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-xs rounded transition-colors duration-200"
+              className={`px-3 py-1 text-xs rounded transition-colors duration-200 ${
+                isDarkMode
+                  ? "bg-red-600 hover:bg-red-500 text-white"
+                  : "bg-red-600 hover:bg-red-700 text-white"
+              }`}
             >
               Confirm
             </button>
             <button
               onClick={cancelDelete}
-              className="px-3 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs rounded transition-colors duration-200"
+              className={`px-3 py-1 text-xs rounded transition-colors duration-200 ${
+                isDarkMode
+                  ? "bg-gray-600 hover:bg-gray-500 text-white"
+                  : "bg-gray-500 hover:bg-gray-600 text-white"
+              }`}
             >
               Cancel
             </button>
@@ -100,13 +153,27 @@ const Post = ({ post }) => {
       {/* Card Body */}
       <div className="p-4">
         {/* Title */}
-        <h5 className="text-xl font-semibold mb-2 text-gray-900 hover:text-blue-600 transition-colors duration-200">
+        <h5
+          className={`text-xl font-semibold mb-2 transition-colors duration-200 ${
+            isDarkMode
+              ? "text-gray-100 hover:text-blue-400"
+              : "text-gray-900 hover:text-blue-600"
+          }`}
+        >
           {post.title}
         </h5>
 
         {/* Timestamp */}
-        <div className="flex items-center text-sm text-gray-500 mb-3">
-          <Clock size={16} strokeWidth={2} className="mr-1 text-gray-600" />
+        <div
+          className={`flex items-center text-sm mb-3 ${
+            isDarkMode ? "text-gray-400" : "text-gray-500"
+          }`}
+        >
+          <Clock
+            size={16}
+            strokeWidth={2}
+            className={`mr-1 ${isDarkMode ? "text-gray-500" : "text-gray-600"}`}
+          />
           <span>{formatDistanceToNow(createdDate, { addSuffix: true })}</span>
         </div>
 
@@ -126,7 +193,13 @@ const Post = ({ post }) => {
         )}
 
         {/* Content */}
-        <p className="text-gray-700 mb-4 leading-relaxed">{post.body}</p>
+        <p
+          className={`mb-4 leading-relaxed ${
+            isDarkMode ? "text-gray-300" : "text-gray-700"
+          }`}
+        >
+          {post.body}
+        </p>
 
         {/* Tags */}
         {post.tags && post.tags.length > 0 && (
@@ -134,7 +207,11 @@ const Post = ({ post }) => {
             {post.tags.map((tag, index) => (
               <span
                 key={`${tag}-${index}`}
-                className="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full hover:bg-blue-200 transition-colors duration-200"
+                className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full transition-colors duration-200 ${
+                  isDarkMode
+                    ? "bg-blue-900/50 text-blue-300 hover:bg-blue-800/70 border border-blue-700/50"
+                    : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                }`}
               >
                 <Hash size={14} strokeWidth={2} className="mr-1" />
                 {tag}
@@ -144,13 +221,21 @@ const Post = ({ post }) => {
         )}
 
         {/* Action Buttons */}
-        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
+        <div
+          className={`flex items-center justify-between pt-2 border-t ${
+            isDarkMode ? "border-gray-700" : "border-gray-100"
+          }`}
+        >
           <div className="flex space-x-3">
             <button
               onClick={handleReaction}
               className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                 isLiked
-                  ? "bg-blue-600 text-white"
+                  ? isDarkMode
+                    ? "bg-blue-600 text-white hover:bg-blue-500"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                  : isDarkMode
+                  ? "bg-gray-700 text-gray-300 hover:bg-blue-600/20 hover:text-blue-400 border border-gray-600"
                   : "bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600"
               }`}
             >
@@ -158,19 +243,43 @@ const Post = ({ post }) => {
               <span>{currentReactions}</span>
             </button>
 
-            <button className="inline-flex items-center px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors duration-200">
+            <button
+              className={`inline-flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 ${
+                isDarkMode
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600 border border-gray-600"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
               <MessageCircle size={16} strokeWidth={2} className="mr-2" />
               <span className="hidden sm:inline">Comment</span>
             </button>
           </div>
 
           {/* Status Indicator */}
-          <div className="flex items-center text-xs text-gray-500">
-            <div className="w-2 h-2 bg-green-400 rounded-full mr-1"></div>
+          <div
+            className={`flex items-center text-xs ${
+              isDarkMode ? "text-gray-400" : "text-gray-500"
+            }`}
+          >
+            <div
+              className={`w-2 h-2 rounded-full mr-1 ${
+                isDarkMode ? "bg-green-400" : "bg-green-400"
+              }`}
+            ></div>
             <span>Active</span>
           </div>
         </div>
       </div>
+
+      {/* Optional: Enhanced hover effect for dark mode */}
+      <style jsx>{`
+        @media (prefers-color-scheme: dark) {
+          .post-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(59, 130, 246, 0.1),
+              0 10px 10px -5px rgba(59, 130, 246, 0.04);
+          }
+        }
+      `}</style>
     </div>
   );
 };

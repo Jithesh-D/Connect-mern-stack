@@ -49,27 +49,43 @@ const router = createBrowserRouter([
           },
           {
             path: "create-post",
-            element: sessionStorage.getItem("user") ? (
-              <CreatePost />
-            ) : (
-              <Navigate to="/signup" />
+            element: (
+              <ProtectedRoute>
+                <CreatePost />
+              </ProtectedRoute>
             ),
           },
           {
             path: "events",
-            element: <EventsPage />,
+            element: (
+              <ProtectedRoute>
+                <EventsPage />
+              </ProtectedRoute>
+            ),
           },
           {
             path: "/create-event",
-            element: <CreateEvent />,
+            element: (
+              <ProtectedRoute>
+                <CreateEvent />
+              </ProtectedRoute>
+            ),
           },
           {
             path: "placements",
-            element: <Placements />,
+            element: (
+              <ProtectedRoute>
+                <Placements />
+              </ProtectedRoute>
+            ),
           },
           {
             path: "/profile",
-            element: <ProfilePage />,
+            element: (
+              <ProtectedRoute>
+                <ProfilePage />
+              </ProtectedRoute>
+            ),
           },
         ],
       },

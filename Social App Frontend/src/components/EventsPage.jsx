@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import EventsPost from "./EventsPost";
-import { getEventsFromServer } from "../services/eventService"; // Import the service
+import { getEventsFromServer } from "../services/eventService";
 
 const EventsPage = () => {
   const navigate = useNavigate();
@@ -9,26 +9,51 @@ const EventsPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Fetch events from the server
+  const fetchEvents = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const data = await getEventsFromServer();
+      setEvents(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      setError(err.message || "Failed to fetch events");
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const data = await getEventsFromServer();
-
-        setEvents(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error("Error fetching events:", err);
-        setError(err.message || "Failed to fetch events");
-        setEvents([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchEvents();
   }, []);
+
+  // Handle image upload for a specific event
+  const handleImageUpload = async (file, eventId) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      // Upload to backend API
+      const res = await fetch(
+        `http://localhost:5000/api/events/${eventId}/upload-image`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      if (!res.ok) throw new Error("Failed to upload image");
+
+      // Refresh events after successful upload
+      fetchEvents();
+    } catch (err) {
+      console.error("Image upload failed:", err);
+      alert("Image upload failed. Please try again.");
+    }
+  };
 
   if (loading) {
     return (
@@ -69,6 +94,7 @@ const EventsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
+      {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Events</h1>
         <button
@@ -79,6 +105,7 @@ const EventsPage = () => {
         </button>
       </div>
 
+      {/* Events Grid */}
       {Array.isArray(events) && events.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {events
@@ -88,13 +115,8 @@ const EventsPage = () => {
               <EventsPost
                 key={event._id || event.id}
                 event={event}
-                onEventUpdate={() => {
-                  getEventsFromServer()
-                    .then((data) => setEvents(Array.isArray(data) ? data : []))
-                    .catch((err) =>
-                      console.error("Error refreshing events:", err)
-                    );
-                }}
+                onImageUpload={(file) => handleImageUpload(file, event._id)}
+                onEventUpdate={fetchEvents}
               />
             ))}
         </div>

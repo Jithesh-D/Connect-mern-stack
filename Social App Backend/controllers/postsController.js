@@ -62,16 +62,45 @@ exports.reactionCounter = async (req, res) => {
 };
 
 exports.editPost = async (req, res) => {
-  const { id } = req.params;
-  const { title, body, tags } = req.body;
+  try {
+    const { id } = req.params;
+    const { title, body } = req.body;
+    let tags = [];
 
-  const post = await Post.findById(id);
-  if (!post) return res.status(404).json({ message: "Post not found" });
+    // Parse tags if they exist
+    if (req.body.tags) {
+      try {
+        // Handle both array format and JSON string format
+        tags = Array.isArray(req.body["tags[]"])
+          ? req.body["tags[]"]
+          : JSON.parse(req.body.tags);
+      } catch (e) {
+        console.error("Error parsing tags:", e);
+      }
+    }
 
-  post.title = title;
-  post.body = body;
-  post.tags = tags;
+    const post = await Post.findById(id);
+    if (!post) {
+      return res.status(404).json({ message: "Post not found" });
+    }
 
-  await post.save();
-  res.status(200).json(post);
+    // Update post fields
+    post.title = title;
+    post.body = body;
+    post.tags = tags;
+
+    // Handle image update if there's a new image
+    if (req.file) {
+      post.image = `/uploads/${req.file.filename}`;
+    }
+
+    await post.save();
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Error updating post:", error);
+    res.status(500).json({
+      message: "Error updating post",
+      error: error.message,
+    });
+  }
 };

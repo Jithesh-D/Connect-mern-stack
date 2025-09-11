@@ -54,11 +54,28 @@ exports.deletePost = async (req, res) => {
 
 exports.reactionCounter = async (req, res) => {
   const { id } = req.params;
+  const userId = req.user._id; // Assuming user info is attached by auth middleware
+
   const post = await Post.findById(id);
   if (!post) return res.status(404).json({ message: "Post not found" });
-  post.reactions += 1;
+
+  const userHasLiked = post.likedBy.includes(userId);
+
+  if (userHasLiked) {
+    // Unlike: Remove user from likedBy and decrease reactions
+    post.likedBy = post.likedBy.filter((id) => !id.equals(userId));
+    post.reactions -= 1;
+  } else {
+    // Like: Add user to likedBy and increase reactions
+    post.likedBy.push(userId);
+    post.reactions += 1;
+  }
+
   await post.save();
-  res.status(200).json({ reactions: post.reactions });
+  res.status(200).json({
+    reactions: post.reactions,
+    hasLiked: !userHasLiked,
+  });
 };
 
 exports.editPost = async (req, res) => {

@@ -10,6 +10,7 @@ const eventSchema = new mongoose.Schema(
     venue: { type: String, required: true },
     registrationLink: String,
     whatsappLink: String,
+    image: { type: String, default: null },
   },
   { timestamps: true }
 );

@@ -634,7 +634,7 @@ const CreatePost = () => {
         </h3>
         <ul
           className={`text-sm space-y-2 ${
-            isDarkMode ? "text-yellow-200" : "text-yellow-700"
+            isDarkMode ? "text-blue-900" : "text-blue-700"
           }`}
         >
           <li>• Write a clear, engaging title that captures attention</li>

@@ -61,14 +61,14 @@ const deletePostFromServer = async (postId) => {
   }
 };
 
-const editReactionFromServer = async (postId) => {
-  const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/reaction`, {
-    method: "PATCH",
-    credentials: "include",
-  });
-  const post = await response.json();
-  return mapPostFromServer(post);
-};
+// const editReactionFromServer = async (postId) => {
+//   const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/reaction`, {
+//     method: "PATCH",
+//     credentials: "include",
+//   });
+//   const post = await response.json();
+//   return mapPostFromServer(post);
+// };
 
 const updatePostInServer = async (id, title, body, tags, image) => {
   try {
@@ -104,6 +104,28 @@ const updatePostInServer = async (id, title, body, tags, image) => {
   }
 };
 
+const editReactionFromServer = async (postId) => {
+  try {
+    const response = await fetch(
+      `${API_BASE_URL}/api/posts/${postId}/reaction`,
+      {
+        method: "POST",
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      handleAuthError(response.status);
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error in editReactionFromServer:", error);
+    throw error;
+  }
+};
+
 const mapPostFromServer = (post) => {
   return {
     id: post._id,
@@ -111,6 +133,7 @@ const mapPostFromServer = (post) => {
     body: post.body,
     tags: post.tags,
     reactions: post.reactions,
+    likedBy: post.likedBy,
     image: post.image,
   };
 };

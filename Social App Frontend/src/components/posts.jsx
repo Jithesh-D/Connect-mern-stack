@@ -21,7 +21,9 @@ const Post = ({ post }) => {
   const { deletePost } = useContext(PostList);
   const navigate = useNavigate();
   const [currentReactions, setReaction] = useState(post.reactions || 0);
-  const [isLiked, setIsLiked] = useState(false);
+  const [isLiked, setIsLiked] = useState(
+    post.likedBy?.includes(localStorage.getItem("userId"))
+  );
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
 
@@ -67,10 +69,16 @@ const Post = ({ post }) => {
   };
 
   const handleReaction = async () => {
+    if (!isAuthenticated) {
+      // Optionally show a message or redirect to login
+      navigate("/login");
+      return;
+    }
+
     try {
       const updatedReactions = await editReactionFromServer(post.id);
       setReaction(updatedReactions.reactions);
-      setIsLiked(!isLiked);
+      setIsLiked(updatedReactions.hasLiked);
     } catch (error) {
       console.error("Error updating reaction:", error);
     }

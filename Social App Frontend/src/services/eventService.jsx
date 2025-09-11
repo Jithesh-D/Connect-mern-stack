@@ -1,11 +1,15 @@
-const addEventToServer = async (eventData) => {
+const addEventToServer = async (formData) => {
   try {
+    console.log("Sending event data to server");
+    // Log the FormData contents for debugging
+    for (let pair of formData.entries()) {
+      console.log(pair[0] + ": " + pair[1]);
+    }
+
     const response = await fetch("http://localhost:3001/api/events", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(eventData),
+      credentials: "include",
+      body: formData,
     });
 
     if (!response.ok) {

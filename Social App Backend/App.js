@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const app = express();
 const mongoose = require("mongoose");
@@ -11,22 +13,39 @@ const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const multer = require("multer");
 
-const mongo_path =
-  "mongodb+srv://root:root@myproject.pmimgo1.mongodb.net/SocialApp?retryWrites=true&w=majority&appName=Myproject";
+// Use environment variables for sensitive data
+const MONGODB_URI =
+  process.env.MONGODB_URI || "mongodb://localhost:27017/social-media";
+const PORT = process.env.PORT || 3001;
+const SESSION_SECRET = process.env.SESSION_SECRET || "CampusConnect";
 
+// Configure MongoDB session store
 const store = new MongoDBStore({
-  uri: mongo_path,
+  uri: MONGODB_URI,
   collection: "sessions",
+  connectionOptions: {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  },
 });
 
-const PORT = 3001;
+// Handle store errors
+store.on("error", function (error) {
+  console.error("Session store error:", error);
+});
 
+// Configure session middleware
 app.use(
   session({
-    secret: "CampusConnect",
+    secret: SESSION_SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false, // Changed to false for better security
     store: store,
+    cookie: {
+      maxAge: 1000 * 60 * 60 * 24, // 24 hours
+      secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+      sameSite: "lax",
+    },
   })
 );
 
@@ -45,14 +64,45 @@ app.use("/api/auth", authRouter);
 app.use("/api/events", eventRouter);
 app.use(errorController.handleError);
 
-mongoose
-  .connect(mongo_path)
-  .then(() => {
-    console.log("Connected to MongoDB");
-    app.listen(PORT, () => {
-      console.log(`server running at ${PORT}`);
+// Connect to MongoDB
+async function connectToMongoDB() {
+  try {
+    await mongoose.connect(MONGODB_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
-  })
-  .catch((err) => {
-    console.error("Error connecting to MongoDB:", err);
-  });
+    console.log("Connected to MongoDB Atlas");
+
+    // Start server only after successful DB connection
+    app.listen(PORT, () => {
+      console.log(`Server running at http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+    process.exit(1); // Exit if cannot connect to database
+  }
+}
+
+// Handle MongoDB connection errors after initial connection
+mongoose.connection.on("error", (err) => {
+  console.error("MongoDB connection error:", err);
+});
+
+mongoose.connection.on("disconnected", () => {
+  console.log("MongoDB disconnected");
+});
+
+// Handle application shutdown
+process.on("SIGINT", async () => {
+  try {
+    await mongoose.connection.close();
+    console.log("MongoDB connection closed through app termination");
+    process.exit(0);
+  } catch (err) {
+    console.error("Error during MongoDB connection closure:", err);
+    process.exit(1);
+  }
+});
+
+// Initialize connection
+connectToMongoDB();

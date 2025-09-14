@@ -1,4 +1,5 @@
 const Post = require("../Model/postModel");
+const { checkToxicity } = require("../utils/toxicityChecker");
 
 exports.createPost = async (req, res) => {
   try {
@@ -11,6 +12,28 @@ exports.createPost = async (req, res) => {
 
     if (!title || !body) {
       return res.status(400).json({ message: "Title and body are required" });
+    }
+
+    // Check toxicity in both title and body
+    try {
+      const [titleToxicity, bodyToxicity] = await Promise.all([
+        checkToxicity(title),
+        checkToxicity(body),
+      ]);
+
+      if (titleToxicity > 0.7 || bodyToxicity > 0.7) {
+        return res.status(400).json({
+          message: "Post contains toxic content",
+          titleToxicity,
+          bodyToxicity,
+        });
+      }
+    } catch (toxicityError) {
+      console.error("Error checking toxicity:", toxicityError);
+      return res.status(500).json({
+        message: "Error checking content toxicity",
+        error: toxicityError.message,
+      });
     }
 
     const post = new Post({

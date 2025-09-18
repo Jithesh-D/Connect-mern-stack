@@ -1,8 +1,11 @@
 const express = require("express");
-const { createEvents, getEvents } = require("../controllers/eventController");
+const {
+  createEvents,
+  getEvents,
+  deleteEvent,
+} = require("../controllers/eventController");
 const multer = require("multer");
 const path = require("path");
-
 // Configure multer for event image uploads
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -34,5 +37,6 @@ const eventRoute = express.Router();
 
 eventRoute.post("/", upload.single("image"), createEvents);
 eventRoute.get("/", getEvents);
+eventRoute.delete("/:id", deleteEvent);
 
 module.exports = eventRoute;

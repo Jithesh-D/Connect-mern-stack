@@ -12,6 +12,8 @@ const cors = require("cors");
 const session = require("express-session");
 const MongoDBStore = require("connect-mongodb-session")(session);
 const multer = require("multer");
+// const fetchRoutes = require("./Routes/chatroute");
+const geminiRoutes = require("./Routes/gemini");
 
 // Use environment variables for sensitive data
 const MONGODB_URI =
@@ -24,8 +26,8 @@ const store = new MongoDBStore({
   uri: MONGODB_URI,
   collection: "sessions",
   connectionOptions: {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000,
   },
 });
 
@@ -62,14 +64,18 @@ app.use(
 app.use("/api/posts", postRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/events", eventRouter);
+
+// app.use("/", fetchRoutes);
+app.use("/", geminiRoutes);
 app.use(errorController.handleError);
 
 // Connect to MongoDB
 async function connectToMongoDB() {
   try {
     await mongoose.connect(MONGODB_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+      maxPoolSize: 10,
     });
     console.log("Connected to MongoDB Atlas");
 

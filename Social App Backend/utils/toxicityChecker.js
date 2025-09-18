@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
-const { GoogleAuth } = require('google-auth-library');
-const path = require('path');
+const { GoogleAuth } = require("google-auth-library");
+const path = require("path");
 
 /**
  * Checks text for toxicity using Google Perspective API
@@ -16,8 +16,8 @@ async function checkToxicity(text) {
 
     // Create a new GoogleAuth instance with the service account credentials
     const auth = new GoogleAuth({
-      keyFile: path.join(__dirname, '..', 'comments.json'),
-      scopes: ['https://www.googleapis.com/auth/userinfo.email']
+      keyFile: path.join(__dirname, "..", "comments.json"),
+      scopes: ["https://www.googleapis.com/auth/userinfo.email"],
     });
 
     // Get the access token
@@ -25,12 +25,12 @@ async function checkToxicity(text) {
     const token = await client.getAccessToken();
 
     const response = await fetch(
-      'https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze',
+      "https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token.token}`
+          Authorization: `Bearer ${token.token}`,
         },
         body: JSON.stringify({
           comment: { text },

@@ -1,8 +1,14 @@
 import React from "react";
 import { IMAGE_BASE_URL } from "../config";
 
-const EventsPost = ({ event }) => {
+const EventsPost = ({ event, onDelete }) => {
+  // ✅ Prevent crash if event is undefined
+  if (!event) {
+    return null; // or show a fallback like <div>Loading...</div>
+  }
+
   const {
+    _id,
     title,
     subtitle,
     description,
@@ -14,8 +20,23 @@ const EventsPost = ({ event }) => {
     image,
   } = event;
 
+  const handleDelete = () => {
+    if (window.confirm("Are you sure you want to delete this event?")) {
+      onDelete(_id);
+    }
+  };
+
   return (
-    <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-6">
+    <div className="bg-white shadow-lg rounded-lg overflow-hidden mb-6 relative">
+      {/* Delete Button */}
+      <button
+        onClick={handleDelete}
+        className="absolute top-4 right-4 z-10 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition-colors duration-200"
+        title="Delete Event"
+      >
+        🗑
+      </button>
+
       {/* Photo Section */}
       {image && (
         <div className="w-full h-64 overflow-hidden">
@@ -39,14 +60,16 @@ const EventsPost = ({ event }) => {
           <div className="space-y-2">
             <div className="flex items-center text-gray-700">
               <span className="mr-2">📅</span>
-              <span>{new Date(date).toLocaleDateString()}</span>
+              <span>
+                {date ? new Date(date).toLocaleDateString() : "No date"}
+              </span>
               <span className="mx-2">⏰</span>
-              <span>{time}</span>
+              <span>{time || "No time"}</span>
             </div>
 
             <div className="flex items-center text-gray-700">
               <span className="mr-2">📍</span>
-              <span>{venue}</span>
+              <span>{venue || "No venue"}</span>
             </div>
           </div>
 

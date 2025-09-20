@@ -9,7 +9,7 @@ import {
   Calendar,
   Briefcase,
   User,
-  GraduationCap,
+  Bot,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -46,6 +46,7 @@ const Sidebar = () => {
     { path: "/create-Post", icon: PlusCircle, label: "Create Post" },
     { path: "/events", icon: Calendar, label: "Events" },
     { path: "/placements", icon: Briefcase, label: "Placements" },
+    { path: "/chatbot", icon: Bot, label: "RVU Assistant" },
   ];
 
   const toggleSidebar = () => {
@@ -189,45 +190,6 @@ const Sidebar = () => {
                 >
                   15
                 </span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* User Profile Section - only show when expanded */}
-        {!isCollapsed && (
-          <div
-            className={`mt-6 p-3 rounded-lg border transition-all duration-200 ${
-              isDarkMode
-                ? "bg-gray-800/30 border-gray-600/30 hover:bg-gray-800/50"
-                : "bg-white/50 border-gray-200/50 hover:bg-white/80"
-            } cursor-pointer group`}
-          >
-            <div className="flex items-center">
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center mr-3 ${
-                  isDarkMode
-                    ? "bg-gradient-to-r from-blue-500 to-purple-600"
-                    : "bg-gradient-to-r from-blue-400 to-purple-500"
-                }`}
-              >
-                <User className="h-4 w-4 text-white" />
-              </div>
-              <div className="flex-1">
-                <div
-                  className={`text-sm font-medium ${
-                    isDarkMode ? "text-gray-200" : "text-gray-800"
-                  }`}
-                >
-                  Student
-                </div>
-                <div
-                  className={`text-xs ${
-                    isDarkMode ? "text-gray-400" : "text-gray-500"
-                  }`}
-                >
-                  View Profile
-                </div>
               </div>
             </div>
           </div>

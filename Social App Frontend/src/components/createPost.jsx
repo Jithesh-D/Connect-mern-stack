@@ -220,7 +220,7 @@ const CreatePost = () => {
       navigate("/");
     } catch (error) {
       console.error("Error saving post:", error);
-      alert("Failed to save post. Please try again.");
+      alert(error.message || "Failed to save post. Please try again.");
     } finally {
       setIsSubmitting(false);
     }

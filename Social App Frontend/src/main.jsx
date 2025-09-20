@@ -18,6 +18,7 @@ import CreateEvent from "./components/Createevents.jsx";
 import Placements from "./components/placements.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
 import Homepage from "./components/homePage.jsx";
+import Chatbot from "./components/chatBot";
 
 const router = createBrowserRouter([
   {
@@ -49,43 +50,27 @@ const router = createBrowserRouter([
           },
           {
             path: "create-post",
-            element: (
-              <ProtectedRoute>
-                <CreatePost />
-              </ProtectedRoute>
-            ),
+            element: <CreatePost />,
           },
           {
             path: "events",
-            element: (
-              <ProtectedRoute>
-                <EventsPage />
-              </ProtectedRoute>
-            ),
+            element: <EventsPage />,
           },
           {
             path: "/create-event",
-            element: (
-              <ProtectedRoute>
-                <CreateEvent />
-              </ProtectedRoute>
-            ),
+            element: <CreateEvent />,
           },
           {
             path: "placements",
-            element: (
-              <ProtectedRoute>
-                <Placements />
-              </ProtectedRoute>
-            ),
+            element: <Placements />,
           },
           {
             path: "/profile",
-            element: (
-              <ProtectedRoute>
-                <ProfilePage />
-              </ProtectedRoute>
-            ),
+            element: <ProfilePage />,
+          },
+          {
+            path: "/chatbot",
+            element: <Chatbot />,
           },
         ],
       },

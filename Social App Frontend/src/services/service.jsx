@@ -25,7 +25,10 @@ const addPostToServer = async (title, body, tags, image) => {
 
     if (!response.ok) {
       handleAuthError(response.status);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || `HTTP error! status: ${response.status}`
+      );
     }
 
     const post = await response.json();
@@ -125,6 +128,28 @@ const editReactionFromServer = async (postId) => {
     throw error;
   }
 };
+
+const API_KEY = "YOUR_API_KEY";
+
+export async function checkToxicity(comment) {
+  const response = await fetch(
+    `https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${AIzaSyCaXFRdpJV4Cir6oMTrCX_40q0DtmwZQ8I}`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        comment: { text: comment },
+        languages: ["en"],
+        requestedAttributes: { TOXICITY: {} },
+      }),
+      headers: { "Content-Type": "application/json" },
+    }
+  );
+
+  const result = await response.json();
+  const score = result.attributeScores.TOXICITY.summaryScore.value;
+
+  return score; // returns a number between 0–1
+}
 
 const mapPostFromServer = (post) => {
   return {

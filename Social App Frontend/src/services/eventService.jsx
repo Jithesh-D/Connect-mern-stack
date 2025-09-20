@@ -43,4 +43,26 @@ const getEventsFromServer = async () => {
   }
 };
 
-export { addEventToServer, getEventsFromServer };
+const deleteEventFromServer = async (eventId) => {
+  try {
+    const response = await fetch(
+      `http://localhost:3001/api/events/${eventId}`,
+      {
+        method: "DELETE",
+        credentials: "include",
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error("Error in deleteEventFromServer:", error);
+    throw error;
+  }
+};
+
+export { addEventToServer, getEventsFromServer, deleteEventFromServer };

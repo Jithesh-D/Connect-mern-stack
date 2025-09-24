@@ -20,6 +20,7 @@ A **full-stack social networking platform** built using the MERN stack (**MongoD
   - Password hashing using bcrypt.
   - Protected routes with token validation.
 - **RVU-BOT**
+  -All query related college can be found 
 ---
 
 ## **🛠 Tech Stack**

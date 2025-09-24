@@ -19,7 +19,7 @@ A **full-stack social networking platform** built using the MERN stack (**MongoD
 - **Security**
   - Password hashing using bcrypt.
   - Protected routes with token validation.
-
+- **RVU-BOT**
 ---
 
 ## **🛠 Tech Stack**

@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import DarkModeToggle from "./DarkModeToggle.jsx";
-import ThemeToggle from "./themeToggle.jsx";
 import {
   Search,
   Menu,
@@ -51,12 +50,16 @@ const Header = () => {
   };
 
   const handleThemeToggle = () => {
-    ThemeToggle();
-    // Update local state after a brief delay to allow theme change to process
-    setTimeout(() => {
-      const darkMode = document.documentElement.classList.contains("dark");
-      setIsDarkMode(darkMode);
-    }, 100);
+    const newTheme = !isDarkMode;
+    setIsDarkMode(newTheme);
+
+    if (newTheme) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
   };
 
   return (
@@ -141,7 +144,21 @@ const Header = () => {
 
           {/* Theme Toggle - Desktop */}
           <div className="hidden md:block mx-4">
-            <DarkModeToggle />
+            <button
+              onClick={handleThemeToggle}
+              className={`p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 border ${
+                isDarkMode
+                  ? "bg-white/10 backdrop-blur-sm border-white/20 text-yellow-400 hover:bg-white/20 hover:text-yellow-300 focus:ring-yellow-400"
+                  : "bg-gray-50 border-gray-200 text-blue-600 hover:bg-gray-100 hover:text-blue-700 focus:ring-blue-500"
+              }`}
+              aria-label="Toggle theme"
+            >
+              {isDarkMode ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </button>
           </div>
 
           {/* Auth Buttons - Desktop */}

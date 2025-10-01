@@ -3,7 +3,6 @@ import Footer from "./footer.jsx";
 import Sidebar from "./sidebar.jsx";
 import PostListProvider from "../store/postListContext.jsx";
 import { Outlet } from "react-router-dom";
-import FloatingChatbot from "./FloatingBot";
 
 function MainLayout() {
   return (
@@ -27,9 +26,6 @@ function MainLayout() {
 
         {/* FOOTER */}
         <Footer />
-
-        {/* FLOATING CHATBOT */}
-        <FloatingChatbot />
       </div>
     </PostListProvider>
   );

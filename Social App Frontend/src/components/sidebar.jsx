@@ -151,14 +151,14 @@ const Sidebar = () => {
           >
             <h3
               className={`text-sm font-semibold mb-2 ${
-                isDarkMode ? "text-gray-200" : "text-gray-700"
+                isDarkMode ? "text-white" : "text-gray-700"
               }`}
             >
               Quick Stats
             </h3>
             <div
               className={`space-y-1 text-xs ${
-                isDarkMode ? "text-gray-400" : "text-gray-600"
+                isDarkMode ? "text-white" : "text-gray-600"
               }`}
             >
               <div className="flex justify-between">

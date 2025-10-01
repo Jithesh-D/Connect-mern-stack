@@ -164,7 +164,7 @@ const Post = ({ post }) => {
         <h5
           className={`text-xl font-semibold mb-2 transition-colors duration-200 ${
             isDarkMode
-              ? "text-gray-100 hover:text-blue-400"
+              ? "text-white hover:text-blue-400"
               : "text-gray-900 hover:text-blue-600"
           }`}
         >

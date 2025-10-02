@@ -318,3 +318,164 @@ const Header = () => {
 };
 
 export default Header;
+
+// Use This in future
+// import { useState } from "react";
+// import { Link } from "react-router-dom";
+// import { Menu, X, Moon, Sun } from "lucide-react";
+// import { useDarkMode } from "../store/darkModeContext"; // ✅ use global dark mode
+
+// const Header = () => {
+//   const [isOpen, setIsOpen] = useState(false);
+//   const { isDarkMode, toggleDarkMode } = useDarkMode(); // ✅ context instead of local state
+
+//   const toggleMenu = () => {
+//     setIsOpen(!isOpen);
+//   };
+
+//   return (
+//     <header
+//       className={`sticky top-0 z-50 w-full border-b backdrop-blur-lg transition-colors duration-300 ${
+//         isDarkMode
+//           ? "bg-slate-900/80 border-slate-700/50"
+//           : "bg-white/80 border-gray-200"
+//       }`}
+//     >
+//       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+//         <div className="flex justify-between h-16 items-center">
+//           {/* Logo */}
+//           <Link
+//             to="/"
+//             className="flex items-center space-x-2 transition-transform duration-200 hover:scale-105"
+//           >
+//             <img
+//               src="/rvu.jpg"
+//               alt="RVU Logo"
+//               className="h-10 w-10 rounded-full object-cover border-2 border-indigo-500"
+//             />
+//             <span
+//               className={`font-bold text-lg sm:text-xl ${
+//                 isDarkMode ? "text-white" : "text-gray-900"
+//               }`}
+//             >
+//               RV University
+//             </span>
+//           </Link>
+
+//           {/* Desktop Menu */}
+//           <nav className="hidden md:flex items-center space-x-6">
+//             <Link
+//               to="/"
+//               className={`transition-colors duration-200 ${
+//                 isDarkMode
+//                   ? "text-gray-300 hover:text-white"
+//                   : "text-gray-700 hover:text-gray-900"
+//               }`}
+//             >
+//               Home
+//             </Link>
+//             <Link
+//               to="/placements"
+//               className={`transition-colors duration-200 ${
+//                 isDarkMode
+//                   ? "text-gray-300 hover:text-white"
+//                   : "text-gray-700 hover:text-gray-900"
+//               }`}
+//             >
+//               Placements
+//             </Link>
+//             <Link
+//               to="/about"
+//               className={`transition-colors duration-200 ${
+//                 isDarkMode
+//                   ? "text-gray-300 hover:text-white"
+//                   : "text-gray-700 hover:text-gray-900"
+//               }`}
+//             >
+//               About
+//             </Link>
+//           </nav>
+
+//           {/* Right Actions */}
+//           <div className="flex items-center space-x-4">
+//             {/* Dark Mode Toggle */}
+//             <button
+//               onClick={toggleDarkMode}
+//               className={`p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 border ${
+//                 isDarkMode
+//                   ? "bg-white/10 backdrop-blur-sm border-white/20 text-yellow-400 hover:bg-white/20 hover:text-yellow-300 focus:ring-yellow-400"
+//                   : "bg-gray-50 border-gray-200 text-blue-600 hover:bg-gray-100 hover:text-blue-700 focus:ring-blue-500"
+//               }`}
+//               aria-label="Toggle theme"
+//             >
+//               {isDarkMode ? (
+//                 <Sun className="h-5 w-5" />
+//               ) : (
+//                 <Moon className="h-5 w-5" />
+//               )}
+//             </button>
+
+//             {/* Mobile Menu Button */}
+//             <button
+//               onClick={toggleMenu}
+//               className={`md:hidden p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 ${
+//                 isDarkMode
+//                   ? "text-gray-300 hover:text-white focus:ring-slate-600"
+//                   : "text-gray-600 hover:text-gray-900 focus:ring-gray-300"
+//               }`}
+//             >
+//               {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+//             </button>
+//           </div>
+//         </div>
+//       </div>
+
+//       {/* Mobile Menu */}
+//       {isOpen && (
+//         <div
+//           className={`md:hidden border-t transition-colors duration-300 ${
+//             isDarkMode ? "border-slate-700 bg-slate-900" : "border-gray-200 bg-white"
+//           }`}
+//         >
+//           <nav className="px-4 py-3 space-y-3">
+//             <Link
+//               to="/"
+//               className={`block transition-colors duration-200 ${
+//                 isDarkMode
+//                   ? "text-gray-300 hover:text-white"
+//                   : "text-gray-700 hover:text-gray-900"
+//               }`}
+//               onClick={() => setIsOpen(false)}
+//             >
+//               Home
+//             </Link>
+//             <Link
+//               to="/placements"
+//               className={`block transition-colors duration-200 ${
+//                 isDarkMode
+//                   ? "text-gray-300 hover:text-white"
+//                   : "text-gray-700 hover:text-gray-900"
+//               }`}
+//               onClick={() => setIsOpen(false)}
+//             >
+//               Placements
+//             </Link>
+//             <Link
+//               to="/about"
+//               className={`block transition-colors duration-200 ${
+//                 isDarkMode
+//                   ? "text-gray-300 hover:text-white"
+//                   : "text-gray-700 hover:text-gray-900"
+//               }`}
+//               onClick={() => setIsOpen(false)}
+//             >
+//               About
+//             </Link>
+//           </nav>
+//         </div>
+//       )}
+//     </header>
+//   );
+// };
+
+// export default Header;

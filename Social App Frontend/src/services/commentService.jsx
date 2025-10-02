@@ -1,49 +1,76 @@
-import { API_BASE_URL } from "../config";
+const API_BASE_URL = "http://localhost:3001/api";
 
-const handleAuthError = (status) => {
-  if (status === 401) {
-    sessionStorage.removeItem("user");
-    window.location.href = "/login";
-  }
-};
-
-export const addComment = async (userId, comment) => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/comments/add`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ userId, comment }),
-    });
-
-    if (!response.ok) {
-      handleAuthError(response.status);
-      throw new Error(`HTTP error! status: ${response.status}`);
+export const commentService = {
+  async getComments(postId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/comments/${postId}`, {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Failed to fetch comments: ${response.status} - ${errorText}`
+        );
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      throw error;
     }
+  },
 
-    return await response.json();
-  } catch (error) {
-    console.error("Error in addComment:", error);
-    throw error;
-  }
-};
+  async addComment(postId, text) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/comments/${postId}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ text }),
+      });
 
-export const getAllComments = async () => {
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/comments/all`, {
-      credentials: "include",
-    });
-
-    if (!response.ok) {
-      handleAuthError(response.status);
-      throw new Error(`HTTP error! status: ${response.status}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(
+          `Failed to add comment: ${response.status} - ${errorText}`
+        );
+      }
+      return await response.json();
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      throw error;
     }
+  },
 
-    return await response.json();
-  } catch (error) {
-    console.error("Error in getAllComments:", error);
-    throw error;
-  }
+  async deleteComment(commentId) {
+    try {
+      console.log("Deleting comment with ID:", commentId);
+
+      const response = await fetch(`${API_BASE_URL}/comments/${commentId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+
+      console.log("Delete response status:", response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Delete error response:", errorText);
+        throw new Error(
+          `Failed to delete comment: ${response.status} - ${errorText}`
+        );
+      }
+
+      const result = await response.json();
+      console.log("Delete successful:", result);
+      return result;
+    } catch (error) {
+      console.error("Error deleting comment - Full error:", error);
+      console.error("Error name:", error.name);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+      throw error;
+    }
+  },
 };

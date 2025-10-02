@@ -1,220 +1,349 @@
 import React, { useState, useEffect } from "react";
-import { addComment, getAllComments } from "../services/commentService";
-import { CommentSkeletons } from "./CommentSkeleton";
+import { commentService } from "../services/commentService";
+import { MessageCircle, X, Trash2 } from "lucide-react";
 
-const CommentsSection = () => {
+const CommentSection = ({ postId, isOpen, onClose }) => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [deletingCommentId, setDeletingCommentId] = useState(null);
 
-  // Fetch all comments
-  const fetchComments = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getAllComments();
-
-      if (data.success) {
-        setComments(data.comments);
-      } else {
-        setError("Failed to fetch comments");
-      }
-    } catch (err) {
-      setError("Error fetching comments");
-      console.error(err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Load comments on component mount
   useEffect(() => {
-    fetchComments();
+    const checkDarkMode = () => {
+      const darkMode = document.documentElement.classList.contains("dark");
+      setIsDarkMode(darkMode);
+    };
+    checkDarkMode();
   }, []);
 
-  // Handle comment submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
-
-    try {
-      const data = await addComment(
-        "current-user-id", // Replace with actual user ID from auth context
-        newComment
-      );
-
-      if (data.success) {
-        setNewComment("");
-        fetchComments(); // Refresh comments list
-      } else {
-        setError(data.message);
+  // Add Escape key listener and body scroll control
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
       }
-    } catch (err) {
-      setError("Error posting comment");
-      console.error(err);
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    // Disable body scroll when modal is open
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen, onClose]);
+
+  // Fetch comments when component opens
+  useEffect(() => {
+    if (isOpen && postId) {
+      fetchComments();
+    }
+  }, [isOpen, postId]);
+
+  // Define fetchComments function
+  const fetchComments = async () => {
+    try {
+      setLoading(true);
+      const commentsData = await commentService.getComments(postId);
+      setComments(commentsData);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <div className="w-full max-w-2xl mx-auto p-4 space-y-6">
-      <h3 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-        Comments
-      </h3>
+  const handleAddComment = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
 
-      {/* Comment Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="relative">
-          <textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Write a comment..."
-            maxLength={500}
-            required
-            disabled={loading}
-            className={`w-full min-h-[100px] p-3 border rounded-lg 
-                       focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-                       bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100
-                       resize-y transition duration-150 ease-in-out
-                       ${loading ? "opacity-50 cursor-not-allowed" : ""}
-                       ${
-                         error
-                           ? "border-red-500 dark:border-red-500"
-                           : "border-gray-300 dark:border-gray-600"
-                       }`}
-          />
-          <div className="absolute bottom-3 right-3 text-sm text-gray-500 dark:text-gray-400">
-            {newComment.length}/500
-          </div>
-        </div>
-        <div className="flex items-center justify-between">
-          <div className="text-sm">
-            {newComment.length >= 450 && (
-              <span
-                className={`${
-                  newComment.length >= 490 ? "text-red-500" : "text-yellow-500"
-                }`}
-              >
-                {500 - newComment.length} characters remaining
-              </span>
-            )}
+    try {
+      const savedComment = await commentService.addComment(postId, newComment);
+      setComments((prevComments) => [savedComment, ...prevComments]);
+      setNewComment("");
+    } catch (error) {
+      console.error("Error adding comment:", error);
+      alert("Failed to add comment. Please try again.");
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    if (!window.confirm("Are you sure you want to delete this comment?")) {
+      return;
+    }
+
+    setDeletingCommentId(commentId);
+
+    try {
+      console.log("Attempting to delete comment:", commentId);
+      await commentService.deleteComment(commentId);
+      setComments((prevComments) =>
+        prevComments.filter((comment) => comment._id !== commentId)
+      );
+      console.log("Comment deleted successfully");
+    } catch (error) {
+      console.error("Full error deleting comment:", error);
+
+      let errorMessage = "Failed to delete comment. ";
+
+      if (error.message.includes("401")) {
+        errorMessage += "You are not logged in.";
+      } else if (error.message.includes("403")) {
+        errorMessage += "You can only delete your own comments.";
+      } else if (error.message.includes("404")) {
+        errorMessage += "Comment not found.";
+      } else {
+        errorMessage += "Please try again.";
+      }
+
+      alert(errorMessage);
+    } finally {
+      setDeletingCommentId(null);
+    }
+  };
+
+  const formatDate = (timestamp) => {
+    return new Date(timestamp).toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const getCurrentUser = () => {
+    try {
+      const userData = sessionStorage.getItem("user");
+      if (userData) {
+        const user = JSON.parse(userData);
+        console.log("Current user from session:", user);
+        return user;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error parsing user data:", error);
+      return null;
+    }
+  };
+
+  const currentUser = getCurrentUser();
+
+  // Function to check if user can delete comment
+  const canDeleteComment = (comment) => {
+    if (!currentUser) return false;
+
+    const currentUserId = currentUser.id || currentUser._id;
+    const commentAuthorId = comment.author?._id || comment.author;
+
+    console.log("Delete check:", {
+      currentUserId,
+      commentAuthorId,
+      currentUserIdType: typeof currentUserId,
+      commentAuthorIdType: typeof commentAuthorId,
+    });
+
+    if (!currentUserId || !commentAuthorId) return false;
+
+    // Convert both to string for comparison
+    const currentUserIdStr = currentUserId.toString();
+    const commentAuthorIdStr = commentAuthorId.toString();
+
+    console.log("String comparison:", {
+      currentUserIdStr,
+      commentAuthorIdStr,
+      match: currentUserIdStr === commentAuthorIdStr,
+    });
+
+    return currentUserIdStr === commentAuthorIdStr;
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div
+      className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 ${
+        isDarkMode ? "dark" : ""
+      }`}
+      onClick={(e) => {
+        // Close when clicking the backdrop (outside the modal)
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+    >
+      <div
+        className={`w-full max-w-md max-h-[80vh] rounded-xl shadow-2xl transform transition-all duration-300 ${
+          isDarkMode
+            ? "bg-gray-800 border border-gray-700"
+            : "bg-white border border-gray-200"
+        }`}
+      >
+        {/* Header */}
+        <div
+          className={`flex items-center justify-between p-4 border-b ${
+            isDarkMode ? "border-gray-700" : "border-gray-200"
+          }`}
+        >
+          <div className="flex items-center space-x-2">
+            <MessageCircle
+              size={20}
+              className={isDarkMode ? "text-blue-400" : "text-blue-600"}
+            />
+            <h3
+              className={`text-lg font-semibold ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
+              Comments
+            </h3>
+            <span
+              className={`text-sm px-2 py-1 rounded-full ${
+                isDarkMode
+                  ? "bg-gray-700 text-gray-300"
+                  : "bg-gray-200 text-gray-600"
+              }`}
+            >
+              {comments.length}
+            </span>
           </div>
           <button
-            type="submit"
-            disabled={loading || !newComment.trim()}
-            className={`px-4 py-2 rounded-lg text-white font-medium
-                      transition-all duration-300 ease-in-out
-                      flex items-center gap-2
-                      ${
-                        loading || !newComment.trim()
-                          ? "bg-gray-400 cursor-not-allowed"
-                          : "bg-blue-600 hover:bg-blue-700 active:bg-blue-800 hover:shadow-md"
-                      }`}
+            onClick={onClose}
+            className={`p-2 rounded-full hover:bg-opacity-20 transition-colors ${
+              isDarkMode
+                ? "text-gray-400 hover:text-white hover:bg-gray-700"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
+            }`}
           >
-            {loading ? (
-              <>
-                <svg
-                  className="animate-spin h-4 w-4 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                <span>Posting...</span>
-              </>
-            ) : (
-              <>
-                <span>Post Comment</span>
-                <svg
-                  className="w-4 h-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M13 5l7 7-7 7M5 5l7 7-7 7"
-                  />
-                </svg>
-              </>
-            )}
+            <X size={20} />
           </button>
         </div>
-      </form>
 
-      {/* Error Message */}
-      {error && (
-        <div className="p-4 bg-red-100 border-l-4 border-red-500 text-red-700 dark:bg-red-900 dark:text-red-100">
-          {error}
-        </div>
-      )}
+        {/* Comments List */}
+        <div className="flex-1 overflow-y-auto p-4 max-h-96">
+          {loading ? (
+            <div
+              className={`text-center py-8 ${
+                isDarkMode ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              Loading comments...
+            </div>
+          ) : comments.length === 0 ? (
+            <div
+              className={`text-center py-8 ${
+                isDarkMode ? "text-gray-400" : "text-gray-500"
+              }`}
+            >
+              <MessageCircle size={48} className="mx-auto mb-2 opacity-50" />
+              <p>No comments yet.</p>
+              <p className="text-sm">Be the first to comment!</p>
+            </div>
+          ) : (
+            comments.map((comment) => {
+              const canDelete = canDeleteComment(comment);
 
-      {/* Comments List */}
-      <div className="space-y-4">
-        {isLoading ? (
-          <CommentSkeletons />
-        ) : (
-          <>
-            {comments.map((comment) => (
-              <div
-                key={comment._id}
-                className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 space-y-2
-                         border border-gray-200 dark:border-gray-700 hover:border-gray-300 
-                         dark:hover:border-gray-600 transition-all duration-300 ease-in-out
-                         animate-fadeIn"
-              >
-                <div className="flex justify-between items-center text-sm text-gray-600 dark:text-gray-400">
-                  <span className="font-medium text-blue-600 dark:text-blue-400">
-                    {comment.userId}
-                  </span>
-                  <span className="text-gray-500">
-                    {new Date(comment.createdAt).toLocaleDateString(undefined, {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </span>
+              return (
+                <div
+                  key={comment._id}
+                  className="flex justify-between items-start mb-4 group"
+                >
+                  <div className="flex-1">
+                    <div className="flex items-baseline gap-2 mb-1">
+                      <span
+                        className={`font-semibold text-sm ${
+                          isDarkMode ? "text-blue-400" : "text-blue-600"
+                        }`}
+                      >
+                        {comment.authorName || comment.author?.name || "User"}
+                      </span>
+                      <span
+                        className={`text-xs ${
+                          isDarkMode ? "text-gray-400" : "text-gray-500"
+                        }`}
+                      >
+                        {formatDate(comment.timestamp)}
+                      </span>
+                    </div>
+                    <p
+                      className={`text-sm ${
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
+                      {comment.text}
+                    </p>
+                  </div>
+                  {canDelete && (
+                    <button
+                      onClick={() => handleDeleteComment(comment._id)}
+                      disabled={deletingCommentId === comment._id}
+                      className={`text-xs transition-all duration-200 ml-2 p-1 rounded ${
+                        deletingCommentId === comment._id
+                          ? "opacity-50 cursor-not-allowed"
+                          : "opacity-70 group-hover:opacity-100"
+                      } ${
+                        isDarkMode
+                          ? "text-red-400 hover:bg-red-900 hover:bg-opacity-50"
+                          : "text-red-500 hover:bg-red-100"
+                      }`}
+                      title="Delete comment"
+                    >
+                      {deletingCommentId === comment._id ? (
+                        "Deleting..."
+                      ) : (
+                        <Trash2 size={14} />
+                      )}
+                    </button>
+                  )}
                 </div>
-                <p className="text-gray-800 dark:text-gray-200 whitespace-pre-wrap">
-                  {comment.comment}
-                </p>
-              </div>
-            ))}
-            {!isLoading && comments.length === 0 && (
-              <div className="text-center py-8">
-                <p className="text-gray-500 dark:text-gray-400 mb-2">
-                  No comments yet
-                </p>
-                <p className="text-sm text-gray-400 dark:text-gray-500">
-                  Be the first to share your thoughts!
-                </p>
-              </div>
-            )}
-          </>
+              );
+            })
+          )}
+        </div>
+
+        {/* Add Comment Form */}
+        {currentUser && (
+          <form
+            onSubmit={handleAddComment}
+            className={`p-4 border-t ${
+              isDarkMode ? "border-gray-700" : "border-gray-200"
+            }`}
+          >
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                placeholder="Add a comment..."
+                className={`flex-1 border rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-2 ${
+                  isDarkMode
+                    ? "bg-gray-700 border-gray-600 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
+                    : "bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
+                }`}
+              />
+              <button
+                type="submit"
+                disabled={!newComment.trim()}
+                className={`px-4 py-2 rounded-full text-sm font-semibold transition-colors ${
+                  isDarkMode
+                    ? "bg-blue-600 text-white hover:bg-blue-500 disabled:bg-blue-800 disabled:text-gray-400"
+                    : "bg-blue-600 text-white hover:bg-blue-700 disabled:bg-blue-300 disabled:text-gray-500"
+                }`}
+              >
+                Post
+              </button>
+            </div>
+          </form>
         )}
       </div>
     </div>
   );
 };
 
-export default CommentsSection;
+export default CommentSection;

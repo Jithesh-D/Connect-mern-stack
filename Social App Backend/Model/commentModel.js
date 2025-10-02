@@ -1,16 +1,25 @@
 const mongoose = require("mongoose");
 
 const commentSchema = new mongoose.Schema({
-  userId: {
+  postId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Post",
+    required: true,
+  },
+  text: {
     type: String,
     required: true,
   },
-  comment: {
+  author: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  authorName: {
     type: String,
     required: true,
-    maxLength: 500,
   },
-  createdAt: {
+  timestamp: {
     type: Date,
     default: Date.now,
   },

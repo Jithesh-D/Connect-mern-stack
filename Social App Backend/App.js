@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const postRouter = require("./Routes/postsRoute");
 const authRouter = require("./Routes/authRoute");
 const eventRouter = require("./Routes/eventRoute");
+const commentRouter = require("./Routes/commentRoute"); // ADD THIS LINE
 const errorController = require("./controllers/errorController");
 const path = require("path");
 const cors = require("cors");
@@ -64,6 +65,7 @@ app.use(
 app.use("/api/posts", postRouter);
 app.use("/api/auth", authRouter);
 app.use("/api/events", eventRouter);
+app.use("/api/comments", commentRouter); // ADD THIS LINE
 
 // app.use("/", fetchRoutes);
 app.use("/", geminiRoutes);

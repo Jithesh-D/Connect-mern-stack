@@ -18,6 +18,7 @@ import CreateEvent from "./components/Createevents.jsx";
 import Placements from "./components/placements.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
 import Homepage from "./components/homePage.jsx";
+import RVUAssistant from "./components/Rvuassistant.jsx"; // ADD THIS IMPORT
 
 const router = createBrowserRouter([
   {
@@ -66,6 +67,10 @@ const router = createBrowserRouter([
           {
             path: "/profile",
             element: <ProfilePage />,
+          },
+          {
+            path: "/chatbot", // ADD THIS ROUTE
+            element: <RVUAssistant />,
           },
         ],
       },

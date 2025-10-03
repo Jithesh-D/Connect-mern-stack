@@ -1,4 +1,4 @@
-import { PlusSquare, Calendar, Briefcase, Home } from "lucide-react";
+import { PlusSquare, Calendar, Briefcase, Home, Bot } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import PostList from "./postList";
 
@@ -52,6 +52,19 @@ export default function Homepage() {
         >
           <PlusSquare className="w-6 h-6" />
           <span className="text-xs">Post</span>
+        </NavLink>
+
+        {/* Assistant (Bot) */}
+        <NavLink
+          to="/chatbot"
+          className={({ isActive }) =>
+            `flex flex-col items-center ${
+              isActive ? "text-blue-600" : "text-gray-600 hover:text-blue-600"
+            }`
+          }
+        >
+          <Bot className="w-6 h-6" />
+          <span className="text-xs">Assistant</span>
         </NavLink>
 
         {/* Events */}

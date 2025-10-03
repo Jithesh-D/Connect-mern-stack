@@ -182,13 +182,13 @@ const Sidebar = () => {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>Job Openings</span>
+                <span>Highest Package</span>
                 <span
                   className={`font-medium ${
                     isDarkMode ? "text-green-400" : "text-green-600"
                   }`}
                 >
-                  15
+                  22.5 LPA
                 </span>
               </div>
             </div>

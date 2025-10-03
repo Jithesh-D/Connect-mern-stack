@@ -1,15 +1,14 @@
-// botRoutes.js
 const express = require("express");
 const router = express.Router();
-const { health, scrape, query } = require("../controllers/botController");
+const botController = require("../controllers/botController");
 
-// public health check
-router.get("/health", health);
+// Chat endpoint
+router.post("/ask", botController.handleChat);
 
-// admin/manual scrape (protect this route in prod!)
-router.post("/scrape", scrape);
+// Scraping status endpoint
+router.get("/scraping-status", botController.getScrapingStatus);
 
-// user query endpoint
-router.post("/query", query);
+// Refresh data endpoint
+router.post("/refresh-data", botController.refreshData);
 
 module.exports = router;

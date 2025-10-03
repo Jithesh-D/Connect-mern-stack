@@ -21,7 +21,22 @@ exports.signup = async (req, res) => {
 
     await newUser.save();
 
-    res.status(201).json({ message: "User created successfully" });
+    // Set session after signup
+    req.session.user = {
+      id: newUser._id,
+      username: newUser.username,
+      email: newUser.email,
+    };
+
+    res.status(201).json({
+      message: "User created successfully",
+      user: {
+        id: newUser._id,
+        username: newUser.username,
+        email: newUser.email,
+        createdAt: newUser.createdAt,
+      },
+    });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Error creating user" });
@@ -38,10 +53,76 @@ exports.login = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(400).json({ error: "Invalid credentials" });
 
-    req.session.user = { id: user._id, username: user.username };
+    req.session.user = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+    };
 
-    res.json({ message: "Login successful", user: req.session.user });
+    res.json({
+      message: "Login successful",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
+    });
   } catch (err) {
     res.status(500).json({ error: "Something went wrong" });
   }
+};
+
+// Get current user profile
+exports.getCurrentUser = async (req, res) => {
+  try {
+    if (req.session.user && req.session.user.id) {
+      const user = await User.findById(req.session.user.id).select("-password");
+
+      if (user) {
+        res.json({
+          user: {
+            id: user._id,
+            username: user.username,
+            email: user.email,
+            createdAt: user.createdAt,
+          },
+        });
+      } else {
+        // User not found in database
+        req.session.destroy();
+        res.status(404).json({ error: "User not found" });
+      }
+    } else {
+      res.status(401).json({ error: "Not authenticated" });
+    }
+  } catch (err) {
+    console.error("Get current user error:", err);
+    res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Check authentication status
+exports.checkAuth = (req, res) => {
+  if (req.session.user) {
+    res.json({
+      authenticated: true,
+      user: req.session.user,
+    });
+  } else {
+    res.json({
+      authenticated: false,
+    });
+  }
+};
+
+// Logout user
+exports.logout = (req, res) => {
+  req.session.destroy((err) => {
+    if (err) {
+      return res.status(500).json({ error: "Logout failed" });
+    }
+    res.clearCookie("connect.sid"); // Clear the session cookie
+    res.json({ message: "Logout successful" });
+  });
 };

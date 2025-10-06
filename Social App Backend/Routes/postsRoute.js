@@ -24,4 +24,11 @@ postRouter.patch(
   postController.editPost
 );
 
+// Assign author to existing post (admin tool)
+postRouter.post(
+  "/:id/assign-author",
+  authMiddleware,
+  postController.assignAuthor
+);
+
 module.exports = postRouter;

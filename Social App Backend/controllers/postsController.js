@@ -42,6 +42,7 @@ exports.createPost = async (req, res) => {
       tags: tags || [],
       reactions: 0,
       image,
+      author: req.session?.user?.id || undefined,
     });
 
     await post.save();
@@ -56,7 +57,8 @@ exports.createPost = async (req, res) => {
 };
 
 exports.getPosts = async (req, res) => {
-  const posts = await Post.find();
+  // Populate author username and profileImage when returning posts
+  const posts = await Post.find().populate("author", "username profileImage");
   res.status(200).json(posts);
 };
 
@@ -142,5 +144,30 @@ exports.editPost = async (req, res) => {
       message: "Error updating post",
       error: error.message,
     });
+  }
+};
+
+// Assign an author to a post (admin or authorized user can call this)
+exports.assignAuthor = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { userId } = req.body;
+
+    if (!userId) return res.status(400).json({ message: "userId is required" });
+
+    const post = await Post.findById(id);
+    if (!post) return res.status(404).json({ message: "Post not found" });
+
+    post.author = userId;
+    await post.save();
+
+    await post.populate("author", "username profileImage");
+
+    res.status(200).json(post);
+  } catch (error) {
+    console.error("Error assigning author:", error);
+    res
+      .status(500)
+      .json({ message: "Error assigning author", error: error.message });
   }
 };

@@ -1,5 +1,13 @@
 const bcrypt = require("bcryptjs");
 const User = require("../Model/userModel");
+const { OAuth2Client } = require("google-auth-library");
+
+const GOOGLE_CLIENT_ID =
+  process.env.GOOGLE_CLIENT_ID ||
+  "731499129152-te7fngasjpd55l5hd550l5o8sgkl40vv.apps.googleusercontent.com";
+const ALLOWED_DOMAIN = "@rvu.edu.in";
+
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 exports.signup = async (req, res) => {
   try {
@@ -125,4 +133,72 @@ exports.logout = (req, res) => {
     res.clearCookie("connect.sid"); // Clear the session cookie
     res.json({ message: "Logout successful" });
   });
+};
+
+// Google OAuth credential verification and login/signup
+exports.googleAuth = async (req, res) => {
+  try {
+    const { credential } = req.body;
+    if (!credential)
+      return res.status(400).json({ error: "No credential provided" });
+
+    // Verify ID token with Google
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const email = payload?.email;
+    const name = payload?.name || payload?.given_name || "";
+
+    if (!email || !email.toLowerCase().endsWith(ALLOWED_DOMAIN)) {
+      return res
+        .status(403)
+        .json({ error: `Only ${ALLOWED_DOMAIN} accounts are allowed.` });
+    }
+
+    // Create or merge user record
+    let user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      // Create a new user. We generate a random password hash so local login won't work unless set.
+      const randomPassword = Math.random().toString(36).slice(-8);
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(randomPassword, salt);
+
+      user = new User({
+        username: name || email.split("@")[0],
+        email: email.toLowerCase(),
+        password: hashedPassword,
+      });
+
+      await user.save();
+    } else {
+      // Optionally update username if missing
+      if (!user.username && name) {
+        user.username = name;
+        await user.save();
+      }
+    }
+
+    // Create server-side session
+    req.session.user = {
+      id: user._id,
+      username: user.username,
+      email: user.email,
+    };
+
+    res.json({
+      message: "Login successful",
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
+    });
+  } catch (err) {
+    console.error("Google auth error:", err);
+    res.status(500).json({ error: "Google authentication failed" });
+  }
 };

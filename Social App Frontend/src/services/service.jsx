@@ -160,6 +160,20 @@ const mapPostFromServer = (post) => {
     reactions: post.reactions,
     likedBy: post.likedBy,
     image: post.image,
+    createdAt: post.createdAt,
+    author: post.author
+      ? {
+          id: post.author._id || post.author.id,
+          username:
+            post.author.username ||
+            post.author.name ||
+            post.authorName ||
+            "Unknown User",
+          profileImage: post.author.profileImage || null,
+        }
+      : post.authorName
+      ? { id: null, username: post.authorName, profileImage: null }
+      : undefined,
   };
 };
 
@@ -169,4 +183,22 @@ export {
   deletePostFromServer,
   editReactionFromServer,
   updatePostInServer,
+};
+
+// Logout helper
+export const logout = async () => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+    if (response.ok) {
+      sessionStorage.removeItem("user");
+      window.location.href = "/login";
+    } else {
+      console.error("Logout failed", await response.text());
+    }
+  } catch (err) {
+    console.error("Error during logout:", err);
+  }
 };

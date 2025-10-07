@@ -32,6 +32,31 @@ const postListReducer = (currPostList, action) => {
           : post
       );
 
+    case "EDIT_POST_FULL":
+      return currPostList.map((post) =>
+        post.id === action.payload.post.id ? action.payload.post : post
+      );
+
+    case "UPDATE_AUTHOR":
+      return currPostList.map((post) => {
+        const authorId =
+          post.author?.id || post.author?._id || post.userId || null;
+        if (authorId && String(authorId) === String(action.payload.userId)) {
+          return {
+            ...post,
+            author: {
+              ...(post.author || {}),
+              username: action.payload.username || post.author?.username,
+              profileImage:
+                action.payload.profileImage !== undefined
+                  ? action.payload.profileImage
+                  : post.author?.profileImage,
+            },
+          };
+        }
+        return post;
+      });
+
     default:
       return currPostList;
   }
@@ -40,16 +65,11 @@ const postListReducer = (currPostList, action) => {
 const PostListProvider = ({ children }) => {
   const [postList, dispatchPostList] = useReducer(postListReducer, []);
 
-  const addPost = (id, postTitle, postBody, tags) => {
+  // Accept a full post object (as returned by the server mapping) so all fields including image are preserved
+  const addPost = (post) => {
     dispatchPostList({
       type: "ADD_POST",
-      payload: {
-        id,
-        title: postTitle,
-        body: postBody,
-        reactions: 0,
-        tags,
-      },
+      payload: post,
     });
   };
 
@@ -79,6 +99,19 @@ const PostListProvider = ({ children }) => {
     });
   };
 
+  // Replace a full post object (useful after server returns the updated post)
+  const updatePost = (post) => {
+    dispatchPostList({ type: "EDIT_POST_FULL", payload: { post } });
+  };
+
+  // Update author info across all posts for a given user id
+  const updateAuthor = ({ userId, username, profileImage }) => {
+    dispatchPostList({
+      type: "UPDATE_AUTHOR",
+      payload: { userId, username, profileImage },
+    });
+  };
+
   return (
     <PostList.Provider
       value={{
@@ -87,6 +120,8 @@ const PostListProvider = ({ children }) => {
         deletePost,
         addInitialPost,
         editPost,
+        updatePost,
+        updateAuthor,
       }}
     >
       {children}

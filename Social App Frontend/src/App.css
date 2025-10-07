@@ -38,6 +38,37 @@ body.dark {
   color: var(--text-light);
 }
 
+/* Dark-mode overrides for common utility classes so body background shows through */
+.dark .app-container,
+.dark #root,
+.dark .min-h-screen,
+.dark main,
+.dark .container,
+.dark .content {
+  background-color: var(--background-dark) !important;
+  color: var(--text-dark) !important;
+}
+
+/* Make common white/gray utility backgrounds neutral in dark mode so the black page background is visible */
+.dark .bg-white,
+.dark .bg-gray-50,
+.dark .bg-gray-100,
+.dark .bg-gray-200,
+.dark .bg-white\/5,
+.dark .bg-white\/10,
+.dark .bg-white\/15,
+.dark .bg-white\/20 {
+  background-color: transparent !important;
+}
+
+/* Slight translucent panels for better contrast */
+.dark .panel,
+.dark .card,
+.dark .bg-white\/5,
+.dark .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.03) !important;
+}
+
 .itemContainer {
   display: flex;
 }

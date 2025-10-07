@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useDarkMode } from "../store/darkModeContext";
 // Assuming BotServices.js is in the same directory or adjust the path
 // import { sendMessage } from "../services/BotServices";
 
@@ -94,13 +95,19 @@ const Chatbot = () => {
     }
   };
 
+  const { isDarkMode } = useDarkMode();
+
   return (
     <>
       {/* Chatbot Toggle Button */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="hidden md:block fixed bottom-5 right-5 bg-gray-800 text-white p-4 rounded-2xl shadow-lg hover:bg-gray-700 transition-all duration-200 hover:scale-105"
+          className={`hidden md:block fixed bottom-5 right-5 p-4 rounded-2xl shadow-lg hover:scale-105 transition-all duration-200 ${
+            isDarkMode
+              ? "bg-gray-800 text-white hover:bg-gray-700"
+              : "bg-white text-gray-800 border border-gray-200 hover:bg-gray-50"
+          }`}
           aria-label="Open chat"
         >
           <svg
@@ -121,9 +128,19 @@ const Chatbot = () => {
 
       {/* Chatbot Modal */}
       {isOpen && (
-        <div className="fixed bottom-5 right-5 w-[400px] h-[600px] bg-gray-900 text-white rounded-2xl shadow-2xl flex flex-col z-50">
+        <div
+          className={`fixed bottom-5 right-5 w-[400px] h-[600px] rounded-2xl shadow-2xl flex flex-col z-50 ${
+            isDarkMode
+              ? "bg-gray-900 text-white"
+              : "bg-white text-gray-900 border border-gray-200"
+          }`}
+        >
           {/* Header */}
-          <div className="p-4 border-b border-gray-700">
+          <div
+            className={`p-4 border-b ${
+              isDarkMode ? "border-gray-700" : "border-gray-200"
+            }`}
+          >
             <div className="flex justify-between items-center">
               <h3 className="font-semibold text-lg">College Assistant</h3>
               <button
@@ -149,7 +166,11 @@ const Chatbot = () => {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-4 bg-gray-800">
+          <div
+            className={`flex-1 overflow-y-auto p-4 ${
+              isDarkMode ? "bg-gray-800" : "bg-gray-50"
+            }`}
+          >
             <div className="space-y-6">
               {messages.map((message) => (
                 <div
@@ -210,7 +231,11 @@ const Chatbot = () => {
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Ask me anything..."
-                className="w-full pl-4 pr-12 py-3 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-500 bg-gray-700 text-gray-100"
+                className={`w-full pl-4 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 ${
+                  isDarkMode
+                    ? "border-gray-600 focus:ring-gray-500 bg-gray-700 text-gray-100"
+                    : "border-gray-300 focus:ring-blue-500 bg-white text-gray-900"
+                }`}
                 disabled={isLoading}
               />
               <button

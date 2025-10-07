@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useDarkMode } from "../store/darkModeContext";
 import { useNavigate } from "react-router-dom";
 import { addEventToServer } from "../services/eventService";
 import {
@@ -36,7 +37,7 @@ const CreateEvent = () => {
   const [image, setImage] = useState(null);
   const [preview, setPreview] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode } = useDarkMode();
   const [dragActive, setDragActive] = useState(false);
   const [titleCount, setTitleCount] = useState(0);
   const [descCount, setDescCount] = useState(0);
@@ -52,28 +53,7 @@ const CreateEvent = () => {
     "image/webp",
   ];
 
-  // Check for dark mode on component mount (same as your reference)
-  useEffect(() => {
-    const checkDarkMode = () => {
-      const darkMode =
-        document.documentElement.classList.contains("dark") ||
-        localStorage.getItem("theme") === "dark" ||
-        (!localStorage.getItem("theme") &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches);
-      setIsDarkMode(darkMode);
-    };
-
-    checkDarkMode();
-
-    // Listen for theme changes
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
+  // Using global DarkMode context; no local MutationObserver required
 
   const handleChange = (e) => {
     const { name, value } = e.target;

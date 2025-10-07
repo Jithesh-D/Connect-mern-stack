@@ -51,6 +51,8 @@ function LoginPage() {
       );
       console.log("Login successful:", res.data);
       sessionStorage.setItem("user", JSON.stringify(res.data.user));
+      // notify app about auth change so chatbot / other widgets can update immediately
+      window.dispatchEvent(new Event("userChanged"));
       navigate("/home");
     } catch (err) {
       setError(err.response?.data?.error || "Login failed. Please try again.");
@@ -59,44 +61,9 @@ function LoginPage() {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse) => {
-    setError("");
-    setIsGoogleLoading(true);
-
-    try {
-      const credential = credentialResponse?.credential;
-      if (!credential) {
-        setError("Google login failed: no credential returned.");
-        setIsGoogleLoading(false);
-        return;
-      }
-
-      // Send credential to backend for verification and session creation
-      const res = await axios.post(
-        "http://localhost:3001/api/auth/google",
-        { credential },
-        { withCredentials: true }
-      );
-
-      // Backend will create a session cookie. We trust server response and
-      // navigate to home. Optionally store minimal user info from server.
-      const user = res.data.user;
-      if (user) sessionStorage.setItem("user", JSON.stringify(user));
-      navigate("/home");
-    } catch (err) {
-      setError(
-        err.response?.data?.error || "Google sign-in failed. Please try again."
-      );
-      console.error(err);
-    } finally {
-      setIsGoogleLoading(false);
-    }
-  };
-
-  const handleGoogleError = () => {
-    setError("Google sign-in was cancelled or failed. Please try again.");
-    setIsGoogleLoading(false);
-  };
+  // Google sign-in moved to Signup page. Keep placeholder handlers in case of future reuse.
+  const handleGoogleSuccess = async () => {};
+  const handleGoogleError = () => {};
 
   return (
     <div className="container mt-5">
@@ -104,40 +71,13 @@ function LoginPage() {
         <div className="col-md-6">
           <div className="card">
             <div className="card-body">
-              <h2 className="text-center mb-4">Sign in</h2>
+              <h2 className="text-center mb-4">Login</h2>
 
               {error && (
                 <div className="alert alert-danger" role="alert">
                   {error}
                 </div>
               )}
-
-              <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
-                <div className="d-flex justify-content-center mb-3 position-relative">
-                  <div style={{ opacity: isGoogleLoading ? 0.6 : 1 }}>
-                    <GoogleLogin
-                      onSuccess={handleGoogleSuccess}
-                      onError={handleGoogleError}
-                      useOneTap={false}
-                    />
-                  </div>
-                  {isGoogleLoading && (
-                    <div
-                      className="position-absolute d-flex justify-content-center align-items-center"
-                      style={{ inset: 0 }}
-                    >
-                      <div
-                        className="spinner-border text-primary"
-                        role="status"
-                      >
-                        <span className="visually-hidden">Loading...</span>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </GoogleOAuthProvider>
-
-              <div className="text-center my-2">or</div>
 
               <form onSubmit={handleManualSubmit}>
                 <div className="mb-3">
@@ -190,6 +130,18 @@ function LoginPage() {
                   </button>
                 </div>
               </form>
+
+              <div className="text-center mt-3">
+                <p className="mb-0">
+                  Don't have an account?{" "}
+                  <a
+                    href="/signup"
+                    className="text-primary text-decoration-none fw-semibold"
+                  >
+                    Sign up
+                  </a>
+                </p>
+              </div>
             </div>
           </div>
         </div>

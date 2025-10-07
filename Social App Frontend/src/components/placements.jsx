@@ -1,5 +1,6 @@
 import React from "react";
 import { TrendingUp, Users, Briefcase, DollarSign, Award } from "lucide-react";
+import { useDarkMode } from "../store/darkModeContext";
 
 export default function PlacementDashboard() {
   const companies = [
@@ -68,8 +69,16 @@ export default function PlacementDashboard() {
     },
   ];
 
+  const { isDarkMode } = useDarkMode();
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-black-900 to-slate-900 text-white">
+    <div
+      className={`min-h-screen ${
+        isDarkMode
+          ? "bg-gradient-to-br from-slate-900 via-black-900 to-slate-900 text-white"
+          : "bg-white text-gray-900"
+      }`}
+    >
       {/* Header */}
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">
@@ -196,9 +205,9 @@ export default function PlacementDashboard() {
       <div className="bg-black/40 backdrop-blur-sm border-t border-white/10 py-6 overflow-hidden">
         <div className="flex items-center space-x-2 mb-3 px-4">
           <Briefcase className="w-5 h-5 text-blue-400" />
-          <p className="text-sm font-semibold text-gray-300">
-            OUR RECRUITING PARTNERS
-          </p>
+          <h3 className="text-sm font-semibold  text-gray-300">
+            COMPANIES VISITED
+          </h3>
         </div>
         <div className="relative flex overflow-hidden">
           <div className="flex animate-scroll whitespace-nowrap">

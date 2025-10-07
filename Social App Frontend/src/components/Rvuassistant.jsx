@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useDarkMode } from "../store/darkModeContext";
 import {
   Bot,
   Send,
@@ -245,8 +246,14 @@ const RVUAssistant = () => {
     </>
   );
 
+  const { isDarkMode } = useDarkMode();
+
   return (
-    <div className="flex h-screen bg-[#212121] text-white">
+    <div
+      className={`flex h-screen ${
+        isDarkMode ? "bg-[#212121] text-white" : "bg-white text-gray-900"
+      }`}
+    >
       {/* Desktop Sidebar - Only show on larger screens when open */}
       {!isMobile && sidebarOpen && <Sidebar />}
 

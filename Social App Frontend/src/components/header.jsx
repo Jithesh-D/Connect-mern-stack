@@ -1,46 +1,37 @@
 import React, { useState, useEffect } from "react";
 import { X, Menu, Sun, Moon } from "lucide-react";
+import { useDarkMode } from "../store/darkModeContext";
+
+// Words for the animation effect
+const animatedWords = [
+  "Connect",
+  "Events",
+  "Clubs",
+  "Network",
+  "Unite",
+  "Discover",
+];
 
 // Header Component
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(true);
+  const { isDarkMode, toggleDarkMode } = useDarkMode();
 
-  // Check for dark mode on component mount
+  // State to track the current word for the animation
+  const [wordIndex, setWordIndex] = useState(0);
+  const [isVisible, setIsVisible] = useState(true);
+
+  // Effect to cycle through the words every 2 seconds
   useEffect(() => {
-    const checkDarkMode = () => {
-      const darkMode =
-        document.documentElement.classList.contains("dark") ||
-        localStorage.getItem("theme") === "dark" ||
-        (!localStorage.getItem("theme") &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches);
-      setIsDarkMode(darkMode);
-    };
-
-    checkDarkMode();
-
-    // Listen for theme changes
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
+    const interval = setInterval(() => {
+      setIsVisible(false);
+      setTimeout(() => {
+        setWordIndex((prevIndex) => (prevIndex + 1) % animatedWords.length);
+        setIsVisible(true);
+      }, 250);
+    }, 2000);
+    return () => clearInterval(interval);
   }, []);
-
-  const handleThemeToggle = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-
-    if (newTheme) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  };
 
   return (
     <nav
@@ -54,19 +45,36 @@ const Header = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo - Left */}
           <div className="flex items-center">
-            <a href="/" className="flex items-center space-x-3">
+            <a href="/" className="flex items-center">
               <img
                 src="/finallogo.png"
                 alt="RVU Logo"
-                className="h-10 w-10 object-contain"
+                className="h-10 w-10 object-contain mr-2"
               />
               <span
-                className={`text-xl font-bold transition-colors duration-300 ${
+                className={`text-2xl font-bold transition-colors duration-300 ${
                   isDarkMode ? "text-white" : "text-gray-800"
                 }`}
               >
-                RVUConnect
+                RVU
               </span>
+
+              {/* Animated text box */}
+              <div
+                className={`relative flex items-center justify-center h-8 w-28 ml-1.5 px-3 rounded-md overflow-hidden transition-colors duration-300 ${
+                  isDarkMode ? "bg-gray-800" : "bg-blue-600"
+                }`}
+              >
+                <span
+                  className={`text-lg font-bold text-white transition-all duration-500 ease-in-out ${
+                    isVisible
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-5"
+                  }`}
+                >
+                  {animatedWords[wordIndex]}
+                </span>
+              </div>
             </a>
           </div>
 
@@ -116,10 +124,10 @@ const Header = () => {
             </div>
           </div>
 
-          {/* Theme Toggle - Desktop */}
-          <div className="hidden md:flex items-center space-x-2">
+          {/* Right Side - Theme Toggle & Auth Buttons - Desktop */}
+          <div className="hidden md:flex items-center space-x-3">
             <button
-              onClick={handleThemeToggle}
+              onClick={toggleDarkMode}
               className={`p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 border ${
                 isDarkMode
                   ? "bg-white/10 backdrop-blur-sm border-white/20 text-yellow-400 hover:bg-white/20 hover:text-yellow-300 focus:ring-yellow-400"
@@ -133,34 +141,47 @@ const Header = () => {
                 <Moon className="h-5 w-5" />
               )}
             </button>
-          </div>
-
-          {/* Auth Buttons - Desktop */}
-          <div className="hidden md:flex items-center space-x-4">
-            <a
-              href="/login"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
-                isDarkMode
-                  ? "bg-yellow-500 hover:bg-yellow-600 text-blue-900"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
-              }`}
-            >
-              Login
-            </a>
-            <a
-              href="/signup"
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border ${
-                isDarkMode
-                  ? "border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-blue-900"
-                  : "border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
-              }`}
-            >
-              Sign Up
-            </a>
+            <div className="flex items-center space-x-3">
+              <a
+                href="/login"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
+                  isDarkMode
+                    ? "bg-yellow-500 hover:bg-yellow-600 text-blue-900"
+                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                }`}
+              >
+                Login
+              </a>
+              <a
+                href="/signup"
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border ${
+                  isDarkMode
+                    ? "border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-blue-900"
+                    : "border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+                }`}
+              >
+                Sign Up
+              </a>
+            </div>
           </div>
 
           {/* Mobile menu button */}
-          <div className="md:hidden">
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={toggleDarkMode}
+              className={`p-2 mr-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 border ${
+                isDarkMode
+                  ? "bg-white/10 border-white/20 text-yellow-400"
+                  : "bg-gray-50 border-gray-200 text-blue-600"
+              }`}
+              aria-label="Toggle theme"
+            >
+              {isDarkMode ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </button>
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={`focus:outline-none transition-colors duration-200 ${
@@ -230,33 +251,12 @@ const Header = () => {
               Profile
             </a>
 
-            {/* Mobile Theme Toggle */}
-            <div className="px-3 py-2">
-              <button
-                onClick={handleThemeToggle}
-                className={`w-full flex items-center justify-center p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 border ${
-                  isDarkMode
-                    ? "bg-white/10 backdrop-blur-sm border-white/20 text-yellow-400 hover:bg-white/20 hover:text-yellow-300 focus:ring-yellow-400"
-                    : "bg-gray-50 border-gray-200 text-blue-600 hover:bg-gray-100 hover:text-blue-700 focus:ring-blue-500"
-                }`}
-                aria-label="Toggle theme"
-              >
-                {isDarkMode ? (
-                  <>
-                    <Sun className="h-5 w-5 mr-2" />
-                    <span className="text-sm font-medium">Light Mode</span>
-                  </>
-                ) : (
-                  <>
-                    <Moon className="h-5 w-5 mr-2" />
-                    <span className="text-sm font-medium">Dark Mode</span>
-                  </>
-                )}
-              </button>
-            </div>
-
             {/* Mobile Auth Buttons */}
-            <div className="px-3 py-2 space-y-2">
+            <div
+              className={`border-t pt-4 mt-2 px-2 space-y-2 ${
+                isDarkMode ? "border-gray-700" : "border-gray-200"
+              }`}
+            >
               <a
                 href="/login"
                 className={`block text-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${

@@ -1,4 +1,5 @@
 import { useContext, useRef, useState, useEffect } from "react";
+import { useDarkMode } from "../store/darkModeContext";
 import { PostList as PostListData } from "../store/postListContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { addPostToServer, updatePostInServer } from "../services/service.jsx";
@@ -19,7 +20,7 @@ import {
 } from "lucide-react";
 
 const CreatePost = () => {
-  const { addPost, editPost } = useContext(PostListData);
+  const { addPost, editPost, updatePost } = useContext(PostListData);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -39,7 +40,7 @@ const CreatePost = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [dragActive, setDragActive] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const { isDarkMode } = useDarkMode();
 
   const maxTitleLength = 100;
   const maxBodyLength = 1000;
@@ -52,28 +53,7 @@ const CreatePost = () => {
     "image/webp",
   ];
 
-  // Check for dark mode on component mount
-  useEffect(() => {
-    const checkDarkMode = () => {
-      const darkMode =
-        document.documentElement.classList.contains("dark") ||
-        localStorage.getItem("theme") === "dark" ||
-        (!localStorage.getItem("theme") &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches);
-      setIsDarkMode(darkMode);
-    };
-
-    checkDarkMode();
-
-    // Listen for theme changes
-    const observer = new MutationObserver(checkDarkMode);
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => observer.disconnect();
-  }, []);
+  // Using global DarkMode context; no local MutationObserver required
 
   useEffect(() => {
     if (editingPost) {
@@ -194,13 +174,22 @@ const CreatePost = () => {
           postBody,
           postTags
         );
-        editPost(
-          updatedPost.id,
-          updatedPost.title,
-          updatedPost.body,
-          updatedPost.tags,
-          updatedPost.image
-        );
+        // Ensure updated post has author populated from session for instant ownership recognition
+        try {
+          const sessionUser = JSON.parse(sessionStorage.getItem("user")) || {};
+          if (!updatedPost.author || !updatedPost.author.id) {
+            updatedPost.author = {
+              id: sessionUser.id || sessionUser._id || null,
+              username: sessionUser.username || sessionUser.name || "You",
+              profileImage: sessionUser.profileImage || null,
+            };
+          }
+        } catch (e) {
+          // ignore parsing errors
+        }
+
+        // Replace the full post in the context so ownership and image fields update immediately
+        updatePost(updatedPost);
       } else {
         const newPost = await addPostToServer(
           postTitle,
@@ -208,13 +197,23 @@ const CreatePost = () => {
           postTags,
           selectedImage // Pass the actual File object
         );
-        addPost(
-          newPost.id,
-          newPost.title,
-          newPost.body,
-          newPost.tags,
-          newPost.image
-        );
+
+        // Ensure the author field is populated from the current session so ownership checks work instantly
+        try {
+          const sessionUser = JSON.parse(sessionStorage.getItem("user")) || {};
+          if (!newPost.author || !newPost.author.id) {
+            newPost.author = {
+              id: sessionUser.id || sessionUser._id || null,
+              username: sessionUser.username || sessionUser.name || "You",
+              profileImage: sessionUser.profileImage || null,
+            };
+          }
+        } catch (e) {
+          // ignore
+        }
+
+        // Add the full post object to the context so image and other fields are immediately available
+        addPost(newPost);
       }
 
       navigate("/");

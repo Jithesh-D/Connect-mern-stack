@@ -129,6 +129,48 @@ const editReactionFromServer = async (postId) => {
   }
 };
 
+// New: like a post (one like per user)
+const likePost = async (postId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/like`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      handleAuthError(response.status);
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error in likePost:", error);
+    throw error;
+  }
+};
+
+// New: unlike a post
+const unlikePost = async (postId) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/posts/${postId}/like`, {
+      method: "DELETE",
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      handleAuthError(response.status);
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.message || `HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error in unlikePost:", error);
+    throw error;
+  }
+};
+
 const API_KEY = "YOUR_API_KEY";
 
 export async function checkToxicity(comment) {
@@ -161,19 +203,34 @@ const mapPostFromServer = (post) => {
     likedBy: post.likedBy,
     image: post.image,
     createdAt: post.createdAt,
-    author: post.author
-      ? {
-          id: post.author._id || post.author.id,
+    // Author may be populated (object) or an id (string/ObjectId). Handle both.
+    author: (function () {
+      if (!post.author) {
+        if (post.authorName)
+          return { id: null, username: post.authorName, profileImage: null };
+        return undefined;
+      }
+
+      // If author is an object with fields
+      if (typeof post.author === "object") {
+        return {
+          id: post.author._id || post.author.id || String(post.author),
           username:
             post.author.username ||
             post.author.name ||
             post.authorName ||
             "Unknown User",
           profileImage: post.author.profileImage || null,
-        }
-      : post.authorName
-      ? { id: null, username: post.authorName, profileImage: null }
-      : undefined,
+        };
+      }
+
+      // Otherwise treat it as an id string
+      return {
+        id: String(post.author),
+        username: post.authorName || "Unknown User",
+        profileImage: null,
+      };
+    })(),
   };
 };
 
@@ -182,6 +239,8 @@ export {
   getPostsFromServer,
   deletePostFromServer,
   editReactionFromServer,
+  likePost,
+  unlikePost,
   updatePostInServer,
 };
 

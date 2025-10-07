@@ -10,6 +10,9 @@ postRouter.post(
   upload.single("image"),
   postController.createPost
 );
+// Like a post (one like per user) - concurrency safe
+postRouter.post("/:id/like", authMiddleware, postController.likePost);
+postRouter.delete("/:id/like", authMiddleware, postController.unlikePost);
 postRouter.get("/", postController.getPosts);
 postRouter.delete("/:id", authMiddleware, postController.deletePost);
 postRouter.patch(

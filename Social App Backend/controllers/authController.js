@@ -1,6 +1,31 @@
 const bcrypt = require("bcryptjs");
 const User = require("../Model/userModel");
 const { OAuth2Client } = require("google-auth-library");
+const path = require("path");
+const multer = require("multer");
+
+// Multer setup for profile image uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, path.join(__dirname, "..", "uploads"));
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + "-" + uniqueSuffix + ext);
+  },
+});
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith("image/")) {
+      return cb(new Error("Only image files are allowed"));
+    }
+    cb(null, true);
+  },
+});
 
 const GOOGLE_CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID ||
@@ -93,6 +118,7 @@ exports.getCurrentUser = async (req, res) => {
             id: user._id,
             username: user.username,
             email: user.email,
+            profileImage: user.profileImage || null,
             createdAt: user.createdAt,
           },
         });
@@ -107,6 +133,72 @@ exports.getCurrentUser = async (req, res) => {
   } catch (err) {
     console.error("Get current user error:", err);
     res.status(500).json({ error: "Server error" });
+  }
+};
+
+// Handler to upload profile image (multipart/form-data)
+exports.uploadProfileImage = [
+  upload.single("profileImage"),
+  async (req, res) => {
+    try {
+      if (!req.session.user || !req.session.user.id) {
+        return res.status(401).json({ error: "Not authenticated" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ error: "No file uploaded" });
+      }
+
+      const imagePath = `/uploads/${req.file.filename}`;
+
+      const user = await User.findById(req.session.user.id);
+      if (!user) return res.status(404).json({ error: "User not found" });
+
+      user.profileImage = imagePath;
+      await user.save();
+
+      // Also update session info so frontend /api/auth/check or session reads the new image
+      req.session.user.profileImage = imagePath;
+
+      res.json({ profileImage: imagePath });
+    } catch (err) {
+      console.error("Upload profile image error:", err);
+      res.status(500).json({ error: "Failed to upload image" });
+    }
+  },
+];
+
+// Handler to update username or profileImage via JSON
+exports.updateProfile = async (req, res) => {
+  try {
+    if (!req.session.user || !req.session.user.id) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+
+    const { username, profileImage } = req.body;
+    const user = await User.findById(req.session.user.id);
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    if (username && username.trim().length >= 3) {
+      user.username = username.trim();
+      req.session.user.username = user.username;
+    }
+
+    if (profileImage) {
+      user.profileImage = profileImage;
+      req.session.user.profileImage = profileImage;
+    }
+
+    await user.save();
+
+    res.json({
+      id: user._id,
+      username: user.username,
+      profileImage: user.profileImage || null,
+    });
+  } catch (err) {
+    console.error("Update profile error:", err);
+    res.status(500).json({ error: "Failed to update profile" });
   }
 };
 

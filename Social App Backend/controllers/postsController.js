@@ -1,4 +1,5 @@
 const Post = require("../Model/postModel");
+const mongoose = require("mongoose");
 const { checkToxicity } = require("../utils/toxicityChecker");
 
 exports.createPost = async (req, res) => {
@@ -101,6 +102,108 @@ exports.reactionCounter = async (req, res) => {
     reactions: post.reactions,
     hasLiked: !userHasLiked,
   });
+};
+
+// POST /posts/:id/like
+// Adds the current user's id to the likedBy array only if it's not already present.
+// Uses an atomic findOneAndUpdate with a filter to avoid duplicate likes under concurrent requests.
+exports.likePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?._id || req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized - please login" });
+    }
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ message: "Invalid post id" });
+    }
+
+    // Try to atomically add the user to likedBy only if they're not already present
+    const updatedPost = await Post.findOneAndUpdate(
+      { _id: id, likedBy: { $ne: userId } }, // match only if userId is not already in likedBy
+      { $push: { likedBy: userId }, $inc: { reactions: 1 } },
+      { new: true }
+    ).populate("author", "username profileImage");
+
+    // If updatedPost is returned, the like was applied
+    if (updatedPost) {
+      return res.status(200).json({
+        message: "Post liked",
+        reactions: updatedPost.reactions,
+        hasLiked: true,
+      });
+    }
+
+    // If no document was updated, either the post doesn't exist or the user already liked it.
+    const existingPost = await Post.findById(id);
+    if (!existingPost) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Already liked - safe to return success with info
+    return res.status(200).json({
+      message: "Already liked",
+      reactions: existingPost.reactions,
+      hasLiked: existingPost.likedBy.some((u) => u.equals(userId)),
+    });
+  } catch (error) {
+    console.error("Error liking post:", error);
+    res
+      .status(500)
+      .json({ message: "Error liking post", error: error.message });
+  }
+};
+
+// DELETE /posts/:id/like
+// Removes the current user's id from likedBy only if it's present.
+// Uses an atomic findOneAndUpdate to safely decrement reactions under concurrent requests.
+exports.unlikePost = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?._id || req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized - please login" });
+    }
+
+    if (!mongoose.isValidObjectId(id)) {
+      return res.status(400).json({ message: "Invalid post id" });
+    }
+
+    // Atomically remove the user from likedBy only if they currently like the post
+    const updatedPost = await Post.findOneAndUpdate(
+      { _id: id, likedBy: userId }, // match only if userId is currently in likedBy
+      { $pull: { likedBy: userId }, $inc: { reactions: -1 } },
+      { new: true }
+    ).populate("author", "username profileImage");
+
+    if (updatedPost) {
+      return res.status(200).json({
+        message: "Post unliked",
+        reactions: updatedPost.reactions,
+        hasLiked: false,
+      });
+    }
+
+    // If no document updated, either post not found or user hadn't liked it
+    const existingPost = await Post.findById(id);
+    if (!existingPost) {
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    return res.status(200).json({
+      message: "Not previously liked",
+      reactions: existingPost.reactions,
+      hasLiked: existingPost.likedBy.some((u) => u.equals(userId)),
+    });
+  } catch (error) {
+    console.error("Error unliking post:", error);
+    res
+      .status(500)
+      .json({ message: "Error unliking post", error: error.message });
+  }
 };
 
 exports.editPost = async (req, res) => {

@@ -269,3 +269,6 @@ process.on("SIGINT", async () => {
 
 // Start the server
 startServer();
+
+// Export the express app for testing
+module.exports = app;

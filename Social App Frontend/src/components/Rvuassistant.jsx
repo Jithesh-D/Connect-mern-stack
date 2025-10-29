@@ -1,4 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
+import axios from "axios";
+
+const API = import.meta.env.VITE_API_URL || "http://localhost:3001";
 import { useDarkMode } from "../store/darkModeContext";
 import {
   Bot,
@@ -16,6 +19,8 @@ import {
 } from "lucide-react";
 
 const RVUAssistant = () => {
+  const { isDarkMode } = useDarkMode();
+
   const [messages, setMessages] = useState([
     {
       id: 1,
@@ -26,7 +31,7 @@ const RVUAssistant = () => {
   ]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Default closed for mobile
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState("connected");
   const [connectionError, setConnectionError] = useState("");
   const [isMobile, setIsMobile] = useState(false);
@@ -35,7 +40,7 @@ const RVUAssistant = () => {
   // Detect mobile screen size
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768); // 768px is typical tablet breakpoint
+      setIsMobile(window.innerWidth < 768);
     };
 
     checkMobile();
@@ -61,6 +66,34 @@ const RVUAssistant = () => {
     scrollToBottom();
   }, [messages]);
 
+  // Ping backend on mount to check availability
+  useEffect(() => {
+    let mounted = true;
+    const check = async () => {
+      try {
+        const res = await axios.get(`${API}/api/health`);
+        if (!mounted) return;
+        if (res?.data?.status) {
+          setConnectionStatus("connected");
+          setConnectionError("");
+        } else {
+          setConnectionStatus("disconnected");
+          setConnectionError("Health check failed");
+        }
+      } catch (err) {
+        if (!mounted) return;
+        setConnectionStatus("disconnected");
+        setConnectionError(err?.message || "Unable to contact backend");
+        console.warn(
+          "RVU Assistant: backend health check failed:",
+          err?.response || err?.message || err
+        );
+      }
+    };
+    check();
+    return () => (mounted = false);
+  }, []);
+
   const handleSendMessage = async () => {
     if (!inputText.trim() || isLoading) return;
 
@@ -74,18 +107,54 @@ const RVUAssistant = () => {
     setMessages((prev) => [...prev, userMessage]);
     setInputText("");
     setIsLoading(true);
+    setConnectionStatus("checking");
 
-    // Simulate API call - replace with actual sendMessage call
-    setTimeout(() => {
+    try {
+      console.debug("RVUAssistant: sending message to backend:", {
+        message: userMessage.text,
+      });
+      const res = await axios.post(
+        `${API}/api/bot/ask`,
+        { message: userMessage.text },
+        { withCredentials: true }
+      );
+
+      const botText =
+        res?.data?.response ||
+        res?.data?.message ||
+        "Sorry, no response from bot.";
+
       const botMessage = {
         id: Date.now() + 1,
-        text: "I'm here to help you with RV University information. This is a demo response. In production, this would connect to your backend service.",
+        text: botText,
         isUser: false,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, botMessage]);
+      setConnectionStatus("connected");
+      setConnectionError("");
+    } catch (err) {
+      console.error(
+        "Error calling bot API:",
+        err?.response || err?.message || err
+      );
+      setConnectionStatus("disconnected");
+      setConnectionError(
+        err?.response?.data?.error || err?.message || "Bot service error"
+      );
+
+      const botMessage = {
+        id: Date.now() + 1,
+        text:
+          err?.response?.data?.error ||
+          "I'm sorry — the assistant is currently unavailable. Please try again later.",
+        isUser: false,
+        timestamp: new Date(),
+      };
+      setMessages((prev) => [...prev, botMessage]);
+    } finally {
       setIsLoading(false);
-    }, 1000);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -97,9 +166,9 @@ const RVUAssistant = () => {
 
   const suggestions = [
     "What courses does RVU offer?",
-    "Show me placement statistics",
-    "Tell me about the faculty",
-    "Upcoming events at RVU",
+    "How can I enroll in B-Tech?",
+    "Tell me about RV University",
+    "What courses are available for computer science?",
   ];
 
   const ConnectionStatusBadge = () => {
@@ -129,10 +198,26 @@ const RVUAssistant = () => {
 
   // Sidebar component
   const Sidebar = () => (
-    <div className="w-64 bg-[#171717] border-r border-gray-800 flex flex-col overflow-hidden h-full">
+    <div
+      className={`w-64 border-r flex flex-col overflow-hidden h-full ${
+        isDarkMode
+          ? "bg-[#171717] border-gray-800"
+          : "bg-gray-50 border-gray-200"
+      }`}
+    >
       {/* Sidebar Header */}
-      <div className="p-2 border-b border-gray-800">
-        <button className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-[#2A2A2A] transition-colors text-left">
+      <div
+        className={`p-2 border-b ${
+          isDarkMode ? "border-gray-800" : "border-gray-200"
+        }`}
+      >
+        <button
+          className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors text-left ${
+            isDarkMode
+              ? "hover:bg-[#2A2A2A] text-white"
+              : "hover:bg-gray-200 text-gray-900"
+          }`}
+        >
           <Plus className="h-4 w-4" />
           <span className="text-sm">New chat</span>
         </button>
@@ -145,7 +230,11 @@ const RVUAssistant = () => {
           <input
             type="text"
             placeholder="Search"
-            className="w-full bg-[#2A2A2A] border-0 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-600 text-white placeholder-gray-500"
+            className={`w-full border-0 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 ${
+              isDarkMode
+                ? "bg-[#2A2A2A] focus:ring-gray-600 text-white placeholder-gray-500"
+                : "bg-white focus:ring-gray-300 text-gray-900 placeholder-gray-400 border border-gray-200"
+            }`}
           />
         </div>
       </div>
@@ -156,11 +245,19 @@ const RVUAssistant = () => {
           {chatHistory.map((chat) => (
             <button
               key={chat.id}
-              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[#2A2A2A] transition-colors text-left group"
+              className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-left group ${
+                isDarkMode ? "hover:bg-[#2A2A2A]" : "hover:bg-gray-200"
+              }`}
             >
               <MessageSquare className="h-4 w-4 text-gray-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <p className="text-sm truncate text-gray-300">{chat.title}</p>
+                <p
+                  className={`text-sm truncate ${
+                    isDarkMode ? "text-gray-300" : "text-gray-700"
+                  }`}
+                >
+                  {chat.title}
+                </p>
               </div>
               <MoreVertical className="h-4 w-4 text-gray-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             </button>
@@ -169,13 +266,27 @@ const RVUAssistant = () => {
       </div>
 
       {/* User Profile */}
-      <div className="p-2 border-t border-gray-800">
-        <button className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[#2A2A2A] transition-colors">
+      <div
+        className={`p-2 border-t ${
+          isDarkMode ? "border-gray-800" : "border-gray-200"
+        }`}
+      >
+        <button
+          className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors ${
+            isDarkMode ? "hover:bg-[#2A2A2A]" : "hover:bg-gray-200"
+          }`}
+        >
           <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center flex-shrink-0">
             <User className="h-4 w-4 text-white" />
           </div>
           <div className="flex-1 text-left min-w-0">
-            <p className="text-sm truncate">Student</p>
+            <p
+              className={`text-sm truncate ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
+              Student
+            </p>
           </div>
         </button>
       </div>
@@ -187,12 +298,24 @@ const RVUAssistant = () => {
     <>
       {/* Sidebar */}
       <div className="fixed inset-0 z-40 flex">
-        <div className="w-64 bg-[#171717] border-r border-gray-800 flex flex-col overflow-hidden h-full">
+        <div
+          className={`w-64 border-r flex flex-col overflow-hidden h-full ${
+            isDarkMode
+              ? "bg-[#171717] border-gray-800"
+              : "bg-gray-50 border-gray-200"
+          }`}
+        >
           {/* Mobile Sidebar Header */}
-          <div className="p-2 border-b border-gray-800 flex items-center gap-2">
+          <div
+            className={`p-2 border-b flex items-center gap-2 ${
+              isDarkMode ? "border-gray-800" : "border-gray-200"
+            }`}
+          >
             <button
               onClick={() => setSidebarOpen(false)}
-              className="p-1.5 hover:bg-[#2A2A2A] rounded-md transition-colors"
+              className={`p-1.5 rounded-md transition-colors ${
+                isDarkMode ? "hover:bg-[#2A2A2A]" : "hover:bg-gray-200"
+              }`}
             >
               <ArrowLeft className="h-4 w-4" />
             </button>
@@ -200,8 +323,16 @@ const RVUAssistant = () => {
           </div>
 
           {/* Rest of sidebar content */}
-          <div className="p-2 border-b border-gray-800">
-            <button className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg hover:bg-[#2A2A2A] transition-colors text-left">
+          <div
+            className={`p-2 border-b ${
+              isDarkMode ? "border-gray-800" : "border-gray-200"
+            }`}
+          >
+            <button
+              className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg transition-colors text-left ${
+                isDarkMode ? "hover:bg-[#2A2A2A]" : "hover:bg-gray-200"
+              }`}
+            >
               <Plus className="h-4 w-4" />
               <span className="text-sm">New chat</span>
             </button>
@@ -213,7 +344,11 @@ const RVUAssistant = () => {
               <input
                 type="text"
                 placeholder="Search"
-                className="w-full bg-[#2A2A2A] border-0 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-gray-600 text-white placeholder-gray-500"
+                className={`w-full border-0 rounded-lg pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-1 ${
+                  isDarkMode
+                    ? "bg-[#2A2A2A] focus:ring-gray-600 text-white placeholder-gray-500"
+                    : "bg-white focus:ring-gray-300 text-gray-900 placeholder-gray-400"
+                }`}
               />
             </div>
           </div>
@@ -223,11 +358,17 @@ const RVUAssistant = () => {
               {chatHistory.map((chat) => (
                 <button
                   key={chat.id}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-[#2A2A2A] transition-colors text-left group"
+                  className={`w-full flex items-center gap-2 px-3 py-2 rounded-lg transition-colors text-left group ${
+                    isDarkMode ? "hover:bg-[#2A2A2A]" : "hover:bg-gray-200"
+                  }`}
                 >
                   <MessageSquare className="h-4 w-4 text-gray-400 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm truncate text-gray-300">
+                    <p
+                      className={`text-sm truncate ${
+                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                      }`}
+                    >
                       {chat.title}
                     </p>
                   </div>
@@ -246,12 +387,10 @@ const RVUAssistant = () => {
     </>
   );
 
-  const { isDarkMode } = useDarkMode();
-
   return (
     <div
       className={`flex h-screen ${
-        isDarkMode ? "bg-[#212121] text-white" : "bg-white text-gray-900"
+        isDarkMode ? "bg-[#212121] text-white" : "bg-gray-50 text-gray-900"
       }`}
     >
       {/* Desktop Sidebar - Only show on larger screens when open */}
@@ -267,11 +406,17 @@ const RVUAssistant = () => {
         }`}
       >
         {/* Header */}
-        <div className="h-12 border-b border-gray-800 flex items-center justify-between px-3">
+        <div
+          className={`h-12 border-b flex items-center justify-between px-3 ${
+            isDarkMode ? "border-gray-800" : "border-gray-200"
+          }`}
+        >
           <div className="flex items-center gap-2">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 hover:bg-[#2A2A2A] rounded-md transition-colors"
+              className={`p-1.5 rounded-md transition-colors ${
+                isDarkMode ? "hover:bg-[#2A2A2A]" : "hover:bg-gray-200"
+              }`}
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -298,7 +443,11 @@ const RVUAssistant = () => {
                   <button
                     key={index}
                     onClick={() => setInputText(suggestion)}
-                    className="p-3 bg-[#2A2A2A] hover:bg-[#333333] rounded-lg text-left transition-colors text-sm"
+                    className={`p-3 rounded-lg text-left transition-colors text-sm ${
+                      isDarkMode
+                        ? "bg-[#2A2A2A] hover:bg-[#333333]"
+                        : "bg-white hover:bg-gray-100 border border-gray-200"
+                    }`}
                   >
                     {suggestion}
                   </button>
@@ -323,7 +472,9 @@ const RVUAssistant = () => {
                     <div
                       className={`max-w-[85%] ${
                         message.isUser
-                          ? "bg-[#2A2A2A] rounded-2xl px-4 py-2.5"
+                          ? isDarkMode
+                            ? "bg-[#2A2A2A] rounded-2xl px-4 py-2.5"
+                            : "bg-blue-600 text-white rounded-2xl px-4 py-2.5"
                           : ""
                       }`}
                     >
@@ -332,7 +483,11 @@ const RVUAssistant = () => {
                       </p>
                     </div>
                     {message.isUser && (
-                      <div className="w-8 h-8 rounded-full bg-[#2A2A2A] flex items-center justify-center flex-shrink-0">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                          isDarkMode ? "bg-[#2A2A2A]" : "bg-gray-200"
+                        }`}
+                      >
                         <User className="h-4 w-4" />
                       </div>
                     )}
@@ -365,16 +520,30 @@ const RVUAssistant = () => {
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-gray-800 p-4">
+        <div
+          className={`border-t p-4 ${
+            isDarkMode ? "border-gray-800" : "border-gray-200"
+          }`}
+        >
           <div className="max-w-3xl mx-auto">
-            <div className="relative flex items-end bg-[#2A2A2A] rounded-3xl border border-gray-700 focus-within:border-gray-600">
+            <div
+              className={`relative flex items-center gap-2 rounded-2xl border transition-colors ${
+                isDarkMode
+                  ? "bg-[#2A2A2A] border-gray-700 focus-within:border-gray-600"
+                  : "bg-white border-gray-300 focus-within:border-blue-500"
+              }`}
+            >
               <textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Message RVU Assistant"
                 rows="1"
-                className="flex-1 bg-transparent px-4 py-3 focus:outline-none resize-none text-sm max-h-32 text-white placeholder-gray-500"
+                className={`flex-1 bg-transparent px-4 py-3 focus:outline-none resize-none text-sm max-h-32 ${
+                  isDarkMode
+                    ? "text-white placeholder-gray-500"
+                    : "text-gray-900 placeholder-gray-400"
+                }`}
                 style={{ minHeight: "44px" }}
                 disabled={connectionStatus !== "connected"}
               />
@@ -385,7 +554,11 @@ const RVUAssistant = () => {
                   isLoading ||
                   connectionStatus !== "connected"
                 }
-                className="m-1.5 p-1.5 rounded-lg bg-white text-black hover:bg-gray-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className={`mr-2 p-2 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed ${
+                  isDarkMode
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-blue-600 text-white hover:bg-blue-700"
+                }`}
               >
                 <Send className="h-4 w-4" />
               </button>

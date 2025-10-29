@@ -160,6 +160,57 @@ const Post = ({ post }) => {
   const toggleOptions = () => setShowOptions(!showOptions);
   const isAuthenticated = sessionStorage.getItem("user");
 
+  // Helper component to load image, compute natural aspect ratio and clamp to Instagram-style bounds
+  const PostImage = ({ src, alt }) => {
+    const [aspect, setAspect] = useState(null);
+
+    useEffect(() => {
+      let mounted = true;
+      if (!src) return;
+      const img = new Image();
+      img.onload = () => {
+        if (!mounted) return;
+        const ratio = img.naturalWidth / img.naturalHeight; // width / height
+        const minRatio = 1.0 / (4 / 5); // 0.8 (4:5 portrait) -> width/height = 0.8
+        // note: minRatio computed but we'll use literal for clarity
+        const clamped = Math.max(0.8, Math.min(1.91, ratio));
+        setAspect(clamped);
+      };
+      img.onerror = () => {
+        if (!mounted) return;
+        setAspect(16 / 9);
+      };
+      img.src = src;
+      return () => {
+        mounted = false;
+      };
+    }, [src]);
+
+    // Use CSS aspect-ratio when available; fall back to a sensible default while loading
+    const containerStyle = {
+      aspectRatio: aspect ? String(aspect) : "16/9",
+      maxHeight: "70vh",
+      width: "100%",
+    };
+
+    return (
+      <div
+        className="mb-4 rounded-lg overflow-hidden relative"
+        style={containerStyle}
+      >
+        <img
+          src={src}
+          alt={alt}
+          className="w-full h-full object-cover block"
+          onError={(e) => {
+            console.error("Image failed to load:", src);
+            e.target.style.display = "none";
+          }}
+        />
+      </div>
+    );
+  };
+
   return (
     <>
       <div
@@ -313,17 +364,7 @@ const Post = ({ post }) => {
 
           {/* Image Section */}
           {post.image && (
-            <div className="mb-4 rounded-lg overflow-hidden">
-              <img
-                src={`${API_BASE_URL}${post.image}`}
-                alt={post.title}
-                className="w-full h-60 object-cover hover:scale-105 transition-transform duration-300"
-                onError={(e) => {
-                  console.error("Image failed to load:", post.image);
-                  e.target.style.display = "none";
-                }}
-              />
-            </div>
+            <PostImage src={`${API_BASE_URL}${post.image}`} alt={post.title} />
           )}
 
           {/* Content */}

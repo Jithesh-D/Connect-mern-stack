@@ -39,11 +39,11 @@ const EventsPost = ({ event, onDelete }) => {
 
       {/* Photo Section */}
       {image && (
-        <div className="w-full h-64 overflow-hidden">
+        <div className="w-full overflow-hidden rounded-b">
           <img
             src={`${IMAGE_BASE_URL}${image}`}
             alt={title}
-            className="w-full h-full object-cover"
+            className="w-full h-auto max-h-[60vh] object-contain"
           />
         </div>
       )}

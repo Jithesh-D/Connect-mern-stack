@@ -1,4 +1,12 @@
-import { PlusSquare, Calendar, Briefcase, Home, Bot } from "lucide-react";
+import {
+  PlusSquare,
+  Calendar,
+  Briefcase,
+  Home,
+  Bot,
+  Users,
+  Link as LinkIcon,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import PostList from "./postList";
 
@@ -11,17 +19,46 @@ export default function Homepage() {
       </main>
 
       {/* RIGHT SIDEBAR */}
-      <aside className="hidden lg:block w-80 bg-white shadow-lg p-4">
-        <h2 className="text-xl font-bold mb-4">Trending</h2>
-        <div className="space-y-4">
-          <div className="p-3 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100 transition">
-            🚀 RVU Hackathon starts in 2 days!
-          </div>
-          <div className="p-3 bg-green-50 rounded-lg cursor-pointer hover:bg-green-100 transition">
-            💼 Infosys placed 20 students this week!
-          </div>
-          <div className="p-3 bg-pink-50 rounded-lg cursor-pointer hover:bg-pink-100 transition">
-            🎉 RVU Cultural Fest announced!
+      <aside className="hidden lg:block w-80 bg-white shadow-lg p-4 overflow-y-auto">
+        {/* Quick Links Section */}
+        <div className="mb-6">
+          <h2 className="text-xl font-bold mb-3">M</h2>
+          <div className="space-y-2">
+            <NavLink
+              to="/chatbot"
+              className={({ isActive }) =>
+                `flex items-center gap-3 p-3 rounded-lg transition ${
+                  isActive ? "bg-black-100 text-black-600" : "hover:bg-gray-100"
+                }`
+              }
+            >
+              <Bot className="w-5 h-5" />
+              <span className="font-medium">RVU Assistant</span>
+            </NavLink>
+
+            <NavLink
+              to="/community"
+              className={({ isActive }) =>
+                `flex items-center gap-3 p-3 rounded-lg transition ${
+                  isActive ? "bg-black-100 text-black-600" : "hover:bg-gray-100"
+                }`
+              }
+            >
+              <Users className="w-5 h-5" />
+              <span className="font-medium">Community</span>
+            </NavLink>
+
+            <NavLink
+              to="/key-links"
+              className={({ isActive }) =>
+                `flex items-center gap-3 p-3 rounded-lg transition ${
+                  isActive ? "bg-black-100 text-black-600" : "hover:bg-gray-100"
+                }`
+              }
+            >
+              <LinkIcon className="w-5 h-5" />
+              <span className="font-medium">Key Links</span>
+            </NavLink>
           </div>
         </div>
       </aside>

@@ -2,6 +2,9 @@ require("dotenv").config();
 
 const express = require("express");
 const app = express();
+const http = require("http");
+const server = http.createServer(app);
+let io; // will be initialized after DB connects
 const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
@@ -145,6 +148,31 @@ try {
   console.log("❌ Gemini routes failed:", error.message);
 }
 
+// Mount newly added gang/posts/messages routes
+try {
+  const gangsRoute = require("./Routes/gangsRoute");
+  app.use("/api/gangs", gangsRoute);
+  console.log("✅ Gangs routes loaded");
+} catch (err) {
+  console.log("❌ Gangs routes failed:", err.message);
+}
+
+try {
+  const gangPosts = require("./Routes/gangPostsRoute");
+  app.use("/api/posts", gangPosts);
+  console.log("✅ Gang posts routes loaded");
+} catch (err) {
+  console.log("❌ Gang posts routes failed:", err.message);
+}
+
+try {
+  const messagesRoute = require("./Routes/messagesRoute");
+  app.use("/api/messages", messagesRoute);
+  console.log("✅ Messages routes loaded");
+} catch (err) {
+  console.log("❌ Messages routes failed:", err.message);
+}
+
 // ==================== TEST AUTH ENDPOINTS ====================
 
 // Test session endpoint
@@ -232,7 +260,40 @@ async function startServer() {
     });
     console.log("✅ Connected to MongoDB");
 
-    app.listen(PORT, () => {
+    // initialize socket.io server
+    const { Server } = require("socket.io");
+    io = new Server(server, {
+      cors: {
+        origin: "http://localhost:5173",
+        methods: ["GET", "POST"],
+      },
+    });
+
+    io.on("connection", (socket) => {
+      console.log("Socket connected:", socket.id);
+
+      socket.on("joinGang", (gangId) => {
+        socket.join(gangId);
+      });
+
+      socket.on("leaveGang", (gangId) => {
+        socket.leave(gangId);
+      });
+
+      socket.on("newMessage", (msg) => {
+        if (msg && msg.gangId) {
+          io.to(msg.gangId).emit("message", msg);
+        }
+      });
+
+      socket.on("newPost", (post) => {
+        if (post && post.gangId) {
+          io.to(post.gangId).emit("post", post);
+        }
+      });
+    });
+
+    server.listen(PORT, () => {
       console.log(`\n🚀 SERVER RUNNING ON http://localhost:${PORT}`);
       console.log(`🔍 Health: http://localhost:${PORT}/api/health`);
       console.log(`🔐 Auth: POST http://localhost:${PORT}/api/auth/signup`);
@@ -271,4 +332,4 @@ process.on("SIGINT", async () => {
 startServer();
 
 // Export the express app for testing
-module.exports = app;
+module.exports = { app, server, getIo: () => io };

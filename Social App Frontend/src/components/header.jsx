@@ -125,7 +125,7 @@ const Header = () => {
           </div>
 
           {/* Right Side - Theme Toggle & Auth Buttons - Desktop */}
-          <div className="hidden md:flex items-center space-x-3">
+          <div className="hidden md:flex items-center space-x-4">
             <button
               onClick={toggleDarkMode}
               className={`p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 border ${
@@ -141,10 +141,10 @@ const Header = () => {
                 <Moon className="h-5 w-5" />
               )}
             </button>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 ml-2">
               <a
                 href="/login"
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
                   isDarkMode
                     ? "bg-yellow-500 hover:bg-yellow-600 text-blue-900"
                     : "bg-blue-600 hover:bg-blue-700 text-white"
@@ -154,7 +154,7 @@ const Header = () => {
               </a>
               <a
                 href="/signup"
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border ${
+                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 border ${
                   isDarkMode
                     ? "border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-blue-900"
                     : "border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"

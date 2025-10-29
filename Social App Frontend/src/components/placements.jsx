@@ -161,26 +161,26 @@ export default function PlacementDashboard() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-left max-w-3xl mx-auto">
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
-              <p className="text-gray-300">
+              <p className="text-blue-700">
                 Top-tier companies including PhonePe, Arctic Wolf Networks, and
                 Thomson Reuters
               </p>
             </div>
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
-              <p className="text-gray-300">
+              <p className="text-blue-700">
                 Diverse opportunities in Product and Service-based companies
               </p>
             </div>
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
-              <p className="text-gray-300">
+              <p className="text-blue-700">
                 Both Internship-only and Full-time placement opportunities
               </p>
             </div>
             <div className="flex items-start space-x-3">
               <div className="w-2 h-2 bg-blue-400 rounded-full mt-2"></div>
-              <p className="text-gray-300">
+              <p className="text-blue-700">
                 Multiple offers from renowned organizations like DRDO and Cisco
               </p>
             </div>

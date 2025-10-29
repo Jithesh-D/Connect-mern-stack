@@ -1,7 +1,15 @@
 import React from "react";
 import { useDarkMode } from "../store/darkModeContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, PlusCircle, Calendar, Briefcase, Bot } from "lucide-react";
+import {
+  Home,
+  PlusCircle,
+  Calendar,
+  Briefcase,
+  Bot,
+  Users,
+  Link, // Import Link icon for KEY-LINKZ
+} from "lucide-react";
 
 const Sidebar = () => {
   const navigate = useNavigate();
@@ -9,12 +17,37 @@ const Sidebar = () => {
   const { isDarkMode } = useDarkMode();
 
   const menuItems = [
-    { path: "/", icon: Home, label: "Home" },
-    { path: "/create-Post", icon: PlusCircle, label: "Create Post" },
-    { path: "/events", icon: Calendar, label: "Events" },
-    { path: "/placements", icon: Briefcase, label: "Placements" },
-    { path: "/chatbot", icon: Bot, label: "RVU Assistant" },
+    { path: "/", icon: Home, label: "Home", type: "internal" },
+    {
+      path: "/create-Post",
+      icon: PlusCircle,
+      label: "Create Post",
+      type: "internal",
+    },
+    { path: "/community", icon: Users, label: "Community", type: "internal" },
+    { path: "/events", icon: Calendar, label: "Events", type: "internal" },
+    {
+      path: "/placements",
+      icon: Briefcase,
+      label: "Placements",
+      type: "internal",
+    },
+    { path: "/chatbot", icon: Bot, label: "RVU Assistant", type: "internal" },
+    {
+      path: "https://keys-vault-rvu.vercel.app/",
+      icon: Link,
+      label: "KEY-LINKZ",
+      type: "external",
+    }, // External link
   ];
+
+  const handleNavigation = (item) => {
+    if (item.type === "external") {
+      window.open(item.path, "_blank"); // Open external link in new tab
+    } else {
+      navigate(item.path); // Navigate internally
+    }
+  };
 
   return (
     <div
@@ -47,12 +80,13 @@ const Sidebar = () => {
         <nav className="space-y-2">
           {menuItems.map((item) => {
             const Icon = item.icon;
-            const isActive = location.pathname === item.path;
+            const isActive =
+              item.type === "internal" && location.pathname === item.path;
 
             return (
               <button
                 key={item.path}
-                onClick={() => navigate(item.path)}
+                onClick={() => handleNavigation(item)}
                 className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200 group ${
                   isActive
                     ? isDarkMode
@@ -75,6 +109,21 @@ const Sidebar = () => {
                 <span className="font-medium transition-opacity duration-200">
                   {item.label}
                 </span>
+                {item.type === "external" && (
+                  <svg
+                    className="ml-auto h-4 w-4 opacity-50"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+                    />
+                  </svg>
+                )}
               </button>
             );
           })}
@@ -138,10 +187,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-{
-  /* ${ selectedTab === "CreatePost"
- ? "active bg-dark text-white"
- : "text-dark"}` */
-}
-
-/*{${selectedTab === "Home" ? "active bg-dark text-white" : "text-dark"}} */

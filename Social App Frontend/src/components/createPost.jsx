@@ -4,19 +4,10 @@ import { PostList as PostListData } from "../store/postListContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import { addPostToServer, updatePostInServer } from "../services/service.jsx";
 import {
-  PenTool,
-  Type,
-  FileText,
-  Hash,
-  Send,
-  Edit3,
-  Sparkles,
-  X,
-  Check,
+  ArrowLeft,
   Image as ImageIcon,
-  Upload,
-  Camera,
-  Trash2,
+  ChevronRight,
+  ChevronDown,
 } from "lucide-react";
 
 const CreatePost = () => {
@@ -34,17 +25,20 @@ const CreatePost = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [charCount, setCharCount] = useState(0);
-  const [titleCount, setTitleCount] = useState(0);
   const [tags, setTags] = useState([]);
   const [tagInput, setTagInput] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [dragActive, setDragActive] = useState(false);
+  const [showTitleModal, setShowTitleModal] = useState(false);
+  const [showTagsModal, setShowTagsModal] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("general");
   const { isDarkMode } = useDarkMode();
 
-  const maxTitleLength = 100;
-  const maxBodyLength = 1000;
-  const maxImageSize = 5 * 1024 * 1024; // 5MB
+  const maxBodyLength = 2200;
+  const maxImageSize = 5 * 1024 * 1024;
   const allowedImageTypes = [
     "image/jpeg",
     "image/jpg",
@@ -53,26 +47,25 @@ const CreatePost = () => {
     "image/webp",
   ];
 
-  // Using global DarkMode context; no local MutationObserver required
+  const categories = [
+    { value: "general", label: "General" },
+    { value: "clubs", label: "Clubs" },
+  ];
 
   useEffect(() => {
     if (editingPost) {
       setIsEditing(true);
-      postTitleElement.current.value = editingPost.title;
+      setTitle(editingPost.title);
       postBodyElement.current.value = editingPost.body;
-      setTitleCount(editingPost.title.length);
       setCharCount(editingPost.body.length);
       setTags(editingPost.tags || []);
       setTagInput(editingPost.tags?.join(" ") || "");
+      setCategory(editingPost.category || "general");
       if (editingPost.image) {
         setImagePreview(editingPost.image);
       }
     }
   }, [editingPost]);
-
-  const handleTitleChange = (e) => {
-    setTitleCount(e.target.value.length);
-  };
 
   const handleBodyChange = (e) => {
     setCharCount(e.target.value.length);
@@ -85,13 +78,6 @@ const CreatePost = () => {
       .split(/\s+/)
       .filter((tag) => tag.length > 0);
     setTags(newTags);
-  };
-
-  const removeTag = (tagToRemove) => {
-    const updatedTags = tags.filter((tag) => tag !== tagToRemove);
-    setTags(updatedTags);
-    setTagInput(updatedTags.join(" "));
-    tagsElement.current.value = updatedTags.join(" ");
   };
 
   const validateImage = (file) => {
@@ -139,29 +125,19 @@ const CreatePost = () => {
     handleImageSelect(file);
   };
 
-  const removeImage = () => {
-    setSelectedImage(null);
-    setImagePreview(null);
-    if (imageInputElement.current) {
-      imageInputElement.current.value = "";
-    }
-  };
-
   const triggerImageUpload = () => {
     imageInputElement.current?.click();
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async () => {
     setIsSubmitting(true);
 
-    const postTitle = postTitleElement.current.value;
+    const postTitle = title;
     const postBody = postBodyElement.current.value;
     const postTags = tags;
 
-    // Validation
-    if (!postTitle.trim() || !postBody.trim()) {
-      alert("Please fill in both title and content fields.");
+    if (!postBody.trim()) {
+      alert("Please write a caption.");
       setIsSubmitting(false);
       return;
     }
@@ -172,9 +148,9 @@ const CreatePost = () => {
           editingPost.id,
           postTitle,
           postBody,
-          postTags
+          postTags,
+          category
         );
-        // Ensure updated post has author populated from session for instant ownership recognition
         try {
           const sessionUser = JSON.parse(sessionStorage.getItem("user")) || {};
           if (!updatedPost.author || !updatedPost.author.id) {
@@ -184,21 +160,16 @@ const CreatePost = () => {
               profileImage: sessionUser.profileImage || null,
             };
           }
-        } catch (e) {
-          // ignore parsing errors
-        }
-
-        // Replace the full post in the context so ownership and image fields update immediately
+        } catch (e) {}
         updatePost(updatedPost);
       } else {
         const newPost = await addPostToServer(
           postTitle,
           postBody,
           postTags,
-          selectedImage // Pass the actual File object
+          selectedImage,
+          category
         );
-
-        // Ensure the author field is populated from the current session so ownership checks work instantly
         try {
           const sessionUser = JSON.parse(sessionStorage.getItem("user")) || {};
           if (!newPost.author || !newPost.author.id) {
@@ -208,11 +179,7 @@ const CreatePost = () => {
               profileImage: sessionUser.profileImage || null,
             };
           }
-        } catch (e) {
-          // ignore
-        }
-
-        // Add the full post object to the context so image and other fields are immediately available
+        } catch (e) {}
         addPost(newPost);
       }
 
@@ -230,419 +197,380 @@ const CreatePost = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className={`min-h-screen ${isDarkMode ? "bg-black" : "bg-white"}`}>
+      {/* Header */}
       <div
-        className={`rounded-2xl shadow-xl border overflow-hidden ${
-          isDarkMode
-            ? "bg-gray-800 border-gray-700"
-            : "bg-white border-gray-100"
+        className={`flex items-center justify-between px-4 py-3 border-b ${
+          isDarkMode ? "border-gray-800" : "border-gray-200"
         }`}
       >
-        {/* Header */}
-        <div
-          className={`px-8 py-6 ${
-            isDarkMode
-              ? "bg-gradient-to-r from-blue-700 via-purple-700 to-indigo-700"
-              : "bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600"
+        <button
+          onClick={handleCancel}
+          className={`p-2 ${isDarkMode ? "text-white" : "text-black"}`}
+        >
+          <ArrowLeft className="h-6 w-6" />
+        </button>
+        <h1
+          className={`text-base font-semibold ${
+            isDarkMode ? "text-white" : "text-black"
           }`}
         >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              {isEditing ? (
-                <Edit3 className="h-7 w-7 text-white" />
-              ) : (
-                <PenTool className="h-7 w-7 text-white" />
-              )}
-              <div>
-                <h1 className="text-2xl font-bold text-white">
-                  {isEditing ? "Edit Your Post" : "Create New Post"}
-                </h1>
-                <p
-                  className={`text-sm ${
-                    isDarkMode ? "text-blue-200" : "text-blue-100"
-                  }`}
-                >
-                  {isEditing
-                    ? "Update your thoughts"
-                    : "Share your thoughts with the campus community"}
-                </p>
-              </div>
-            </div>
-            <Sparkles className="h-8 w-8 text-yellow-300 animate-pulse" />
-          </div>
-        </div>
+          New post
+        </h1>
+        <button
+          onClick={handleSubmit}
+          disabled={isSubmitting}
+          className={`px-4 py-1.5 rounded-lg text-sm font-semibold text-white ${
+            isSubmitting ? "bg-gray-600" : "bg-black"
+          }`}
+        >
+          {isSubmitting ? "Sharing..." : "Share"}
+        </button>
+      </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-8 space-y-8">
-          {/* Title Field */}
-          <div className="space-y-3">
-            <label
-              htmlFor="title"
-              className={`flex items-center text-lg font-semibold ${
-                isDarkMode ? "text-gray-200" : "text-gray-700"
+      <div className="flex flex-col md:flex-row">
+        {/* Left side - Image upload */}
+        <div
+          className={`flex-1 flex items-center justify-center p-8 border-b md:border-b-0 md:border-r ${
+            isDarkMode ? "border-gray-800 bg-black" : "border-gray-200 bg-white"
+          }`}
+        >
+          {!imagePreview ? (
+            <div
+              className={`w-full max-w-md text-center cursor-pointer ${
+                dragActive ? "opacity-70" : ""
               }`}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={triggerImageUpload}
             >
-              <Type
-                className={`h-5 w-5 mr-2 ${
-                  isDarkMode ? "text-blue-400" : "text-blue-600"
-                }`}
-              />
-              Post Title
-              <span className="text-red-500 ml-1">*</span>
-            </label>
-            <div className="relative">
               <input
-                type="text"
-                ref={postTitleElement}
-                className={`w-full px-4 py-4 border-2 rounded-xl transition-all duration-200 text-lg ${
-                  isDarkMode
-                    ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-blue-400 focus:bg-gray-600"
-                    : "bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400 focus:border-blue-500 focus:bg-white"
-                } focus:outline-none`}
-                id="title"
-                placeholder="What's on your mind? Make it catchy..."
-                maxLength={maxTitleLength}
-                onChange={handleTitleChange}
-                required
+                type="file"
+                ref={imageInputElement}
+                onChange={handleImageChange}
+                accept="image/*"
+                className="hidden"
               />
-              <div
-                className={`absolute right-4 top-4 text-sm ${
-                  isDarkMode ? "text-gray-400" : "text-gray-400"
-                }`}
-              >
-                {titleCount}/{maxTitleLength}
-              </div>
-            </div>
-            <div
-              className={`h-2 rounded-full overflow-hidden ${
-                isDarkMode ? "bg-gray-700" : "bg-gray-200"
-              }`}
-            >
-              <div
-                className="h-full bg-gradient-to-r from-blue-500 to-purple-500 transition-all duration-200"
-                style={{ width: `${(titleCount / maxTitleLength) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Content Field */}
-          <div className="space-y-3">
-            <label
-              htmlFor="body"
-              className={`flex items-center text-lg font-semibold ${
-                isDarkMode ? "text-gray-200" : "text-gray-700"
-              }`}
-            >
-              <FileText
-                className={`h-5 w-5 mr-2 ${
-                  isDarkMode ? "text-purple-400" : "text-purple-600"
-                }`}
-              />
-              Post Content
-              <span className="text-red-500 ml-1">*</span>
-            </label>
-            <div className="relative">
-              <textarea
-                ref={postBodyElement}
-                rows="6"
-                className={`w-full px-4 py-4 border-2 rounded-xl transition-all duration-200 text-base resize-none ${
-                  isDarkMode
-                    ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-purple-400 focus:bg-gray-600"
-                    : "bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400 focus:border-purple-500 focus:bg-white"
-                } focus:outline-none`}
-                id="body"
-                placeholder="Tell us more about it... Share your thoughts, experiences, or ask questions!"
-                maxLength={maxBodyLength}
-                onChange={handleBodyChange}
-                required
-              />
-              <div
-                className={`absolute right-4 bottom-4 text-sm ${
-                  isDarkMode ? "text-gray-400" : "text-gray-400"
-                }`}
-              >
-                {charCount}/{maxBodyLength}
-              </div>
-            </div>
-            <div
-              className={`h-2 rounded-full overflow-hidden ${
-                isDarkMode ? "bg-gray-700" : "bg-gray-200"
-              }`}
-            >
-              <div
-                className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-200"
-                style={{ width: `${(charCount / maxBodyLength) * 100}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Image Upload Field */}
-          <div className="space-y-3">
-            <label
-              className={`flex items-center text-lg font-semibold ${
-                isDarkMode ? "text-gray-200" : "text-gray-700"
-              }`}
-            >
-              <ImageIcon
-                className={`h-5 w-5 mr-2 ${
-                  isDarkMode ? "text-green-400" : "text-green-600"
-                }`}
-              />
-              Add Image
-              <span
-                className={`ml-2 text-sm font-normal ${
-                  isDarkMode ? "text-gray-400" : "text-gray-400"
-                }`}
-              >
-                (optional)
-              </span>
-            </label>
-
-            {!imagePreview ? (
-              <div
-                className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 cursor-pointer ${
-                  dragActive
-                    ? isDarkMode
-                      ? "border-green-400 bg-green-900/20"
-                      : "border-green-500 bg-green-50"
-                    : isDarkMode
-                    ? "border-gray-600 hover:border-green-400 hover:bg-gray-700/50"
-                    : "border-gray-300 hover:border-green-400 hover:bg-gray-50"
-                }`}
-                onDragOver={handleDragOver}
-                onDragLeave={handleDragLeave}
-                onDrop={handleDrop}
-                onClick={triggerImageUpload}
-              >
-                <input
-                  type="file"
-                  ref={imageInputElement}
-                  onChange={handleImageChange}
-                  accept="image/*"
-                  className="hidden"
-                />
-                <div className="flex flex-col items-center space-y-4">
-                  <div
-                    className={`p-4 rounded-full ${
-                      isDarkMode ? "bg-green-900/30" : "bg-green-100"
-                    }`}
-                  >
-                    <Upload
-                      className={`h-8 w-8 ${
-                        isDarkMode ? "text-green-400" : "text-green-600"
-                      }`}
-                    />
-                  </div>
-                  <div>
-                    <p
-                      className={`text-lg font-medium ${
-                        isDarkMode ? "text-gray-200" : "text-gray-700"
-                      }`}
-                    >
-                      Drop an image here or click to browse
-                    </p>
-                    <p
-                      className={`text-sm mt-1 ${
-                        isDarkMode ? "text-gray-400" : "text-gray-500"
-                      }`}
-                    >
-                      Supports JPEG, PNG, GIF, WebP (max 5MB)
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    className={`inline-flex items-center px-4 py-2 rounded-lg transition-colors duration-200 ${
-                      isDarkMode
-                        ? "bg-green-600 hover:bg-green-500 text-white"
-                        : "bg-green-600 hover:bg-green-700 text-white"
-                    }`}
-                  >
-                    <Camera className="h-4 w-4 mr-2" />
-                    Choose Image
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="relative">
+              <div className="flex flex-col items-center space-y-4">
                 <div
-                  className={`relative rounded-xl overflow-hidden border ${
-                    isDarkMode ? "border-gray-600" : "border-gray-200"
+                  className={`p-4 rounded-full ${
+                    isDarkMode ? "bg-gray-900" : "bg-gray-100"
                   }`}
                 >
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="w-full h-64 object-cover"
+                  <ImageIcon
+                    className={`h-12 w-12 ${
+                      isDarkMode ? "text-white" : "text-gray-600"
+                    }`}
                   />
-                  <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center">
-                    <button
-                      type="button"
-                      onClick={removeImage}
-                      className="opacity-0 hover:opacity-100 bg-red-500 text-white p-2 rounded-full transition-opacity duration-200"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
                 </div>
+                <p
+                  className={`text-xl ${
+                    isDarkMode ? "text-white" : "text-gray-900"
+                  }`}
+                >
+                  Drag photos and videos here
+                </p>
                 <button
                   type="button"
-                  onClick={removeImage}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full hover:bg-red-600 transition-colors duration-200"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Tags Field */}
-          <div className="space-y-3">
-            <label
-              htmlFor="tags"
-              className={`flex items-center text-lg font-semibold ${
-                isDarkMode ? "text-gray-200" : "text-gray-700"
-              }`}
-            >
-              <Hash
-                className={`h-5 w-5 mr-2 ${
-                  isDarkMode ? "text-indigo-400" : "text-indigo-600"
-                }`}
-              />
-              Tags
-              <span
-                className={`ml-2 text-sm font-normal ${
-                  isDarkMode ? "text-gray-400" : "text-gray-400"
-                }`}
-              >
-                (optional)
-              </span>
-            </label>
-            <input
-              type="text"
-              ref={tagsElement}
-              className={`w-full px-4 py-4 border-2 rounded-xl transition-all duration-200 ${
-                isDarkMode
-                  ? "bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400 focus:border-indigo-400 focus:bg-gray-600"
-                  : "bg-gray-50 border-gray-200 text-gray-800 placeholder-gray-400 focus:border-indigo-500 focus:bg-white"
-              } focus:outline-none`}
-              id="tags"
-              placeholder="Add tags separated by spaces (e.g., programming student-life campus-events)"
-              value={tagInput}
-              onChange={handleTagInputChange}
-            />
-
-            {/* Tag Preview */}
-            {tags.length > 0 && (
-              <div
-                className={`flex flex-wrap gap-2 p-4 rounded-xl border ${
-                  isDarkMode
-                    ? "bg-gradient-to-r from-blue-900/30 to-purple-900/30 border-blue-700/50"
-                    : "bg-gradient-to-r from-blue-50 to-purple-50 border-blue-100"
-                }`}
-              >
-                <span
-                  className={`text-sm font-medium mr-2 ${
-                    isDarkMode ? "text-gray-300" : "text-gray-600"
+                  className={`px-4 py-2 rounded-lg text-sm font-semibold ${
+                    isDarkMode
+                      ? "bg-blue-500 text-white hover:bg-blue-600"
+                      : "bg-blue-500 text-white hover:bg-blue-600"
                   }`}
                 >
-                  Preview:
-                </span>
-                {tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="inline-flex items-center px-3 py-1 bg-gradient-to-r from-blue-500 to-purple-500 text-white text-sm font-medium rounded-full shadow-sm hover:shadow-md transition-all duration-200"
-                  >
-                    <Hash className="h-3 w-3 mr-1" />
-                    {tag}
-                    <button
-                      type="button"
-                      onClick={() => removeTag(tag)}
-                      className="ml-2 hover:bg-white/20 rounded-full p-0.5 transition-colors duration-200"
-                    >
-                      <X className="h-3 w-3" />
-                    </button>
-                  </span>
-                ))}
+                  Select from Device
+                </button>
               </div>
-            )}
+            </div>
+          ) : (
+            <div className="w-full max-w-2xl">
+              <img
+                src={imagePreview}
+                alt="Preview"
+                className="w-full h-auto max-h-[600px] object-contain"
+              />
+            </div>
+          )}
+        </div>
+
+        {/* Right side - Caption and details */}
+        <div
+          className={`w-full md:w-96 flex flex-col ${
+            isDarkMode ? "bg-black" : "bg-white"
+          }`}
+        >
+          {/* User info */}
+          <div className="flex items-center px-4 py-3">
+            <div className="w-7 h-7 rounded-full bg-yellow-400 flex items-center justify-center text-black text-sm font-semibold">
+              🚶
+            </div>
+            <span
+              className={`ml-3 text-sm font-semibold ${
+                isDarkMode ? "text-white" : "text-black"
+              }`}
+            >
+              You
+            </span>
           </div>
 
-          {/* Action Buttons */}
+          {/* Caption textarea */}
+          <div className="px-4 py-2">
+            <textarea
+              ref={postBodyElement}
+              rows="8"
+              className={`w-full resize-none border-none focus:outline-none text-sm ${
+                isDarkMode
+                  ? "bg-black text-white placeholder-gray-500"
+                  : "bg-white text-black placeholder-gray-400"
+              }`}
+              placeholder="Write a caption..."
+              maxLength={maxBodyLength}
+              onChange={handleBodyChange}
+            />
+            <div
+              className={`text-xs text-right mt-1 ${
+                isDarkMode ? "text-gray-500" : "text-gray-400"
+              }`}
+            >
+              {charCount}/{maxBodyLength}
+            </div>
+          </div>
+
+          {/* Options */}
+          <div className="mt-auto">
+            <button
+              onClick={() => setShowTitleModal(true)}
+              className={`w-full flex items-center justify-between px-4 py-3 border-t ${
+                isDarkMode
+                  ? "border-gray-800 text-white hover:bg-gray-900"
+                  : "border-gray-200 text-black hover:bg-gray-50"
+              }`}
+            >
+              <span className="text-sm">Add title</span>
+              <ChevronRight className="h-5 w-5 text-gray-400" />
+            </button>
+
+            <button
+              onClick={() => setShowCategoryModal(true)}
+              className={`w-full flex items-center justify-between px-4 py-3 border-t ${
+                isDarkMode
+                  ? "border-gray-800 text-white hover:bg-gray-900"
+                  : "border-gray-200 text-black hover:bg-gray-50"
+              }`}
+            >
+              <div className="flex flex-col items-start">
+                <span className="text-sm">Category</span>
+                <span
+                  className={`text-xs ${
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
+                  {categories.find((cat) => cat.value === category)?.label ||
+                    "General"}
+                </span>
+              </div>
+              <ChevronRight className="h-5 w-5 text-gray-400" />
+            </button>
+
+            <button
+              onClick={() => setShowTagsModal(true)}
+              className={`w-full flex items-center justify-between px-4 py-3 border-t ${
+                isDarkMode
+                  ? "border-gray-800 text-white hover:bg-gray-900"
+                  : "border-gray-200 text-black hover:bg-gray-50"
+              }`}
+            >
+              <span className="text-sm">Tags</span>
+              <ChevronRight className="h-5 w-5 text-gray-400" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Title Modal */}
+      {showTitleModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div
-            className={`flex flex-col sm:flex-row gap-4 pt-6 border-t ${
-              isDarkMode ? "border-gray-700" : "border-gray-200"
+            className={`w-full max-w-md rounded-xl ${
+              isDarkMode ? "bg-gray-900" : "bg-white"
             }`}
           >
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className={`flex-1 inline-flex items-center justify-center px-8 py-4 rounded-xl text-white font-semibold text-lg transition-all duration-200 ${
-                isSubmitting
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 hover:shadow-lg transform hover:scale-105"
-              }`}
-            >
-              {isSubmitting ? (
-                <>
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-3"></div>
-                  {isEditing ? "Updating..." : "Publishing..."}
-                </>
-              ) : (
-                <>
-                  {isEditing ? (
-                    <Check className="h-5 w-5 mr-2" />
-                  ) : (
-                    <Send className="h-5 w-5 mr-2" />
-                  )}
-                  {isEditing ? "Update Post" : "Publish Post"}
-                </>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={handleCancel}
-              className={`flex-1 sm:flex-initial inline-flex items-center justify-center px-8 py-4 font-semibold rounded-xl transition-all duration-200 border-2 ${
-                isDarkMode
-                  ? "bg-gray-700 hover:bg-gray-600 text-gray-200 border-gray-600 hover:border-gray-500"
-                  : "bg-gray-100 hover:bg-gray-200 text-gray-700 border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              <X className="h-5 w-5 mr-2" />
-              Cancel
-            </button>
+            <div className="p-4 border-b border-gray-700">
+              <h2
+                className={`text-lg font-semibold ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Add Title
+              </h2>
+            </div>
+            <div className="p-4">
+              <input
+                ref={postTitleElement}
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Enter post title..."
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                  isDarkMode
+                    ? "bg-gray-800 border-gray-700 text-white focus:ring-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500"
+                }`}
+              />
+            </div>
+            <div className="p-4 border-t border-gray-700 flex justify-end space-x-2">
+              <button
+                onClick={() => setShowTitleModal(false)}
+                className={`px-4 py-2 rounded-lg ${
+                  isDarkMode
+                    ? "bg-gray-800 text-white hover:bg-gray-700"
+                    : "bg-gray-200 text-black hover:bg-gray-300"
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setShowTitleModal(false)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                Done
+              </button>
+            </div>
           </div>
-        </form>
-      </div>
+        </div>
+      )}
 
-      {/* Helpful Tips */}
-      <div
-        className={`mt-8 border rounded-xl p-6 ${
-          isDarkMode
-            ? "bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border-yellow-700/50"
-            : "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200"
-        }`}
-      >
-        <h3
-          className={`text-lg font-semibold mb-3 flex items-center ${
-            isDarkMode ? "text-yellow-300" : "text-yellow-800"
-          }`}
-        >
-          <Sparkles className="h-5 w-5 mr-2" />
-          Tips for Great Posts
-        </h3>
-        <ul
-          className={`text-sm space-y-2 ${
-            isDarkMode ? "text-blue-900" : "text-blue-700"
-          }`}
-        >
-          <li>• Write a clear, engaging title that captures attention</li>
-          <li>• Share your genuine thoughts and experiences</li>
-          <li>• Use high-quality images to make your post more engaging</li>
-          <li>• Use relevant tags to help others find your post</li>
-          <li>• Be respectful and constructive in your communication</li>
-        </ul>
-      </div>
+      {/* Category Modal */}
+      {showCategoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div
+            className={`w-full max-w-md rounded-xl ${
+              isDarkMode ? "bg-gray-900" : "bg-white"
+            }`}
+          >
+            <div className="p-4 border-b border-gray-700">
+              <h2
+                className={`text-lg font-semibold ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Select Category
+              </h2>
+            </div>
+            <div className="p-4">
+              {categories.map((cat) => (
+                <button
+                  key={cat.value}
+                  onClick={() => {
+                    setCategory(cat.value);
+                    setShowCategoryModal(false);
+                  }}
+                  className={`w-full text-left px-4 py-3 rounded-lg mb-2 transition-colors ${
+                    category === cat.value
+                      ? isDarkMode
+                        ? "bg-blue-600 text-white"
+                        : "bg-blue-500 text-white"
+                      : isDarkMode
+                      ? "bg-gray-800 text-white hover:bg-gray-700"
+                      : "bg-gray-100 text-black hover:bg-gray-200"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{cat.label}</span>
+                    {category === cat.value && (
+                      <svg
+                        className="w-5 h-5"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                </button>
+              ))}
+            </div>
+            <div className="p-4 border-t border-gray-700 flex justify-end">
+              <button
+                onClick={() => setShowCategoryModal(false)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tags Modal */}
+      {showTagsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div
+            className={`w-full max-w-md rounded-xl ${
+              isDarkMode ? "bg-gray-900" : "bg-white"
+            }`}
+          >
+            <div className="p-4 border-b border-gray-700">
+              <h2
+                className={`text-lg font-semibold ${
+                  isDarkMode ? "text-white" : "text-black"
+                }`}
+              >
+                Add Tags
+              </h2>
+            </div>
+            <div className="p-4">
+              <input
+                ref={tagsElement}
+                type="text"
+                value={tagInput}
+                onChange={handleTagInputChange}
+                placeholder="Enter tags separated by spaces..."
+                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                  isDarkMode
+                    ? "bg-gray-800 border-gray-700 text-white focus:ring-blue-500"
+                    : "bg-white border-gray-300 text-black focus:ring-blue-500"
+                }`}
+              />
+              {tags.length > 0 && (
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      className="px-3 py-1 bg-blue-500 text-white text-xs rounded-full"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="p-4 border-t border-gray-700 flex justify-end space-x-2">
+              <button
+                onClick={() => setShowTagsModal(false)}
+                className={`px-4 py-2 rounded-lg ${
+                  isDarkMode
+                    ? "bg-gray-800 text-white hover:bg-gray-700"
+                    : "bg-gray-200 text-black hover:bg-gray-300"
+                }`}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setShowTagsModal(false)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

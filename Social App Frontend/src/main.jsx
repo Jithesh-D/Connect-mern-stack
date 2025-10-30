@@ -19,8 +19,8 @@ import Placements from "./components/placements.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
 import Homepage from "./components/homePage.jsx";
 import RVUAssistant from "./components/Rvuassistant.jsx";
-import CommunityPage from "./components/CommunityPage.jsx";
-
+import Contribution from "./components/contribution.jsx";
+import AddContribution from "./components/AddContribution.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -74,14 +74,12 @@ const router = createBrowserRouter([
             element: <RVUAssistant />,
           },
           {
-            path: "community",
-            element: (
-              <CommunityPage
-                currentUser={JSON.parse(
-                  sessionStorage.getItem("user") || "null"
-                )}
-              />
-            ),
+            path: "/contribution",
+            element: <Contribution />,
+          },
+          {
+            path: "/add-contribution",
+            element: <AddContribution />,
           },
         ],
       },

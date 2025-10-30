@@ -7,8 +7,8 @@ import {
   Calendar,
   Briefcase,
   Bot,
-  Users,
-  Link, // Import Link icon for KEY-LINKZ
+  Link,
+  GitPullRequest,
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -24,28 +24,34 @@ const Sidebar = () => {
       label: "Create Post",
       type: "internal",
     },
-    { path: "/community", icon: Users, label: "Community", type: "internal" },
     { path: "/events", icon: Calendar, label: "Events", type: "internal" },
+    {
+      path: "/contribution",
+      icon: GitPullRequest,
+      label: "Collab Hub",
+      type: "internal",
+    },
     {
       path: "/placements",
       icon: Briefcase,
       label: "Placements",
       type: "internal",
     },
-    { path: "/chatbot", icon: Bot, label: "RVU Assistant", type: "internal" },
+
     {
       path: "https://keys-vault-rvu.vercel.app/",
       icon: Link,
       label: "KEY-LINKZ",
       type: "external",
-    }, // External link
+    },
+    { path: "/chatbot", icon: Bot, label: "RVU Assistant", type: "internal" },
   ];
 
   const handleNavigation = (item) => {
     if (item.type === "external") {
-      window.open(item.path, "_blank"); // Open external link in new tab
+      window.open(item.path, "_blank");
     } else {
-      navigate(item.path); // Navigate internally
+      navigate(item.path);
     }
   };
 

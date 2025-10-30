@@ -89,7 +89,12 @@ const EventsPage = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">Events</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Events</h1>
+          <h6 className="text-gray-600">
+            College or Club Events will appear here
+          </h6>
+        </div>
         <button
           onClick={() => navigate("/create-event")}
           className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"

@@ -45,7 +45,7 @@ if (!fs.existsSync(uploadsDir)) {
 // CORS middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
@@ -117,6 +117,14 @@ try {
 }
 
 try {
+  const eventAuthRouter = require("./Routes/eventAuthRoute");
+  app.use("/api/event-auth", eventAuthRouter);
+  console.log("✅ Event auth routes loaded");
+} catch (error) {
+  console.log("❌ Event auth routes failed:", error.message);
+}
+
+try {
   const commentRouter = require("./Routes/commentRoute");
   app.use("/api/comments", commentRouter);
   console.log("✅ Comments routes loaded");
@@ -163,6 +171,14 @@ try {
   console.log("✅ Gang posts routes loaded");
 } catch (err) {
   console.log("❌ Gang posts routes failed:", err.message);
+}
+
+try {
+  const contribution = require("./Routes/collabRoutes");
+  app.use("/api/contributions", contribution);
+  console.log("✅ Contributions routes loaded");
+} catch (err) {
+  console.log("❌ Contributions routes failed:", err.message);
 }
 
 try {
@@ -250,8 +266,6 @@ app.use((error, req, res, next) => {
   });
 });
 
-// ==================== DATABASE & SERVER START ====================
-
 async function startServer() {
   try {
     await mongoose.connect(MONGODB_URI, {
@@ -264,7 +278,7 @@ async function startServer() {
     const { Server } = require("socket.io");
     io = new Server(server, {
       cors: {
-        origin: "http://localhost:5173",
+        origin: process.env.FRONTEND_URL || "http://localhost:5173",
         methods: ["GET", "POST"],
       },
     });

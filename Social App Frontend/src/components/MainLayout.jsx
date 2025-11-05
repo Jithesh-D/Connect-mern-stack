@@ -1,8 +1,10 @@
 import Header from "./header.jsx";
-import Footer from "./footer.jsx";
+import DeveloperInfoCard from "./footer.jsx";
 import Sidebar from "./sidebar.jsx";
+import RightSidebar from "./RightSidebar.jsx";
 import PostListProvider from "../store/postListContext.jsx";
 import { Outlet } from "react-router-dom";
+import BottomNav from "./BottomNav";
 
 function MainLayout() {
   return (
@@ -11,21 +13,32 @@ function MainLayout() {
         {/* HEADER */}
         <Header />
 
-        {/* MIDDLE SECTION: Sidebar + Main Content */}
-        <div className="flex flex-1">
+        {/* MIDDLE SECTION: Left Sidebar + Main Content + Right Sidebar */}
+        <div className="flex flex-1 relative">
           {/* LEFT SIDEBAR */}
-          <aside className="hidden md:block w-64 bg-white dark:bg-black shadow-lg transition-colors duration-200">
-            <Sidebar />
+          <aside
+            className="hidden lg:block w-64 sticky top-16 self-start transition-colors duration-200"
+            style={{ maxHeight: "calc(100vh - 4rem)" }}
+          >
+            <div className="overflow-y-auto h-full">
+              <Sidebar />
+            </div>
           </aside>
 
           {/* MAIN CONTENT AREA */}
-          <main className="flex-1 p-4 overflow-auto bg-white dark:bg-black transition-colors duration-200">
+          <main className="flex-1 min-w-0 p-4 bg-white dark:bg-black transition-colors duration-200">
             <Outlet />
           </main>
+
+          {/* RIGHT SIDEBAR */}
+          <RightSidebar />
         </div>
 
         {/* FOOTER */}
-        <Footer />
+        <DeveloperInfoCard />
+
+        {/* Persistent mobile bottom navigation */}
+        <BottomNav />
       </div>
     </PostListProvider>
   );

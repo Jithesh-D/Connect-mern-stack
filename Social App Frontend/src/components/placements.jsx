@@ -5,11 +5,16 @@ import {
   Briefcase,
   DollarSign,
   Award,
-  ListChecks, // Added for achievements list
+  ListChecks,
 } from "lucide-react";
+// Assuming the path to your context is this, based on your previous code
+import { useDarkMode } from "../store/darkModeContext";
 
 // Main component
 export default function PlacementDashboard() {
+  // Get dark mode state from context
+  const { isDarkMode } = useDarkMode();
+
   // Data arrays
   const companies = [
     "NTT Data",
@@ -88,18 +93,29 @@ export default function PlacementDashboard() {
     "Multiple offers from renowned organizations like DRDO and Cisco",
   ];
 
-  // We duplicate the companies list to ensure a smooth, infinite scroll
-  const doubledCompanies = [...companies, ...companies, ...companies];
+  const doubledCompanies = [...companies, ...companies];
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 font-inter">
+    <div
+      className={`min-h-screen font-inter ${
+        isDarkMode ? "bg-black text-gray-400" : "bg-gray-100 text-gray-900"
+      }`}
+    >
       <div className="container mx-auto px-4 py-12">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-3">
+          <h1
+            className={`text-4xl md:text-5xl font-bold mb-3 ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Internship & Placement Summary
           </h1>
-          <p className="text-lg md:text-xl text-gray-600">
+          <p
+            className={`text-lg md:text-xl ${
+              isDarkMode ? "text-gray-400" : "text-gray-600"
+            }`}
+          >
             B.Tech 2022 Batch - School of Computer Science & Engineering
           </p>
         </div>
@@ -109,7 +125,11 @@ export default function PlacementDashboard() {
           {stats.map((stat, index) => (
             <div
               key={index}
-              className="bg-white rounded-xl shadow-lg p-6 flex items-center space-x-4 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
+              className={`rounded-xl p-6 flex items-center space-x-4 transition-all duration-300 ${
+                isDarkMode
+                  ? "bg-black" // In dark mode, card is black (no shadow)
+                  : "bg-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
+              }`}
             >
               <div
                 className={`w-12 h-12 rounded-full flex items-center justify-center ${stat.bgColor}`}
@@ -117,20 +137,39 @@ export default function PlacementDashboard() {
                 <stat.icon className={`w-6 h-6 ${stat.color}`} />
               </div>
               <div>
-                <p className="text-gray-500 text-sm font-medium">
+                <p
+                  className={`text-sm font-medium ${
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
                   {stat.label}
                 </p>
-                <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
+                {/* Per image, stat value is also gray in dark mode */}
+                <p
+                  className={`text-3xl font-bold ${
+                    isDarkMode ? "text-gray-400" : "text-gray-900"
+                  }`}
+                >
+                  {stat.value}
+                </p>
               </div>
             </div>
           ))}
         </div>
 
         {/* Highlights Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
+        <div
+          className={`rounded-2xl p-8 mb-12 ${
+            isDarkMode ? "bg-black" : "bg-white shadow-lg"
+          }`}
+        >
           <div className="flex items-center mb-6">
             <Award className="w-8 h-8 text-yellow-500 mr-3" />
-            <h2 className="text-3xl font-bold text-gray-900">
+            <h2
+              className={`text-3xl font-bold ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            >
               Placement Highlights
             </h2>
           </div>
@@ -138,28 +177,58 @@ export default function PlacementDashboard() {
             {highlights.map((highlight, index) => (
               <div
                 key={index}
-                className="bg-gray-50 rounded-xl p-6 border border-gray-200 transition-all duration-300 hover:bg-gray-100 hover:border-gray-300"
+                className={`rounded-xl p-6 transition-all duration-300 ${
+                  isDarkMode
+                    ? "bg-black border border-gray-800" // Dark mode has borders
+                    : "bg-gray-50 border border-gray-200 hover:bg-gray-100 hover:border-gray-300"
+                }`}
               >
-                <p className="text-gray-500 text-sm mb-2">{highlight.label}</p>
+                <p
+                  className={`text-sm mb-2 ${
+                    isDarkMode ? "text-gray-400" : "text-gray-500"
+                  }`}
+                >
+                  {highlight.label}
+                </p>
                 <p className="text-3xl font-bold text-blue-600 mb-2">
                   {highlight.value}
                 </p>
-                <p className="text-sm text-gray-600">{highlight.subtext}</p>
+                <p
+                  className={`text-sm ${
+                    isDarkMode ? "text-gray-400" : "text-gray-600"
+                  }`}
+                >
+                  {highlight.subtext}
+                </p>
               </div>
             ))}
           </div>
         </div>
 
         {/* Additional Info / Key Achievements */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-12">
-          <h3 className="text-2xl font-semibold mb-6 text-center">
+        <div
+          className={`rounded-2xl p-8 mb-12 ${
+            isDarkMode ? "bg-black" : "bg-white shadow-lg"
+          }`}
+        >
+          <h3
+            className={`text-2xl font-semibold mb-6 text-center ${
+              isDarkMode ? "text-white" : "text-gray-900"
+            }`}
+          >
             Key Achievements
           </h3>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4 max-w-4xl mx-auto">
             {achievements.map((item, index) => (
               <li key={index} className="flex items-start space-x-3">
                 <ListChecks className="w-5 h-5 text-green-600 flex-shrink-0 mt-1" />
-                <span className="text-gray-700">{item}</span>
+                <span
+                  className={`${
+                    isDarkMode ? "text-gray-400" : "text-gray-700"
+                  }`}
+                >
+                  {item}
+                </span>
               </li>
             ))}
           </ul>
@@ -180,35 +249,35 @@ export default function PlacementDashboard() {
       </div>
 
       {/* Moving Companies Ticker */}
-      <div className="bg-white border-t border-gray-200 py-6 overflow-hidden">
+      <div
+        className={`py-6 overflow-hidden ${
+          isDarkMode
+            ? "bg-black border-t border-gray-800"
+            : "bg-white border-t border-gray-200"
+        }`}
+      >
         <div className="container mx-auto px-4">
           <div className="flex items-center space-x-2 mb-4">
             <Briefcase className="w-5 h-5 text-blue-600" />
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-gray-600">
+            <h3
+              className={`text-sm font-semibold uppercase tracking-wider ${
+                isDarkMode ? "text-gray-400" : "text-gray-600"
+              }`}
+            >
               Companies Visited
             </h3>
           </div>
         </div>
-        <div className="relative flex overflow-hidden">
-          <div className="flex animate-scroll whitespace-nowrap">
+        <div className="relative flex overflow-hidden group">
+          <div className="flex animate-scroll whitespace-nowrap group-hover:[animation-play-state:paused]">
             {doubledCompanies.map((company, index) => (
               <span
-                key={`first-${index}`}
-                className="inline-block mx-8 text-xl font-medium text-gray-500 hover:text-gray-900 transition-colors"
-              >
-                {company}
-              </span>
-            ))}
-          </div>
-          {/* This second div is for the infinite loop illusion */}
-          <div
-            className="flex animate-scroll whitespace-nowrap absolute top-0 left-0"
-            aria-hidden="true"
-          >
-            {doubledCompanies.map((company, index) => (
-              <span
-                key={`second-${index}`}
-                className="inline-block mx-8 text-xl font-medium text-gray-500 hover:text-gray-900 transition-colors"
+                key={index}
+                className={`inline-block mx-8 text-xl font-medium transition-colors ${
+                  isDarkMode
+                    ? "text-gray-500 hover:text-white"
+                    : "text-gray-500 hover:text-gray-900"
+                }`}
               >
                 {company}
               </span>
@@ -224,15 +293,11 @@ export default function PlacementDashboard() {
             transform: translateX(0);
           }
           to {
-            /* We translate by -50% because the inner content is 200% width */
             transform: translateX(-50%);
           }
         }
         .animate-scroll {
-          /* The inner container's width is 200% of the doubled list */
-          /* Adjust timing (e.g., 50s) to change scroll speed */
           animation: scroll 60s linear infinite;
-          width: calc(200% * ${companies.length}); 
         }
       `}</style>
     </div>

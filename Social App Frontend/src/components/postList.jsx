@@ -17,6 +17,7 @@ const PostList = () => {
       setFetchingData(true);
       try {
         const posts = await getPostsFromServer();
+        // Posts are already sorted by backend (newest first)
         addInitialPost(posts);
       } catch (error) {
         console.error("Error fetching posts:", error);

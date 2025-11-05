@@ -48,8 +48,8 @@ function App() {
     return () => window.removeEventListener("userChanged", onUserChanged);
   }, []);
 
-  // If unauthenticated and the root path, send to signup
-  if (!isAuthenticated && location.pathname === "/") {
+  // Redirect unauthenticated users to signup, except for login/signup pages
+  if (!isAuthenticated && !["/login", "/signup"].includes(location.pathname)) {
     return <Navigate to="/signup" />;
   }
 

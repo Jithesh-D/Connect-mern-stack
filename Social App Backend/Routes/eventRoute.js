@@ -4,6 +4,7 @@ const {
   getEvents,
   deleteEvent,
 } = require("../controllers/eventController");
+const eventAuthMiddleware = require("../Middleware/eventAuth");
 const multer = require("multer");
 const path = require("path");
 // Configure multer for event image uploads
@@ -35,8 +36,8 @@ const upload = multer({
 
 const eventRoute = express.Router();
 
-eventRoute.post("/", upload.single("image"), createEvents);
+eventRoute.post("/", eventAuthMiddleware, upload.single("image"), createEvents);
 eventRoute.get("/", getEvents);
-eventRoute.delete("/:id", deleteEvent);
+eventRoute.delete("/:id", eventAuthMiddleware, deleteEvent);
 
 module.exports = eventRoute;

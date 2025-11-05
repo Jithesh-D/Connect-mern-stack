@@ -168,8 +168,8 @@ const CommentSection = ({ postId, isOpen, onClose }) => {
 
   return (
     <div
-      className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 ${
-        isDarkMode ? "dark" : ""
+      className={`fixed inset-0 flex items-center justify-center z-50 p-4 transition-colors duration-200 ${
+        isDarkMode ? "bg-black bg-opacity-70" : "bg-black bg-opacity-40"
       }`}
       onClick={(e) => {
         // Close when clicking the backdrop (outside the modal)
@@ -181,32 +181,32 @@ const CommentSection = ({ postId, isOpen, onClose }) => {
       <div
         className={`w-full max-w-md max-h-[80vh] rounded-xl shadow-2xl transform transition-all duration-300 ${
           isDarkMode
-            ? "bg-gray-800 border border-gray-700"
-            : "bg-white border border-gray-200"
+            ? "bg-gray-900 border border-gray-700 text-white"
+            : "bg-white border border-gray-200 text-gray-900"
         }`}
       >
         {/* Header */}
         <div
-          className={`flex items-center justify-between p-4 border-b ${
+          className={`flex items-center justify-between p-4 border-b transition-colors duration-200 ${
             isDarkMode ? "border-gray-700" : "border-gray-200"
           }`}
         >
           <div className="flex items-center space-x-2">
             <MessageCircle
               size={20}
-              className={isDarkMode ? "text-blue-400" : "text-blue-600"}
+              className={isDarkMode ? "text-blue-300" : "text-blue-600"}
             />
             <h3
-              className={`text-lg font-semibold ${
+              className={`text-lg font-semibold transition-colors duration-200 ${
                 isDarkMode ? "text-white" : "text-gray-900"
               }`}
             >
               Comments
             </h3>
             <span
-              className={`text-sm px-2 py-1 rounded-full ${
+              className={`text-sm px-2 py-1 rounded-full transition-colors duration-200 ${
                 isDarkMode
-                  ? "bg-gray-700 text-gray-300"
+                  ? "bg-gray-800 text-gray-200"
                   : "bg-gray-200 text-gray-600"
               }`}
             >
@@ -215,9 +215,9 @@ const CommentSection = ({ postId, isOpen, onClose }) => {
           </div>
           <button
             onClick={onClose}
-            className={`p-2 rounded-full hover:bg-opacity-20 transition-colors ${
+            className={`p-2 rounded-full hover:bg-opacity-20 transition-colors duration-200 ${
               isDarkMode
-                ? "text-gray-400 hover:text-white hover:bg-gray-700"
+                ? "text-gray-300 hover:text-white hover:bg-gray-800"
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-200"
             }`}
           >
@@ -229,19 +229,24 @@ const CommentSection = ({ postId, isOpen, onClose }) => {
         <div className="flex-1 overflow-y-auto p-4 max-h-96">
           {loading ? (
             <div
-              className={`text-center py-8 ${
-                isDarkMode ? "text-gray-400" : "text-gray-500"
+              className={`text-center py-8 transition-colors duration-200 ${
+                isDarkMode ? "text-gray-300" : "text-gray-500"
               }`}
             >
               Loading comments...
             </div>
           ) : comments.length === 0 ? (
             <div
-              className={`text-center py-8 ${
-                isDarkMode ? "text-gray-400" : "text-gray-500"
+              className={`text-center py-8 transition-colors duration-200 ${
+                isDarkMode ? "text-gray-300" : "text-gray-500"
               }`}
             >
-              <MessageCircle size={48} className="mx-auto mb-2 opacity-50" />
+              <MessageCircle
+                size={48}
+                className={`mx-auto mb-2 opacity-60 transition-colors duration-200 ${
+                  isDarkMode ? "text-gray-400" : "text-gray-400"
+                }`}
+              />
               <p>No comments yet.</p>
               <p className="text-sm">Be the first to comment!</p>
             </div>
@@ -257,23 +262,23 @@ const CommentSection = ({ postId, isOpen, onClose }) => {
                   <div className="flex-1">
                     <div className="flex items-baseline gap-2 mb-1">
                       <span
-                        className={`font-semibold text-sm ${
-                          isDarkMode ? "text-blue-400" : "text-blue-600"
+                        className={`font-semibold text-sm transition-colors duration-200 ${
+                          isDarkMode ? "text-white" : "text-blue-600"
                         }`}
                       >
                         {comment.authorName || comment.author?.name || "User"}
                       </span>
                       <span
-                        className={`text-xs ${
-                          isDarkMode ? "text-gray-400" : "text-gray-500"
+                        className={`text-xs transition-colors duration-200 ${
+                          isDarkMode ? "text-gray-300" : "text-gray-500"
                         }`}
                       >
                         {formatDate(comment.timestamp)}
                       </span>
                     </div>
                     <p
-                      className={`text-sm ${
-                        isDarkMode ? "text-gray-300" : "text-gray-700"
+                      className={`text-sm transition-colors duration-200 ${
+                        isDarkMode ? "text-gray-100" : "text-gray-700"
                       }`}
                     >
                       {comment.text}

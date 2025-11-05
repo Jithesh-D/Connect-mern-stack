@@ -27,6 +27,7 @@ const CreateEvent = () => {
   const [dragActive, setDragActive] = useState(false);
   const [titleCount, setTitleCount] = useState(0);
   const [descCount, setDescCount] = useState(0);
+  const [currentUser, setCurrentUser] = useState(null);
 
   const maxTitleLength = 100;
   const maxDescLength = 500;
@@ -114,34 +115,52 @@ const CreateEvent = () => {
               New Event
             </h1>
           </div>
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            disabled={isSubmitting}
-            onClick={handleSubmit}
-            className={`px-6 py-2 rounded-lg font-medium transition-all ${
-              isSubmitting ? "opacity-60 cursor-not-allowed" : "hover:shadow-md"
-            } ${
-              isDarkMode
-                ? "bg-blue-600 hover:bg-blue-700 text-white"
-                : "bg-black hover:bg-gray-800 text-white"
-            }`}
-          >
-            {isSubmitting ? "Publishing..." : "Share"}
-          </motion.button>
+          <div className="flex gap-3">
+            <button
+              onClick={() => {
+                localStorage.removeItem("eventToken");
+                localStorage.removeItem("eventUser");
+                navigate("/event-login");
+              }}
+              className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                isDarkMode
+                  ? "bg-gray-700 hover:bg-gray-600 text-white"
+                  : "bg-gray-200 hover:bg-gray-300 text-gray-700"
+              }`}
+            >
+              Logout
+            </button>
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              disabled={isSubmitting}
+              onClick={handleSubmit}
+              className={`px-6 py-2 rounded-lg font-medium transition-all ${
+                isSubmitting
+                  ? "opacity-60 cursor-not-allowed"
+                  : "hover:shadow-md"
+              } ${
+                isDarkMode
+                  ? "bg-blue-600 hover:bg-blue-700 text-white"
+                  : "bg-black hover:bg-gray-800 text-white"
+              }`}
+            >
+              {isSubmitting ? "Publishing..." : "Share"}
+            </motion.button>
+          </div>
         </div>
       </div>
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column - Image Upload */}
+          {/* Left Column - Sticky Image Upload */}
           <div className="lg:col-span-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.4 }}
-              className={`rounded-xl overflow-hidden ${
+              className={`rounded-xl overflow-hidden sticky top-24 ${
                 isDarkMode ? "bg-black" : "bg-white"
               } shadow-sm border ${
                 isDarkMode ? "border-gray-800" : "border-gray-200"
@@ -219,7 +238,7 @@ const CreateEvent = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.4 }}
-                    className="w-full h-96 object-cover"
+                    className="w-full h-[500px] object-cover"
                   />
                   <motion.button
                     whileHover={{ scale: 1.1 }}
@@ -244,7 +263,7 @@ const CreateEvent = () => {
                 isDarkMode ? "bg-black" : "bg-white"
               } shadow-sm border ${
                 isDarkMode ? "border-gray-800" : "border-gray-200"
-              }`}
+              } max-h-[80vh] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-transparent sticky top-24`}
             >
               {/* User Info */}
               <div className="flex items-center gap-3">
@@ -256,7 +275,7 @@ const CreateEvent = () => {
                     isDarkMode ? "text-white" : "text-gray-900"
                   }`}
                 >
-                  You
+                  {currentUser?.username || currentUser?.name || "You"}
                 </span>
               </div>
 
@@ -333,7 +352,8 @@ const CreateEvent = () => {
                 </p>
               </div>
 
-              {/* Date */}
+              {/* Remaining fields (Date, Time, Venue, Registration, WhatsApp) stay unchanged */}
+              {/* DATE */}
               <div>
                 <label
                   className={`text-xs font-semibold block mb-2 ${
@@ -356,7 +376,7 @@ const CreateEvent = () => {
                 />
               </div>
 
-              {/* Time */}
+              {/* TIME */}
               <div>
                 <label
                   className={`text-xs font-semibold block mb-2 ${
@@ -379,7 +399,7 @@ const CreateEvent = () => {
                 />
               </div>
 
-              {/* Venue */}
+              {/* VENUE */}
               <div>
                 <label
                   className={`text-xs font-semibold block mb-2 ${
@@ -403,7 +423,7 @@ const CreateEvent = () => {
                 />
               </div>
 
-              {/* Registration Link */}
+              {/* REGISTRATION LINK */}
               <div>
                 <label
                   className={`text-xs font-semibold block mb-2 ${
@@ -426,7 +446,7 @@ const CreateEvent = () => {
                 />
               </div>
 
-              {/* WhatsApp Link */}
+              {/* WHATSAPP LINK */}
               <div>
                 <label
                   className={`text-xs font-semibold block mb-2 ${

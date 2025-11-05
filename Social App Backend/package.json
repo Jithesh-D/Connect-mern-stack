@@ -4,7 +4,8 @@
   "main": "App.js",
   "scripts": {
     "test": "jest --runInBand",
-    "start": "nodemon App.js"
+    "start": "node App.js",
+    "dev": "nodemon App.js"
   },
   "keywords": [],
   "author": "",
@@ -23,16 +24,17 @@
     "express-session": "^1.18.2",
     "express-validator": "^7.2.1",
     "google-auth-library": "^10.3.0",
+    "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.18.0",
     "mongoose": "^8.18.3",
     "multer": "^2.0.2",
     "node-fetch": "^2.7.0",
-    "nodemon": "^3.1.10",
     "socket.io": "^4.7.2"
   },
   "devDependencies": {
     "jest": "^29.6.1",
     "mongodb-memory-server": "^8.12.2",
-    "supertest": "^6.3.3"
+    "supertest": "^6.3.3",
+    "nodemon": "^3.1.10"
   }
 }

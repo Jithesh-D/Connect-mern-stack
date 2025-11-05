@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { X, Menu, Sun, Moon } from "lucide-react";
+import {
+  X,
+  Menu,
+  Sun,
+  Moon,
+  Key,
+  Bot,
+  Users,
+  User,
+  Home,
+  LogOut,
+  GitPullRequest as Github,
+} from "lucide-react";
 import { useDarkMode } from "../store/darkModeContext";
+import { useNavigate } from "react-router-dom";
 
 // Words for the animation effect
 const animatedWords = [
@@ -16,6 +29,7 @@ const animatedWords = [
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { isDarkMode, toggleDarkMode } = useDarkMode();
+  const navigate = useNavigate();
 
   // State to track the current word for the animation
   const [wordIndex, setWordIndex] = useState(0);
@@ -78,11 +92,11 @@ const Header = () => {
             </a>
           </div>
 
-          {/* Navigation Links - Desktop - Centered */}
+          {/* Navigation Links - Desktop */}
           <div className="hidden md:flex flex-1 justify-center">
             <div className="flex items-baseline space-x-6">
-              <a
-                href="/"
+              <button
+                onClick={() => navigate("/")}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   isDarkMode
                     ? "text-white hover:bg-blue-700 hover:text-yellow-300"
@@ -90,9 +104,9 @@ const Header = () => {
                 }`}
               >
                 Home
-              </a>
-              <a
-                href="/events"
+              </button>
+              <button
+                onClick={() => navigate("/events")}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   isDarkMode
                     ? "text-gray-300 hover:bg-blue-700 hover:text-white"
@@ -100,9 +114,9 @@ const Header = () => {
                 }`}
               >
                 Events
-              </a>
-              <a
-                href="/clubs"
+              </button>
+              <button
+                onClick={() => navigate("/clubs")}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   isDarkMode
                     ? "text-gray-300 hover:bg-blue-700 hover:text-white"
@@ -110,9 +124,9 @@ const Header = () => {
                 }`}
               >
                 Clubs
-              </a>
-              <a
-                href="/profile"
+              </button>
+              <button
+                onClick={() => navigate("/profile")}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
                   isDarkMode
                     ? "text-gray-300 hover:bg-blue-700 hover:text-white"
@@ -120,12 +134,12 @@ const Header = () => {
                 }`}
               >
                 Profile
-              </a>
+              </button>
             </div>
           </div>
 
-          {/* Right Side - Theme Toggle & Auth Buttons - Desktop */}
-          <div className="hidden md:flex items-center space-x-4">
+          {/* Right Side - Theme Toggle & Logout - Desktop */}
+          <div className="hidden md:flex items-center space-x-6">
             <button
               onClick={toggleDarkMode}
               className={`p-2 rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 border ${
@@ -141,27 +155,25 @@ const Header = () => {
                 <Moon className="h-5 w-5" />
               )}
             </button>
-            <div className="flex items-center space-x-3 ml-2">
-              <a
-                href="/login"
+            <div className="ml-2">
+              <button
+                onClick={() => {
+                  sessionStorage.removeItem("user");
+                  localStorage.removeItem("userEmail");
+                  try {
+                    localStorage.removeItem("isAuthenticated");
+                  } catch (e) {}
+                  // After logout, redirect users to signup page
+                  navigate("/signup");
+                }}
                 className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md ${
                   isDarkMode
-                    ? "bg-yellow-500 hover:bg-yellow-600 text-blue-900"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-red-600 hover:bg-red-700 text-white"
                 }`}
               >
-                Login
-              </a>
-              <a
-                href="/signup"
-                className={`px-5 py-2 rounded-lg text-sm font-medium transition-all duration-200 border ${
-                  isDarkMode
-                    ? "border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-blue-900"
-                    : "border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
-                }`}
-              >
-                Sign Up
-              </a>
+                Logout
+              </button>
             </div>
           </div>
 
@@ -186,8 +198,8 @@ const Header = () => {
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className={`focus:outline-none transition-colors duration-200 ${
                 isDarkMode
-                  ? "text-gray-300 hover:text-white focus:text-white"
-                  : "text-gray-600 hover:text-gray-800 focus:text-gray-800"
+                  ? "text-gray-300 hover:text-white"
+                  : "text-gray-600 hover:text-gray-800"
               }`}
             >
               {isMenuOpen ? (
@@ -200,87 +212,117 @@ const Header = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
-      {isMenuOpen && (
-        <div
-          className={`md:hidden transition-all duration-300 ${
-            isDarkMode
-              ? "bg-blue-800 border-t border-blue-700"
-              : "bg-white border-t border-gray-200 shadow-lg"
-          }`}
-        >
-          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <a
-              href="/"
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                isDarkMode
-                  ? "text-white hover:bg-blue-700"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
-            >
-              Home
-            </a>
-            <a
-              href="/events"
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                isDarkMode
-                  ? "text-gray-300 hover:bg-blue-700 hover:text-white"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-700"
-              }`}
-            >
-              Events
-            </a>
-            <a
-              href="/clubs"
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                isDarkMode
-                  ? "text-gray-300 hover:bg-blue-700 hover:text-white"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-700"
-              }`}
-            >
-              Clubs
-            </a>
-            <a
-              href="/profile"
-              className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-200 ${
-                isDarkMode
-                  ? "text-gray-300 hover:bg-blue-700 hover:text-white"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-700"
-              }`}
-            >
-              Profile
-            </a>
+      {/* Mobile Menu - Slide Down Animation */}
+      <div
+        className={`md:hidden overflow-hidden transition-all duration-500 ease-in-out ${
+          isMenuOpen ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+        } ${isDarkMode ? "bg-blue-800" : "bg-white border-t border-gray-200"}`}
+      >
+        <div className="px-4 pt-3 pb-4 space-y-2">
+          <button
+            onClick={() => {
+              window.open("https://keys-vault-rvu.vercel.app/", "_blank");
+              setIsMenuOpen(false);
+            }}
+            className={`flex items-center gap-3 w-full text-left px-3 py-2 rounded-md text-base font-medium ${
+              isDarkMode
+                ? "text-white hover:bg-blue-700"
+                : "text-gray-700 hover:bg-gray-100"
+            }`}
+          >
+            <Key className="h-5 w-5" />
+            Key Vault
+          </button>
 
-            {/* Mobile Auth Buttons */}
-            <div
-              className={`border-t pt-4 mt-2 px-2 space-y-2 ${
-                isDarkMode ? "border-gray-700" : "border-gray-200"
+          <button
+            onClick={() => {
+              navigate("/chatbot");
+              setIsMenuOpen(false);
+            }}
+            className={`flex items-center gap-3 w-full text-left px-3 py-2 rounded-md text-base font-medium ${
+              isDarkMode
+                ? "text-gray-300 hover:bg-blue-700 hover:text-white"
+                : "text-gray-600 hover:bg-gray-100 hover:text-gray-700"
+            }`}
+          >
+            <Bot className="h-5 w-5" />
+            RVU Assistant
+          </button>
+
+          <button
+            onClick={() => {
+              navigate("/clubs");
+              setIsMenuOpen(false);
+            }}
+            className={`flex items-center gap-3 w-full text-left px-3 py-2 rounded-md text-base font-medium ${
+              isDarkMode
+                ? "text-gray-300 hover:bg-blue-700 hover:text-white"
+                : "text-gray-600 hover:bg-gray-100 hover:text-gray-700"
+            }`}
+          >
+            <Users className="h-5 w-5" />
+            Clubs
+          </button>
+
+          <button
+            onClick={() => {
+              navigate("/profile");
+              setIsMenuOpen(false);
+            }}
+            className={`flex items-center gap-3 w-full text-left px-3 py-2 rounded-md text-base font-medium ${
+              isDarkMode
+                ? "text-gray-300 hover:bg-blue-700 hover:text-white"
+                : "text-gray-600 hover:bg-gray-100 hover:text-gray-700"
+            }`}
+          >
+            <User className="h-5 w-5" />
+            Profile
+          </button>
+
+          {/* Collab Hub Button with GitHub Logo */}
+          <button
+            onClick={() => {
+              navigate("/collabhub");
+              setIsMenuOpen(false);
+            }}
+            className={`flex items-center gap-3 w-full text-left px-3 py-2 rounded-md text-base font-medium ${
+              isDarkMode
+                ? "text-gray-300 hover:bg-blue-700 hover:text-white"
+                : "text-gray-600 hover:bg-gray-100 hover:text-gray-700"
+            }`}
+          >
+            <Github className="h-5 w-5" />
+            Collab Hub
+          </button>
+
+          <div
+            className={`border-t pt-4 mt-3 ${
+              isDarkMode ? "border-gray-700" : "border-gray-200"
+            }`}
+          >
+            <button
+              onClick={() => {
+                sessionStorage.removeItem("user");
+                localStorage.removeItem("userEmail");
+                try {
+                  localStorage.removeItem("isAuthenticated");
+                } catch (e) {}
+                // After logout on mobile, redirect to signup page
+                navigate("/signup");
+                setIsMenuOpen(false);
+              }}
+              className={`flex items-center justify-center gap-2 w-full px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                isDarkMode
+                  ? "bg-red-500 hover:bg-red-600 text-white"
+                  : "bg-red-600 hover:bg-red-700 text-white"
               }`}
             >
-              <a
-                href="/login"
-                className={`block text-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                  isDarkMode
-                    ? "bg-yellow-500 hover:bg-yellow-600 text-blue-900"
-                    : "bg-blue-600 hover:bg-blue-700 text-white"
-                }`}
-              >
-                Login
-              </a>
-              <a
-                href="/signup"
-                className={`block text-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 border ${
-                  isDarkMode
-                    ? "border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-blue-900"
-                    : "border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
-                }`}
-              >
-                Sign Up
-              </a>
-            </div>
+              <LogOut className="h-5 w-5" />
+              Logout
+            </button>
           </div>
         </div>
-      )}
+      </div>
     </nav>
   );
 };

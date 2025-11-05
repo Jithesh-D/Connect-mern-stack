@@ -1,20 +1,28 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useDarkMode } from "../store/darkModeContext";
+import { useSidebar } from "../store/sidebarContext.jsx";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Home,
   PlusCircle,
   Calendar,
   Briefcase,
-  Bot,
-  Link,
   GitPullRequest,
 } from "lucide-react";
+import axios from "axios";
 
 const Sidebar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isDarkMode } = useDarkMode();
+  const { leftSidebarMenuVisible, hideRightSidebar, resetSidebars } =
+    useSidebar();
+  const [stats, setStats] = useState({
+    posts: 0,
+    events: 0,
+    projects: 0,
+  });
+  const [loading, setLoading] = useState(true);
 
   const menuItems = [
     { path: "/", icon: Home, label: "Home", type: "internal" },
@@ -37,17 +45,15 @@ const Sidebar = () => {
       label: "Placements",
       type: "internal",
     },
-
-    {
-      path: "https://keys-vault-rvu.vercel.app/",
-      icon: Link,
-      label: "KEY-LINKZ",
-      type: "external",
-    },
-    { path: "/chatbot", icon: Bot, label: "RVU Assistant", type: "internal" },
   ];
 
   const handleNavigation = (item) => {
+    if (item.label === "Home") {
+      resetSidebars();
+    } else {
+      hideRightSidebar();
+    }
+
     if (item.type === "external") {
       window.open(item.path, "_blank");
     } else {
@@ -55,14 +61,38 @@ const Sidebar = () => {
     }
   };
 
+  const fetchStats = async () => {
+    try {
+      setLoading(true);
+      const [postsRes, eventsRes, projectsRes] = await Promise.all([
+        axios.get("http://localhost:3001/api/posts"),
+        axios.get("http://localhost:3001/api/events"),
+        axios.get("http://localhost:3001/api/contributions"),
+      ]);
+
+      setStats({
+        posts: postsRes.data.length || 0,
+        events: eventsRes.data.length || 0,
+        projects: projectsRes.data.length || 0,
+      });
+    } catch (error) {
+      console.error("Error fetching stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
   return (
     <div
-      className={`w-64 transition-all duration-300 ease-in-out border-r shadow-lg ${
+      className={`w-full h-full transition-all duration-300 ease-in-out border-r shadow-lg ${
         isDarkMode
           ? "bg-gradient-to-b from-gray-800 via-gray-900 to-black border-gray-700"
           : "bg-gradient-to-b from-gray-50 to-gray-100 border-gray-200"
       }`}
-      style={{ minHeight: "calc(100vh - 64px)" }}
     >
       <div className="p-6">
         <div className="flex items-center justify-center mb-6">
@@ -88,12 +118,18 @@ const Sidebar = () => {
             const Icon = item.icon;
             const isActive =
               item.type === "internal" && location.pathname === item.path;
+            const isHomeItem = item.label === "Home";
+            const shouldShow = leftSidebarMenuVisible || isHomeItem;
 
             return (
               <button
                 key={item.path}
                 onClick={() => handleNavigation(item)}
-                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-200 group ${
+                className={`w-full flex items-center px-4 py-3 text-left rounded-lg transition-all duration-300 group ${
+                  shouldShow
+                    ? "opacity-100 translate-x-0"
+                    : "opacity-0 -translate-x-4 pointer-events-none"
+                } ${
                   isActive
                     ? isDarkMode
                       ? "bg-gradient-to-r from-blue-600 to-purple-700 text-white shadow-lg transform scale-105 shadow-blue-500/20"
@@ -162,27 +198,27 @@ const Sidebar = () => {
                   isDarkMode ? "text-blue-400" : "text-blue-600"
                 }`}
               >
-                24
+                {loading ? "..." : stats.posts}
               </span>
             </div>
             <div className="flex justify-between">
-              <span>Upcoming Events</span>
+              <span>Events</span>
               <span
                 className={`font-medium ${
                   isDarkMode ? "text-purple-400" : "text-purple-600"
                 }`}
               >
-                8
+                {loading ? "..." : stats.events}
               </span>
             </div>
             <div className="flex justify-between">
-              <span>Highest Package</span>
+              <span>Open-Projects</span>
               <span
                 className={`font-medium ${
                   isDarkMode ? "text-green-400" : "text-green-600"
                 }`}
               >
-                22.5 LPA
+                {loading ? "..." : stats.projects}
               </span>
             </div>
           </div>

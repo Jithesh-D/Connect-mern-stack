@@ -59,6 +59,9 @@ function SignupPage() {
       if (res.data?.user) {
         try {
           sessionStorage.setItem("user", JSON.stringify(res.data.user));
+          try {
+            localStorage.setItem("isAuthenticated", "true");
+          } catch (e) {}
         } catch (e) {}
         window.dispatchEvent(new Event("userChanged"));
       }
@@ -99,6 +102,9 @@ function SignupPage() {
       if (user) {
         try {
           sessionStorage.setItem("user", JSON.stringify(user));
+          try {
+            localStorage.setItem("isAuthenticated", "true");
+          } catch (e) {}
         } catch (e) {}
         window.dispatchEvent(new Event("userChanged"));
         navigate("/home");
@@ -119,22 +125,18 @@ function SignupPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white-100 px-6">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 px-6">
       <div className="flex flex-col md:flex-row items-center justify-between max-w-6xl w-full gap-12">
         <div className="flex-1 text-center md:text-left">
-          <h1 className="text-5xl font-extrabold text-green-600">
-            CampusConnect
-          </h1>
+          <h1 className="text-5xl font-extrabold text-green-600">RVUConnect</h1>
           <p className="text-lg text-gray-700 mt-4 max-w-md mx-auto md:mx-0">
-            CampusConnect helps you connect, collaborate, and grow with students
-            and opportunities across your campus.
+            RVUConnect helps you connect, collaborate, and grow with students
+            and opportunities across
           </p>
         </div>
 
         <div className="flex-1 max-w-md w-full">
           <div className="bg-white shadow-lg rounded-2xl p-8">
-            <h2 className="text-2xl font-semibold text-center mb-6">Sign Up</h2>
-
             {error && (
               <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm">
                 {error}
@@ -164,7 +166,8 @@ function SignupPage() {
             </GoogleOAuthProvider>
 
             <div className="text-center my-2">or</div>
-
+            <h2 className="text-2xl font-semibold text-center mb-6">Sign Up</h2>
+            <br></br>
             <form onSubmit={handleSubmit} className="space-y-4">
               <input
                 type="text"
@@ -175,14 +178,16 @@ function SignupPage() {
                 required
                 minLength="3"
               />
+              <br></br>
               <input
                 type="email"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="College Email (e.g., name@rvu.edu.in)"
+                placeholder="RVU Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
               />
+              <br></br>
               <input
                 type="password"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -192,6 +197,7 @@ function SignupPage() {
                 required
                 minLength="6"
               />
+              <br></br>
               <input
                 type="password"
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -201,7 +207,7 @@ function SignupPage() {
                 required
                 minLength="6"
               />
-
+              <br></br>
               <button
                 type="submit"
                 disabled={isLoading}

@@ -50,7 +50,8 @@ const EventsPage = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6">
+      // ✅ Use smaller padding on mobile, larger on desktop
+      <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
         <div className="flex justify-center items-center h-64">
           <div className="text-xl text-gray-600">Loading events...</div>
         </div>
@@ -60,12 +61,18 @@ const EventsPage = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-100 p-6">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Events</h1>
+      // ✅ Use smaller padding on mobile, larger on desktop
+      <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
+        {/* ✅ Stack header on mobile, row on desktop */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6 gap-4 sm:gap-0">
+          {/* ✅ Smaller text on mobile, larger on desktop */}
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Events
+          </h1>
           <button
             onClick={() => navigate("/create-event")}
-            className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+            // ✅ Full-width on mobile, auto-width on desktop
+            className="w-full sm:w-auto bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
           >
             Create Event
           </button>
@@ -86,18 +93,31 @@ const EventsPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    // ✅ Use smaller padding on mobile, larger on desktop
+    <div className="min-h-screen bg-gray-100 p-4 sm:p-6">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      {/* ✅ Stack header on mobile (gap-4), row on desktop (gap-0) */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-6 gap-4 sm:gap-0">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Events</h1>
+          {/* ✅ Smaller text on mobile, larger on desktop */}
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Events
+          </h1>
           <h6 className="text-gray-600">
-            College or Club Events will appear here
+            College or Club Events will appear here - Stay tuned!
           </h6>
         </div>
         <button
-          onClick={() => navigate("/create-event")}
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+          onClick={() => {
+            const token = localStorage.getItem("eventToken");
+            if (token) {
+              navigate("/create-event");
+            } else {
+              navigate("/event-login");
+            }
+          }}
+          // ✅ Full-width on mobile, auto-width on desktop
+          className="w-full sm:w-auto bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
         >
           Create Event
         </button>
@@ -105,7 +125,9 @@ const EventsPage = () => {
 
       {/* Events Grid */}
       {Array.isArray(events) && events.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        // ✅ Your grid was already responsive!
+        // ✅ Default is 1 col (mobile). `md:` is tablet. `lg:` is desktop.
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {events
             .slice()
             .reverse()
@@ -119,14 +141,7 @@ const EventsPage = () => {
         </div>
       ) : (
         <div className="text-center py-12">
-          <div className="text-gray-500 text-xl mb-4">No events yet</div>
-          <p className="text-gray-400 mb-6">Be the first to create an event!</p>
-          <button
-            onClick={() => navigate("/create-event")}
-            className="bg-indigo-600 text-white px-6 py-3 rounded-md hover:bg-indigo-700"
-          >
-            Create Your First Event
-          </button>
+          <h3>No Events Yet</h3>
         </div>
       )}
     </div>

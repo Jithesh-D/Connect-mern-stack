@@ -12,27 +12,18 @@ import {
 import { PostList } from "../store/postListContext.jsx";
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "react-router-dom";
-import {
-  deletePostFromServer,
-  likePost,
-  unlikePost,
-} from "../services/service.jsx";
+import { deletePostFromServer } from "../services/service.jsx";
+import { User } from "lucide-react";
 import React from "react";
+import { normalizeTags } from "../utils/tags";
 import CommentSection from "./CommentsSection.jsx";
 import { useDarkMode } from "../store/darkModeContext";
+import { usePersistentLike } from "../hooks/usePersistentLike";
 
 const Post = ({ post }) => {
   const { deletePost } = useContext(PostList);
   const navigate = useNavigate();
   const [currentReactions, setReaction] = useState(post.reactions || 0);
-  const [isLiked, setIsLiked] = useState(
-    Boolean(
-      (post.likedBy || []).some(
-        (u) => String(u) === String(localStorage.getItem("userId"))
-      )
-    )
-  );
-  const [isProcessingLike, setIsProcessingLike] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const { isDarkMode } = useDarkMode();
   const [showComments, setShowComments] = useState(false);
@@ -47,6 +38,17 @@ const Post = ({ post }) => {
     }
   })();
   const currentUserId = sessionUser?.id || sessionUser?._id || null;
+
+  // Use persistent like hook
+  const { isLiked, likeCount, isProcessing, toggleLike } = usePersistentLike(
+    post,
+    currentUserId
+  );
+
+  // Update local reaction count when hook updates
+  useEffect(() => {
+    setReaction(likeCount);
+  }, [likeCount]);
   const postOwnerId =
     post.userId || post.author?.id || post.author?._id || null;
   const isOwner =
@@ -65,6 +67,22 @@ const Post = ({ post }) => {
         profileImage: sessionUser.profileImage || null,
       }
     : { id: null, username: "Unknown User", profileImage: null };
+
+  // Helper: tolerate either a full URL or a server-relative path
+  const getProfileImageSrc = (raw) => {
+    if (!raw) return null;
+    try {
+      if (typeof raw !== "string") return null;
+      if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+      // If server returns a leading slash path, prepend API base
+      return `${API_BASE_URL}${raw}`;
+    } catch (e) {
+      return null;
+    }
+  };
+
+  // local state to handle image load errors so fallback shows reliably
+  const [avatarErrored, setAvatarErrored] = useState(false);
 
   useEffect(() => {
     const fetchCommentsCount = async () => {
@@ -88,6 +106,8 @@ const Post = ({ post }) => {
 
   const createdDate = post.createdAt ? new Date(post.createdAt) : new Date();
 
+  const displayTags = normalizeTags(post.tags);
+
   const handleDelete = async () => {
     if (!showDeleteConfirm) {
       setShowDeleteConfirm(true);
@@ -110,39 +130,7 @@ const Post = ({ post }) => {
       navigate("/login");
       return;
     }
-    if (isProcessingLike) return;
-    setIsProcessingLike(true);
-
-    try {
-      if (!isLiked) {
-        setReaction((r) => r + 1);
-        setIsLiked(true);
-        const res = await likePost(post.id);
-        if (res?.reactions != null) setReaction(res.reactions);
-        setIsLiked(Boolean(res?.hasLiked));
-      } else {
-        setReaction((r) => Math.max(0, r - 1));
-        setIsLiked(false);
-        const res = await unlikePost(post.id);
-        if (res?.reactions != null) setReaction(res.reactions);
-        setIsLiked(Boolean(res?.hasLiked));
-      }
-    } catch (error) {
-      console.error("Error updating like:", error);
-      try {
-        const fresh = await fetch(`${API_BASE_URL}/api/posts/${post.id}`, {
-          credentials: "include",
-        }).then((r) => r.json());
-        setReaction(fresh.reactions || 0);
-        setIsLiked(
-          (fresh.likedBy || []).some((u) => String(u) === String(currentUserId))
-        );
-      } catch (e) {
-        // ignore
-      }
-    } finally {
-      setIsProcessingLike(false);
-    }
+    await toggleLike();
   };
 
   const handleEdit = () => {
@@ -225,22 +213,24 @@ const Post = ({ post }) => {
           <div className="flex items-center space-x-3">
             {/* User Profile Photo */}
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center overflow-hidden border-2 border-white shadow-sm">
-              {displayAuthor?.profileImage ? (
+              {getProfileImageSrc(displayAuthor?.profileImage) &&
+              !avatarErrored ? (
                 <img
-                  src={`${API_BASE_URL}${displayAuthor.profileImage}`}
+                  src={getProfileImageSrc(displayAuthor.profileImage)}
                   alt={displayAuthor?.username || "User"}
                   className="w-full h-full object-cover"
-                  onError={(e) => {
-                    e.target.style.display = "none";
-                    e.target.nextSibling.style.display = "flex";
-                  }}
+                  onError={() => setAvatarErrored(true)}
                 />
-              ) : null}
-              <div className="w-full h-full flex items-center justify-center text-white font-semibold text-sm">
-                {displayAuthor?.username
-                  ? displayAuthor.username.charAt(0).toUpperCase()
-                  : "U"}
-              </div>
+              ) : (
+                // Fallback: show first letter or user icon
+                <div className="w-full h-full flex items-center justify-center text-white font-semibold text-sm bg-transparent">
+                  {displayAuthor?.username ? (
+                    displayAuthor.username.charAt(0).toUpperCase()
+                  ) : (
+                    <User className="text-white" size={18} />
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Username and Timestamp */}
@@ -377,9 +367,9 @@ const Post = ({ post }) => {
           </p>
 
           {/* Tags */}
-          {post.tags && post.tags.length > 0 && (
+          {displayTags && displayTags.length > 0 && (
             <div className="flex flex-wrap gap-2 mb-4">
-              {post.tags.map((tag, index) => (
+              {displayTags.map((tag, index) => (
                 <span
                   key={`${tag}-${index}`}
                   className={`inline-flex items-center px-2 py-1 text-xs font-medium rounded-full transition-colors duration-200 ${
@@ -405,7 +395,7 @@ const Post = ({ post }) => {
               {/* Updated Like/Unlike Button with Heart Icon */}
               <button
                 onClick={handleReaction}
-                disabled={isProcessingLike}
+                disabled={isProcessing}
                 className="flex items-center space-x-2 p-2 rounded-full group transition-colors duration-200 hover:bg-red-500/10"
                 aria-label={isLiked ? "Unlike post" : "Like post"}
               >

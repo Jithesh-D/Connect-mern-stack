@@ -7,12 +7,19 @@ const handleAuthError = (status) => {
   }
 };
 
-const addPostToServer = async (title, body, tags, image) => {
+const addPostToServer = async (
+  title,
+  body,
+  tags,
+  image,
+  category = "general"
+) => {
   try {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("body", body);
     formData.append("tags", JSON.stringify(tags));
+    formData.append("category", category);
     if (image) {
       formData.append("image", image);
     }
@@ -73,11 +80,19 @@ const deletePostFromServer = async (postId) => {
 //   return mapPostFromServer(post);
 // };
 
-const updatePostInServer = async (id, title, body, tags, image) => {
+const updatePostInServer = async (
+  id,
+  title,
+  body,
+  tags,
+  image,
+  category = "general"
+) => {
   try {
     const formData = new FormData();
     formData.append("title", title);
     formData.append("body", body);
+    formData.append("category", category);
 
     // Handle tags
     if (tags && Array.isArray(tags)) {
@@ -199,6 +214,7 @@ const mapPostFromServer = (post) => {
     title: post.title,
     body: post.body,
     tags: post.tags,
+    category: post.category || "general",
     reactions: post.reactions,
     likedBy: post.likedBy,
     image: post.image,
@@ -253,7 +269,8 @@ export const logout = async () => {
     });
     if (response.ok) {
       sessionStorage.removeItem("user");
-      window.location.href = "/login";
+      // Redirect user to signup page after logout
+      window.location.href = "/signup";
     } else {
       console.error("Logout failed", await response.text());
     }

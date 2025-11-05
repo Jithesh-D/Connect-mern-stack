@@ -3,131 +3,89 @@ import {
   Calendar,
   Briefcase,
   Home,
-  Bot,
-  Users,
-  Link as LinkIcon,
+  GitPullRequest as GoMarkGithub,
 } from "lucide-react";
+
+import { useDarkMode } from "../store/darkModeContext";
 import { NavLink } from "react-router-dom";
 import PostList from "./postList";
 
 export default function Homepage() {
+  const { isDarkMode } = useDarkMode();
+
+  const baseItem =
+    "flex flex-col items-center p-2 transition-transform duration-150 no-underline";
+
+  const activeClass = "text-white scale-110";
+  const inactiveClass = isDarkMode
+    ? "text-white/80 hover:scale-105"
+    : "text-gray-700 hover:scale-105";
+
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* MAIN CONTENT */}
-      <main className="flex-1 w-full sm:max-w-2xl sm:mx-auto sm:p-4 p-0 pb-24">
-        <PostList />
+      <main className="flex-1 w-full flex justify-center items-start">
+        <div className="w-full max-w-xl px-4 py-6">
+          <PostList />
+        </div>
       </main>
 
-      {/* RIGHT SIDEBAR */}
-      <aside className="hidden lg:block w-80 bg-white shadow-lg p-4 overflow-y-auto">
-        {/* Quick Links Section */}
-        <div className="mb-6">
-          <h2 className="text-xl font-bold mb-3">M</h2>
-          <div className="space-y-2">
-            <NavLink
-              to="/chatbot"
-              className={({ isActive }) =>
-                `flex items-center gap-3 p-3 rounded-lg transition ${
-                  isActive ? "bg-black-100 text-black-600" : "hover:bg-gray-100"
-                }`
-              }
-            >
-              <Bot className="w-5 h-5" />
-              <span className="font-medium">RVU Assistant</span>
-            </NavLink>
-
-            <NavLink
-              to="/community"
-              className={({ isActive }) =>
-                `flex items-center gap-3 p-3 rounded-lg transition ${
-                  isActive ? "bg-black-100 text-black-600" : "hover:bg-gray-100"
-                }`
-              }
-            >
-              <Users className="w-5 h-5" />
-              <span className="font-medium">Community</span>
-            </NavLink>
-
-            <NavLink
-              to="/key-links"
-              className={({ isActive }) =>
-                `flex items-center gap-3 p-3 rounded-lg transition ${
-                  isActive ? "bg-black-100 text-black-600" : "hover:bg-gray-100"
-                }`
-              }
-            >
-              <LinkIcon className="w-5 h-5" />
-              <span className="font-medium">Key Links</span>
-            </NavLink>
-          </div>
-        </div>
-      </aside>
-
       {/* MOBILE BOTTOM NAVIGATION */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-lg border-t flex justify-around py-2 z-50">
-        {/* Home */}
+      <nav
+        className={`md:hidden fixed bottom-0 left-0 right-0 z-50 border-t flex justify-around py-2 transition-colors duration-200 ${
+          isDarkMode
+            ? "bg-gray-900 border-gray-700"
+            : "bg-white border-gray-200"
+        }`}
+      >
         <NavLink
           to="/home"
           className={({ isActive }) =>
-            `flex flex-col items-center ${
-              isActive ? "text-blue-600" : "text-gray-600 hover:text-blue-600"
-            }`
+            `${baseItem} ${isActive ? activeClass : inactiveClass}`
           }
         >
           <Home className="w-6 h-6" />
-          <span className="text-xs">Home</span>
+          <span className="text-xs no-underline">Home</span>
         </NavLink>
 
-        {/* Post */}
         <NavLink
           to="/create-post"
           className={({ isActive }) =>
-            `flex flex-col items-center ${
-              isActive ? "text-blue-600" : "text-gray-600 hover:text-blue-600"
-            }`
+            `${baseItem} ${isActive ? activeClass : inactiveClass}`
           }
         >
           <PlusSquare className="w-6 h-6" />
-          <span className="text-xs">Post</span>
+          <span className="text-xs no-underline">Post</span>
         </NavLink>
 
-        {/* Assistant (Bot) */}
         <NavLink
-          to="/chatbot"
+          to="/contribution"
           className={({ isActive }) =>
-            `flex flex-col items-center ${
-              isActive ? "text-blue-600" : "text-gray-600 hover:text-blue-600"
-            }`
+            `${baseItem} ${isActive ? activeClass : inactiveClass}`
           }
         >
-          <Bot className="w-6 h-6" />
-          <span className="text-xs">Assistant</span>
+          <GoMarkGithub className="w-6 h-6" />
+          <span className="text-xs no-underline">Collab Hub</span>
         </NavLink>
 
-        {/* Events */}
         <NavLink
           to="/events"
           className={({ isActive }) =>
-            `flex flex-col items-center ${
-              isActive ? "text-blue-600" : "text-gray-600 hover:text-blue-600"
-            }`
+            `${baseItem} ${isActive ? activeClass : inactiveClass}`
           }
         >
           <Calendar className="w-6 h-6" />
-          <span className="text-xs">Events</span>
+          <span className="text-xs no-underline">Events</span>
         </NavLink>
 
-        {/* Placements */}
         <NavLink
           to="/placements"
           className={({ isActive }) =>
-            `flex flex-col items-center ${
-              isActive ? "text-blue-600" : "text-gray-600 hover:text-blue-600"
-            }`
+            `${baseItem} ${isActive ? activeClass : inactiveClass}`
           }
         >
           <Briefcase className="w-6 h-6" />
-          <span className="text-xs">Placements</span>
+          <span className="text-xs no-underline">Placements</span>
         </NavLink>
       </nav>
     </div>

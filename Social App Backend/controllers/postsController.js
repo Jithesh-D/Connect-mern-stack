@@ -4,7 +4,7 @@ const { checkToxicity } = require("../utils/toxicityChecker");
 
 exports.createPost = async (req, res) => {
   try {
-    const { title, body, tags } = req.body;
+    const { title, body, tags, category } = req.body;
     let image = null;
 
     if (req.file) {
@@ -41,6 +41,7 @@ exports.createPost = async (req, res) => {
       title,
       body,
       tags: tags || [],
+      category: category || "general",
       reactions: 0,
       image,
       author: req.session?.user?.id || undefined,
@@ -58,9 +59,18 @@ exports.createPost = async (req, res) => {
 };
 
 exports.getPosts = async (req, res) => {
-  // Populate author username and profileImage when returning posts
-  const posts = await Post.find().populate("author", "username profileImage");
-  res.status(200).json(posts);
+  try {
+    // Populate author username and profileImage when returning posts
+    // Sort by createdAt in descending order (newest first)
+    const posts = await Post.find()
+      .populate("author", "username profileImage")
+      .select("+likedBy") // Ensure likedBy is included
+      .sort({ createdAt: -1 }); // Sort newest first
+    res.status(200).json(posts);
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).json({ message: "Error fetching posts", error: error.message });
+  }
 };
 
 exports.deletePost = async (req, res) => {
@@ -233,6 +243,9 @@ exports.editPost = async (req, res) => {
     post.title = title;
     post.body = body;
     post.tags = tags;
+    if (req.body.category) {
+      post.category = req.body.category;
+    }
 
     // Handle image update if there's a new image
     if (req.file) {

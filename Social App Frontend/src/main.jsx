@@ -7,6 +7,7 @@ import {
   Navigate,
 } from "react-router-dom";
 import { DarkModeProvider } from "./store/darkModeContext";
+import { SidebarProvider } from "./store/sidebarContext.jsx";
 import CreatePost from "./components/createPost.jsx";
 import PostList from "./components/postList.jsx";
 import LoginPage from "./components/loginPage.jsx";
@@ -15,12 +16,16 @@ import MainLayout from "./components/MainLayout.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import EventsPage from "./components/EventsPage.jsx";
 import CreateEvent from "./components/Createevents.jsx";
+import EventLogin from "./components/EventLogin.jsx";
+import ProtectedEventRoute from "./components/ProtectedEventRoute.jsx";
 import Placements from "./components/placements.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
 import Homepage from "./components/homePage.jsx";
 import RVUAssistant from "./components/Rvuassistant.jsx";
 import Contribution from "./components/contribution.jsx";
 import AddContribution from "./components/AddContribution.jsx";
+import ClubsPage from "./components/ClubsPage.jsx";
+import ProfileDemo from "./components/ProfileDemo.jsx";
 const router = createBrowserRouter([
   {
     path: "/",
@@ -33,6 +38,10 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <LoginPage />,
+      },
+      {
+        path: "event-login",
+        element: <EventLogin />,
       },
       {
         element: (
@@ -59,7 +68,11 @@ const router = createBrowserRouter([
           },
           {
             path: "/create-event",
-            element: <CreateEvent />,
+            element: (
+              <ProtectedEventRoute>
+                <CreateEvent />
+              </ProtectedEventRoute>
+            ),
           },
           {
             path: "placements",
@@ -81,6 +94,14 @@ const router = createBrowserRouter([
             path: "/add-contribution",
             element: <AddContribution />,
           },
+          {
+            path: "/clubs",
+            element: <ClubsPage />,
+          },
+          {
+            path: "/profile-demo",
+            element: <ProfileDemo />,
+          },
         ],
       },
     ],
@@ -90,7 +111,9 @@ const router = createBrowserRouter([
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <DarkModeProvider>
-      <RouterProvider router={router} />
+      <SidebarProvider>
+        <RouterProvider router={router} />
+      </SidebarProvider>
     </DarkModeProvider>
   </StrictMode>
 );

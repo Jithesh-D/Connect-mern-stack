@@ -8,6 +8,7 @@ import {
   Image as ImageIcon,
   ChevronRight,
   ChevronDown,
+  User,
 } from "lucide-react";
 
 const CreatePost = () => {
@@ -36,6 +37,20 @@ const CreatePost = () => {
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState("general");
   const { isDarkMode } = useDarkMode();
+
+  const [currentUser, setCurrentUser] = useState(null);
+
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("user");
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        setCurrentUser(parsed);
+      }
+    } catch (e) {
+      setCurrentUser(null);
+    }
+  }, []);
 
   const maxBodyLength = 2200;
   const maxImageSize = 5 * 1024 * 1024;
@@ -301,17 +316,26 @@ const CreatePost = () => {
           }`}
         >
           {/* User info */}
-          <div className="flex items-center px-4 py-3">
-            <div className="w-7 h-7 rounded-full bg-yellow-400 flex items-center justify-center text-black text-sm font-semibold">
-              🚶
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center">
+              <User className="h-5 w-5 text-white" />
             </div>
             <span
-              className={`ml-3 text-sm font-semibold ${
-                isDarkMode ? "text-white" : "text-black"
+              className={`font-medium ${
+                isDarkMode ? "text-white" : "text-gray-900"
               }`}
             >
-              You
+              {currentUser?.username || currentUser?.name || "You"}
             </span>
+          </div>
+          <div
+            className={`w-10 h-10 flex items-center justify-center bg-white`}
+          >
+            <span
+              className={`font-medium ${
+                isDarkMode ? "text-white" : "text-gray-900"
+              }`}
+            ></span>
           </div>
 
           {/* Caption textarea */}

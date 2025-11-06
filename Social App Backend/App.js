@@ -45,11 +45,19 @@ if (!fs.existsSync(uploadsDir)) {
 // CORS middleware
 app.use(
   cors({
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
+    origin: [
+      process.env.FRONTEND_URL || "http://localhost:5173",
+      "https://rvu-connects.onrender.com",
+    ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
+
+// For preflight requests (OPTIONS)
+app.options("*", cors());
+
 
 // Body parsing middleware
 app.use(express.json());

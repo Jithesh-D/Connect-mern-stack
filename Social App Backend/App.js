@@ -42,7 +42,6 @@ if (!fs.existsSync(uploadsDir)) {
 
 // ==================== MIDDLEWARE SETUP ====================
 
-// CORS middleware
 app.use(
   cors({
     origin: [
@@ -51,13 +50,8 @@ app.use(
     ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
-// For preflight requests (OPTIONS)
-app.options("*", cors());
-
 
 // Body parsing middleware
 app.use(express.json());

@@ -88,7 +88,7 @@ const Post = ({ post }) => {
     const fetchCommentsCount = async () => {
       try {
         const response = await fetch(
-          `http://localhost:3001/api/comments/${post.id}`,
+          `${API_BASE_URL}/api/comments/${post.id}`,
           {
             credentials: "include",
           }

@@ -50,7 +50,7 @@ function SignupPage() {
 
     try {
       const res = await axios.post(
-        "http://localhost:3001/api/auth/signup",
+        `${import.meta.env.VITE_API_URL}/api/auth/signup`,
         { username, email, password },
         { withCredentials: true }
       );
@@ -93,7 +93,7 @@ function SignupPage() {
 
       // Send credential to backend for verification and session creation
       const res = await axios.post(
-        "http://localhost:3001/api/auth/google",
+        `${import.meta.env.VITE_API_URL}/api/auth/google`,
         { credential },
         { withCredentials: true }
       );

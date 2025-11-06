@@ -6,13 +6,13 @@ const addEventToServer = async (formData) => {
       console.log(pair[0] + ": " + pair[1]);
     }
 
-    const token = localStorage.getItem('eventToken');
+    const token = localStorage.getItem("eventToken");
     const headers = {};
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
 
-    const response = await fetch("http://localhost:3001/api/events", {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/events`, {
       method: "POST",
       credentials: "include",
       headers,
@@ -36,7 +36,7 @@ const addEventToServer = async (formData) => {
 
 const getEventsFromServer = async () => {
   try {
-    const response = await fetch("http://localhost:3001/api/events");
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/events`);
 
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -52,14 +52,14 @@ const getEventsFromServer = async () => {
 
 const deleteEventFromServer = async (eventId) => {
   try {
-    const token = localStorage.getItem('eventToken');
+    const token = localStorage.getItem("eventToken");
     const headers = {};
     if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
+      headers["Authorization"] = `Bearer ${token}`;
     }
 
     const response = await fetch(
-      `http://localhost:3001/api/events/${eventId}`,
+      `${import.meta.env.VITE_API_URL}/api/events/${eventId}`,
       {
         method: "DELETE",
         credentials: "include",

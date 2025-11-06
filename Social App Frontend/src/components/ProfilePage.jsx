@@ -22,10 +22,13 @@ function ProfilePage() {
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const response = await fetch("http://localhost:3001/api/auth/me", {
-        method: "GET",
-        credentials: "include",
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/auth/me`,
+        {
+          method: "GET",
+          credentials: "include",
+        }
+      );
       if (response.ok) {
         const data = await response.json();
         if (data.user) {
@@ -175,7 +178,7 @@ function ProfilePage() {
         {/* ✅ "Sezzy" Logout Button */}
         <button
           onClick={async () => {
-            await fetch("http://localhost:3001/api/auth/logout", {
+            await fetch(`${import.meta.env.VITE_API_URL}/api/auth/logout`, {
               method: "POST",
               credentials: "include",
             });

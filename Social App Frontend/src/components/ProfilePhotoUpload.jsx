@@ -1,10 +1,15 @@
-import React, { useState, useCallback, useContext, useEffect } from 'react';
-import Cropper from 'react-easy-crop';
-import { Camera, Save, X, Loader2, AlertCircle } from 'lucide-react';
-import axios from 'axios';
-import { PostList as PostListData } from '../store/postListContext.jsx';
+import React, { useState, useCallback, useContext, useEffect } from "react";
+import Cropper from "react-easy-crop";
+import { Camera, Save, X, Loader2, AlertCircle } from "lucide-react";
+import axios from "axios";
+import { PostList as PostListData } from "../store/postListContext.jsx";
 
-const ProfilePhotoUpload = ({ currentPhoto, onPhotoUpdate, userId, username }) => {
+const ProfilePhotoUpload = ({
+  currentPhoto,
+  onPhotoUpdate,
+  userId,
+  username,
+}) => {
   const [imageSrc, setImageSrc] = useState(null);
   const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
@@ -12,14 +17,14 @@ const ProfilePhotoUpload = ({ currentPhoto, onPhotoUpdate, userId, username }) =
   const [showCropper, setShowCropper] = useState(false);
   const [profileImage, setProfileImage] = useState(currentPhoto);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const { updateAuthor } = useContext(PostListData);
 
   useEffect(() => {
     if (currentPhoto) {
-      const fullImageUrl = currentPhoto.startsWith('http') 
-        ? currentPhoto 
-        : `http://localhost:3001${currentPhoto}`;
+      const fullImageUrl = currentPhoto.startsWith("http")
+        ? currentPhoto
+        : `${import.meta.env.VITE_API_URL}${currentPhoto}`;
       setProfileImage(fullImageUrl);
     } else {
       setProfileImage(null);
@@ -29,32 +34,32 @@ const ProfilePhotoUpload = ({ currentPhoto, onPhotoUpdate, userId, username }) =
   const onFileChange = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const file = e.target.files[0];
-      
+
       // Validate file type
-      if (!file.type.startsWith('image/')) {
-        setError('Please select a valid image file');
+      if (!file.type.startsWith("image/")) {
+        setError("Please select a valid image file");
         return;
       }
-      
+
       // Validate file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
-        setError('Image size must be less than 5MB');
+        setError("Image size must be less than 5MB");
         return;
       }
-      
+
       const reader = new FileReader();
       reader.onload = () => {
         setImageSrc(reader.result);
         setShowCropper(true);
-        setError('');
+        setError("");
       };
       reader.onerror = () => {
-        setError('Failed to read image file');
+        setError("Failed to read image file");
       };
       reader.readAsDataURL(file);
     }
     // Reset input value to allow selecting the same file again
-    e.target.value = '';
+    e.target.value = "";
   };
 
   const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
@@ -66,14 +71,14 @@ const ProfilePhotoUpload = ({ currentPhoto, onPhotoUpdate, userId, username }) =
       const image = new Image();
       image.onload = () => resolve(image);
       image.onerror = reject;
-      image.crossOrigin = 'anonymous';
+      image.crossOrigin = "anonymous";
       image.src = url;
     });
 
   const getCroppedImg = async (imageSrc, pixelCrop) => {
     const image = await createImage(imageSrc);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
 
     const size = Math.min(pixelCrop.width, pixelCrop.height);
     canvas.width = size;
@@ -95,12 +100,12 @@ const ProfilePhotoUpload = ({ currentPhoto, onPhotoUpdate, userId, username }) =
       canvas.toBlob(
         (blob) => {
           if (!blob) {
-            reject(new Error('Canvas is empty'));
+            reject(new Error("Canvas is empty"));
             return;
           }
           resolve(blob);
         },
-        'image/jpeg',
+        "image/jpeg",
         0.9
       );
     });
@@ -108,74 +113,76 @@ const ProfilePhotoUpload = ({ currentPhoto, onPhotoUpdate, userId, username }) =
 
   const handleSave = async () => {
     if (!croppedAreaPixels || !imageSrc) {
-      setError('No image selected for cropping');
+      setError("No image selected for cropping");
       return;
     }
-    
+
     setUploading(true);
-    setError('');
-    
+    setError("");
+
     try {
       // Get cropped image as blob
       const croppedImageBlob = await getCroppedImg(imageSrc, croppedAreaPixels);
-      
+
       // Create FormData for upload
       const formData = new FormData();
-      formData.append('profileImage', croppedImageBlob, 'profile.jpg');
-      
+      formData.append("profileImage", croppedImageBlob, "profile.jpg");
+
       // Upload to backend using axios
       const response = await axios.post(
-        'http://localhost:3001/api/auth/upload-profile-image',
+        `${import.meta.env.VITE_API_URL}/api/auth/upload-profile-image`,
         formData,
         {
           headers: {
-            'Content-Type': 'multipart/form-data',
+            "Content-Type": "multipart/form-data",
           },
           withCredentials: true,
           timeout: 30000, // 30 second timeout
         }
       );
-      
+
       const { profileImage: newImageUrl } = response.data;
-      
+
       if (!newImageUrl) {
-        throw new Error('No image URL returned from server');
+        throw new Error("No image URL returned from server");
       }
-      
+
       // Ensure full URL for profile image
-      const fullImageUrl = newImageUrl.startsWith('http') 
-        ? newImageUrl 
-        : `http://localhost:3001${newImageUrl}`;
-      
+      const fullImageUrl = newImageUrl.startsWith("http")
+        ? newImageUrl
+        : `${import.meta.env.VITE_API_URL}${newImageUrl}`;
+
       // Update UI immediately
       setProfileImage(fullImageUrl);
       setShowCropper(false);
       setImageSrc(null);
-      
+
       // Update all posts with new profile photo
       if (updateAuthor && userId && username) {
         updateAuthor({
           userId,
           username,
-          profileImage: fullImageUrl
+          profileImage: fullImageUrl,
         });
       }
-      
+
       // Notify parent component
       onPhotoUpdate?.(fullImageUrl);
-      
     } catch (err) {
-      console.error('Upload error:', err);
-      let errorMessage = 'Failed to upload image. Please try again.';
-      
+      console.error("Upload error:", err);
+      let errorMessage = "Failed to upload image. Please try again.";
+
       if (err.response?.status === 413) {
-        errorMessage = 'Image file is too large. Please choose a smaller image.';
+        errorMessage =
+          "Image file is too large. Please choose a smaller image.";
       } else if (err.response?.status === 400) {
-        errorMessage = 'Invalid image format. Please choose a valid image file.';
-      } else if (err.code === 'ECONNABORTED') {
-        errorMessage = 'Upload timeout. Please check your connection and try again.';
+        errorMessage =
+          "Invalid image format. Please choose a valid image file.";
+      } else if (err.code === "ECONNABORTED") {
+        errorMessage =
+          "Upload timeout. Please check your connection and try again.";
       }
-      
+
       setError(errorMessage);
     } finally {
       setUploading(false);
@@ -188,7 +195,7 @@ const ProfilePhotoUpload = ({ currentPhoto, onPhotoUpdate, userId, username }) =
     setCrop({ x: 0, y: 0 });
     setZoom(1);
     setCroppedAreaPixels(null);
-    setError('');
+    setError("");
   };
 
   return (
@@ -207,11 +214,13 @@ const ProfilePhotoUpload = ({ currentPhoto, onPhotoUpdate, userId, username }) =
             <Camera size={32} className="text-gray-400" />
           )}
         </div>
-        
+
         {/* Upload Button Overlay */}
-        <label className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${
-          uploading ? 'cursor-not-allowed' : 'cursor-pointer'
-        }`}>
+        <label
+          className={`absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 rounded-full opacity-0 group-hover:opacity-100 transition-opacity ${
+            uploading ? "cursor-not-allowed" : "cursor-pointer"
+          }`}
+        >
           {uploading ? (
             <Loader2 className="text-white animate-spin" size={24} />
           ) : (
@@ -225,14 +234,14 @@ const ProfilePhotoUpload = ({ currentPhoto, onPhotoUpdate, userId, username }) =
             className="hidden"
           />
         </label>
-      
-      {/* Error display below profile photo */}
-      {error && (
-        <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
-          <AlertCircle size={16} />
-          <span>{error}</span>
-        </div>
-      )}
+
+        {/* Error display below profile photo */}
+        {error && (
+          <div className="mt-2 flex items-center gap-2 text-red-600 text-sm">
+            <AlertCircle size={16} />
+            <span>{error}</span>
+          </div>
+        )}
       </div>
 
       {/* Cropping Modal */}
@@ -240,7 +249,9 @@ const ProfilePhotoUpload = ({ currentPhoto, onPhotoUpdate, userId, username }) =
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-semibold text-gray-900">Crop Profile Photo</h3>
+              <h3 className="text-xl font-semibold text-gray-900">
+                Crop Profile Photo
+              </h3>
               <button
                 onClick={handleCancel}
                 disabled={uploading}
@@ -264,10 +275,10 @@ const ProfilePhotoUpload = ({ currentPhoto, onPhotoUpdate, userId, username }) =
                 onZoomChange={setZoom}
                 style={{
                   containerStyle: {
-                    width: '100%',
-                    height: '100%',
-                    backgroundColor: '#f3f4f6'
-                  }
+                    width: "100%",
+                    height: "100%",
+                    backgroundColor: "#f3f4f6",
+                  },
                 }}
               />
             </div>

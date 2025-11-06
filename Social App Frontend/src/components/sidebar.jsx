@@ -65,9 +65,9 @@ const Sidebar = () => {
     try {
       setLoading(true);
       const [postsRes, eventsRes, projectsRes] = await Promise.all([
-        axios.get("http://localhost:3001/api/posts"),
-        axios.get("http://localhost:3001/api/events"),
-        axios.get("http://localhost:3001/api/contributions"),
+        axios.get(`${import.meta.env.VITE_API_URL}/api/posts`),
+        axios.get(`${import.meta.env.VITE_API_URL}/api/events`),
+        axios.get(`${import.meta.env.VITE_API_URL}/api/contributions`),
       ]);
 
       setStats({

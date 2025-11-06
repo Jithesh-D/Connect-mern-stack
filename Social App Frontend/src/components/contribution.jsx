@@ -70,7 +70,9 @@ const Contribution = () => {
 
     try {
       const response = await axios.post(
-        `http://localhost:3001/api/contributions/${contributionId}/interest`,
+        `${
+          import.meta.env.VITE_API_URL
+        }/api/contributions/${contributionId}/interest`,
         {},
         { withCredentials: true }
       );
@@ -108,7 +110,7 @@ const Contribution = () => {
       // Fetch interest data
       try {
         const interestResponse = await axios.get(
-          "http://localhost:3001/api/contributions/interests",
+          `${import.meta.env.VITE_API_URL}/api/contributions/interests`,
           { withCredentials: true }
         );
 

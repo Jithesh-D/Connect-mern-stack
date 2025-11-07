@@ -92,6 +92,8 @@ exports.login = async (req, res) => {
       email: user.email,
     };
 
+    console.log("🔐 Login successful for:", email, "Session ID:", req.sessionID);
+
     res.json({
       message: "Login successful",
       user: {
@@ -102,6 +104,7 @@ exports.login = async (req, res) => {
       },
     });
   } catch (err) {
+    console.error("❌ Login error:", err);
     res.status(500).json({ error: "Something went wrong" });
   }
 };

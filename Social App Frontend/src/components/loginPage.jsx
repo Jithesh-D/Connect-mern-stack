@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+
 
 import { useNavigate, Link } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
@@ -47,13 +47,27 @@ function LoginPage() {
 
     setIsLoading(true);
     try {
-      const res = await axios.post(
+      console.log("🔐 Attempting login to:", import.meta.env.VITE_API_URL);
+      const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/auth/login`,
-        { email, password },
-        { withCredentials: true }
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        }
       );
-      console.log("Login successful:", res.data);
-      sessionStorage.setItem("user", JSON.stringify(res.data.user));
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Login failed");
+      }
+      
+      const data = await res.json();
+      console.log("✅ Login successful:", data);
+      sessionStorage.setItem("user", JSON.stringify(data.user));
 
       window.dispatchEvent(new Event("userChanged"));
       try {
@@ -61,7 +75,8 @@ function LoginPage() {
       } catch (e) {}
       navigate("/home");
     } catch (err) {
-      setError(err.response?.data?.error || "Login failed. Please try again.");
+      console.error("❌ Login error:", err);
+      setError(err.message || "Login failed. Please try again.");
     } finally {
       setIsLoading(false);
     }

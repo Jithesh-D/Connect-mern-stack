@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axios from "axios";
+
 import { useNavigate, Link } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 
@@ -49,16 +49,30 @@ function SignupPage() {
     setIsLoading(true);
 
     try {
-      const res = await axios.post(
+      console.log("🔐 Attempting signup to:", import.meta.env.VITE_API_URL);
+      const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/auth/signup`,
-        { username, email, password },
-        { withCredentials: true }
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ username, email, password }),
+        }
       );
-      console.log("Signup successful:", res.data);
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Signup failed");
+      }
+      
+      const data = await res.json();
+      console.log("✅ Signup successful:", data);
       // If server returned user info, persist and notify app
-      if (res.data?.user) {
+      if (data?.user) {
         try {
-          sessionStorage.setItem("user", JSON.stringify(res.data.user));
+          sessionStorage.setItem("user", JSON.stringify(data.user));
           try {
             localStorage.setItem("isAuthenticated", "true");
           } catch (e) {}
@@ -67,7 +81,8 @@ function SignupPage() {
       }
       navigate("/home");
     } catch (err) {
-      setError(err.response?.data?.error || "Signup failed. Please try again.");
+      console.error("❌ Signup error:", err);
+      setError(err.message || "Signup failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -92,13 +107,26 @@ function SignupPage() {
       const payload = decodeJwt(credential);
 
       // Send credential to backend for verification and session creation
-      const res = await axios.post(
+      const res = await fetch(
         `${import.meta.env.VITE_API_URL}/api/auth/google`,
-        { credential },
-        { withCredentials: true }
+        {
+          method: "POST",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ credential }),
+        }
       );
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.error || "Google auth failed");
+      }
+      
+      const data = await res.json();
 
-      const user = res.data.user || payload;
+      const user = data.user || payload;
       if (user) {
         try {
           sessionStorage.setItem("user", JSON.stringify(user));
@@ -110,8 +138,9 @@ function SignupPage() {
         navigate("/home");
       }
     } catch (err) {
+      console.error("❌ Google signup error:", err);
       setError(
-        err.response?.data?.error || "Google sign-up failed. Please try again."
+        err.message || "Google sign-up failed. Please try again."
       );
       console.error(err);
     } finally {

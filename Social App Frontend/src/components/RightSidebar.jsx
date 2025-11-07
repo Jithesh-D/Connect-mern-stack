@@ -17,7 +17,7 @@ const RightSidebar = () => {
       label: "KEY-VAULT",
       type: "external",
     },
-    { path: "/chatbot", icon: Bot, label: "RVU Assistant", type: "internal" },
+    // { path: "/chatbot", icon: Bot, label: "RVU Assistant", type: "internal" },
   ];
 
   const handleNavigation = (item) => {
@@ -140,9 +140,8 @@ const RightSidebar = () => {
                   isDarkMode ? "text-gray-300" : "text-gray-600"
                 }`}
               >
-                Key Vault is a one-stop platform that stores all the important
-                links students need for their daily academic work — from exam
-                schedules and library pages to event updates and resources.
+                Key Vault where you can find college related important links to
+                access (eg: Placement Portal, Library, Academic Resources, etc.)
               </p>
 
               {/* Updated Go to Vault Button */}

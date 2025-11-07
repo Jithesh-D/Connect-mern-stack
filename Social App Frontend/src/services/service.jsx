@@ -47,9 +47,16 @@ const addPostToServer = async (
 };
 
 const getPostsFromServer = async () => {
+  console.log("📝 Fetching posts with credentials from:", API_BASE_URL);
   const response = await fetch(`${API_BASE_URL}/api/posts`, {
     credentials: "include",
   });
+  
+  if (!response.ok) {
+    handleAuthError(response.status);
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+  
   const posts = await response.json();
   return posts.map(mapPostFromServer);
 };
@@ -263,18 +270,21 @@ export {
 // Logout helper
 export const logout = async () => {
   try {
+    console.log("🚪 Logging out from:", API_BASE_URL);
     const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
       method: "POST",
       credentials: "include",
     });
     if (response.ok) {
       sessionStorage.removeItem("user");
+      localStorage.removeItem("isAuthenticated");
+      console.log("✅ Logout successful");
       // Redirect user to signup page after logout
       window.location.href = "/signup";
     } else {
-      console.error("Logout failed", await response.text());
+      console.error("❌ Logout failed", await response.text());
     }
   } catch (err) {
-    console.error("Error during logout:", err);
+    console.error("❌ Error during logout:", err);
   }
 };

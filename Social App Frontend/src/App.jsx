@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import React, { useEffect, useState } from "react";
 import { Outlet, Navigate, useLocation } from "react-router-dom";
-import Chatbot from "./components/chatBot"; // ADD THIS IMPORT
+// import Chatbot from "./components/chatBot"; // ADD THIS IMPORT
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -59,9 +59,7 @@ function App() {
     <div className="app-container min-h-screen bg-white text-black dark:bg-black dark:text-white transition-colors duration-200">
       <Outlet />
       {isAuthenticated && !hideChatOn.includes(location.pathname) && (
-        <div className="fixed bottom-4 right-4 z-50">
-          <Chatbot /> {/* floating chatbot visible only on main app pages */}
-        </div>
+        <div className="fixed bottom-4 right-4 z-50">{/* <Chatbot /> */}</div>
       )}
     </div>
   );

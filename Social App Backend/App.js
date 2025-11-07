@@ -17,6 +17,11 @@ const MONGODB_URI =
   process.env.MONGODB_URI || "mongodb://localhost:27017/social-media";
 const PORT = process.env.PORT || 3001;
 const SESSION_SECRET = process.env.SESSION_SECRET || "CampusConnect";
+console.log("🔑 Session config:", {
+  secure: true,
+  sameSite: "none",
+  domain: process.env.NODE_ENV === "production" ? ".onrender.com" : undefined
+});
 
 // Configure MongoDB session store
 const store = new MongoDBStore({
@@ -44,10 +49,7 @@ if (!fs.existsSync(uploadsDir)) {
 
 app.use(
   cors({
-    origin: [
-      process.env.FRONTEND_URL || "http://localhost:5173",
-      "https://rvu-connects.onrender.com",
-    ],
+    origin: "https://rvu-connects.onrender.com",
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
@@ -69,8 +71,8 @@ app.use(
     store: store,
     cookie: {
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true, // HTTPS required
+      sameSite: "none", // Cross-domain cookies
       httpOnly: true,
     },
   })
@@ -195,6 +197,11 @@ try {
 
 // Test session endpoint
 app.get("/api/test-session", (req, res) => {
+  console.log("🔍 Session Debug:", {
+    sessionId: req.sessionID,
+    hasUser: !!req.session.user,
+    cookies: req.headers.cookie,
+  });
   res.json({
     sessionId: req.sessionID,
     sessionData: req.session,

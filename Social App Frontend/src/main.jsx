@@ -21,7 +21,7 @@ import ProtectedEventRoute from "./components/ProtectedEventRoute.jsx";
 import Placements from "./components/placements.jsx";
 import ProfilePage from "./components/ProfilePage.jsx";
 import Homepage from "./components/homePage.jsx";
-import RVUAssistant from "./components/Rvuassistant.jsx";
+// import RVUAssistant from "./components/Rvuassistant.jsx";
 import Contribution from "./components/contribution.jsx";
 import AddContribution from "./components/AddContribution.jsx";
 import ClubsPage from "./components/ClubsPage.jsx";
@@ -82,10 +82,10 @@ const router = createBrowserRouter([
             path: "/profile",
             element: <ProfilePage />,
           },
-          {
-            path: "/chatbot",
-            element: <RVUAssistant />,
-          },
+          // {
+          //   path: "/chatbot",
+          //   element: <RVUAssistant />,
+          // },
           {
             path: "/contribution",
             element: <Contribution />,

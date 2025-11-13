@@ -1,4 +1,4 @@
-# **Social App – MERN Stack**
+# **Social App – MERN Stack*
 
 A **full-stack social networking platform** built using the MERN stack (**MongoDB, Express.js, React.js, Node.js**) that allows users to connect, share posts, and interact in real-time. The project implements **secure authentication**, **role-based authorization**, and a fully responsive UI.
 

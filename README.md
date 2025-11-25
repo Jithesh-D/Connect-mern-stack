@@ -5,7 +5,7 @@ A **full-stack social networking platform** built using the MERN stack (**MongoD
 ---
 
 ## **🚀 Features**
-- **User Authentication & Authorization*
+- **User Authentication & Authorization**
   - Secure **JWT-based login & signup**.
   - Role-based access control for admin and regular users.
 - **Post Management**
